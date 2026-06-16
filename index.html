@@ -216,12 +216,12 @@ function makePie(id, labels, data, colors){
 
 function makeMetricsTable(tableId, rows, colegiosData){
   const el = document.getElementById(tableId);
-  el.outerHTML = `<canvas id="${tableId}" style="max-height:280px"></canvas>`;
+  el.outerHTML = `<canvas id="${tableId}" style="max-height:320px"></canvas>`;
   const canvas = document.getElementById(tableId);
   if(!canvas) return;
 
   const labels = colegiosData.map(r => getCfg(r["Colegio"]).codigo);
-  const lineColors = ["#214e97","#4eade1","#f3bc52","#c13642","#7a90b5"];
+  const lineColors = ["#214e97","#4eade1","#f3bc52"];
 
   destroyChart(tableId);
   charts[tableId] = new Chart(canvas, {
@@ -245,20 +245,25 @@ function makeMetricsTable(tableId, rows, colegiosData){
     options:{
       plugins:{
         legend:{ display:true, position:"bottom", labels:{ color:"#0d2a5e", font:{size:12}, boxWidth:12, padding:20 } },
-        tooltip:{ enabled:true },
-        datalabels: false
+        tooltip:{ enabled:true }
       },
       scales:{
-        x:{ grid:{color:"rgba(0,0,0,0.04)"}, ticks:{color:"#7a90b5", font:{size:12, weight:"600"}} },
-        y:{ grid:{color:"rgba(0,0,0,0.06)", borderDash:[4,4]}, ticks:{color:"#7a90b5", font:{size:11}} }
+        x:{
+          grid:{ display:false },
+          ticks:{ color:"#7a90b5", font:{size:12, weight:"600"}, padding:16 }
+        },
+        y:{
+          display:false
+        }
       },
       responsive:true,
-      layout:{ padding:{ top:30 } }
+      layout:{ padding:{ top:36, bottom:8, left:8, right:8 } }
     },
     plugins:[{
       id:"datalabels-custom",
       afterDatasetsDraw(chart){
         const ctx = chart.ctx;
+        const offsets = [-14, 0, 14];
         chart.data.datasets.forEach((ds, di) => {
           const meta = chart.getDatasetMeta(di);
           meta.data.forEach((point, i) => {
@@ -269,7 +274,7 @@ function makeMetricsTable(tableId, rows, colegiosData){
             ctx.fillStyle = ds.borderColor;
             ctx.textAlign = "center";
             ctx.textBaseline = "bottom";
-            ctx.fillText(fmt(val), point.x, point.y - 10);
+            ctx.fillText(fmt(val), point.x, point.y - 10 + (offsets[di]||0));
             ctx.restore();
           });
         });
