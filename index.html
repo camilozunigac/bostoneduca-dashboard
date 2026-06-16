@@ -7,101 +7,82 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
-:root {
-  --bg: #fff;
-  --text: #0d2a5e;
-  --muted: #7a90b5;
-  --border: rgba(0,0,0,0.08);
-  --navy: #1b2a4a;
-  --gold: #f3bc52;
-}
-body { background: var(--bg); color: var(--text); font-family: system-ui, sans-serif; min-height: 100vh; }
+:root { --bg:#fff; --text:#0d2a5e; --muted:#7a90b5; --border:rgba(0,0,0,0.08); --navy:#1b2a4a; --gold:#f3bc52; }
+body { background:var(--bg); color:var(--text); font-family:system-ui,sans-serif; min-height:100vh; }
 
-header { background: #fff; border-bottom: 1px solid var(--border); padding: 1.2rem 2.5rem; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
-.logo { display: flex; align-items: center; gap: 16px; }
-.logo-img { width: 72px; height: 72px; border-radius: 10px; overflow: hidden; background: var(--navy); display: flex; align-items: center; justify-content: center; font-size: 22px; font-weight: 900; color: var(--gold); flex-shrink: 0; }
-.logo-img img { width: 100%; height: 100%; object-fit: cover; }
-.logo-text h1 { font-size: 28px; font-weight: 800; color: var(--navy); }
-.logo-text span { font-size: 13px; color: var(--muted); }
-.semana-badge { background: #f5f7fa; border: 1px solid var(--border); border-radius: 6px; padding: 6px 14px; font-size: 13px; color: var(--muted); }
-#loading { font-size: 13px; color: var(--gold); }
+header { background:#fff; border-bottom:1px solid var(--border); padding:1.2rem 2.5rem; display:flex; align-items:center; justify-content:space-between; position:sticky; top:0; z-index:100; }
+.logo { display:flex; align-items:center; gap:16px; }
+.logo-img { width:72px; height:72px; border-radius:10px; overflow:hidden; background:var(--navy); display:flex; align-items:center; justify-content:center; font-size:22px; font-weight:900; color:var(--gold); flex-shrink:0; }
+.logo-img img { width:100%; height:100%; object-fit:cover; }
+.logo-text h1 { font-size:28px; font-weight:800; color:var(--navy); }
+.logo-text span { font-size:13px; color:var(--muted); }
+.semana-badge { background:#f5f7fa; border:1px solid var(--border); border-radius:6px; padding:6px 14px; font-size:13px; color:var(--muted); }
+#loading { font-size:13px; color:var(--gold); }
 
-nav { background: #fff; border-bottom: 1px solid var(--border); padding: 0 2.5rem; display: flex; overflow-x: auto; }
-.nav-tab { padding: 14px 22px; font-size: 13px; font-weight: 500; color: var(--muted); border-bottom: 2px solid transparent; cursor: pointer; white-space: nowrap; transition: all 0.2s; display: flex; align-items: center; gap: 6px; }
-.nav-tab:hover { color: var(--navy); }
-.nav-tab.active { color: var(--navy); border-bottom-color: var(--navy); }
-.nav-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+nav { background:#fff; border-bottom:1px solid var(--border); padding:0 2.5rem; display:flex; overflow-x:auto; }
+.nav-tab { padding:14px 22px; font-size:13px; font-weight:500; color:var(--muted); border-bottom:2px solid transparent; cursor:pointer; white-space:nowrap; transition:all .2s; display:flex; align-items:center; gap:6px; }
+.nav-tab:hover { color:var(--navy); }
+.nav-tab.active { color:var(--navy); border-bottom-color:var(--navy); }
+.nav-dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; }
 
-main { padding: 3rem 2.5rem; max-width: 1440px; margin: 0 auto; }
-.section { display: none; }
-.section.active { display: block; }
+main { padding:3rem 2.5rem; max-width:1440px; margin:0 auto; }
+.section { display:none; }
+.section.active { display:block; }
 
-/* Plataforma sin línea divisoria, más espacio */
-.platform-block { margin-bottom: 4.5rem; }
-.platform-header { font-size: 22px; font-weight: 700; color: var(--navy); margin-bottom: 2.25rem; }
+.platform-block { margin-bottom:4.5rem; }
+.platform-header { font-size:22px; font-weight:700; color:var(--navy); margin-bottom:2.25rem; }
 
-.section-title { font-size: 22px; font-weight: 700; color: var(--navy); margin-bottom: 6px; }
-.section-subtitle { font-size: 13px; color: var(--muted); margin-bottom: 2.5rem; }
+.section-title { font-size:22px; font-weight:700; color:var(--navy); margin-bottom:12px; }
+.ai-summary { font-size:14px; color:var(--muted); line-height:1.7; margin-bottom:2.5rem; max-width:860px; }
+.ai-summary strong { color:var(--navy); }
 
-/* GA4 layout: 80% gráfico + 20% total */
-.ga4-row { display: grid; grid-template-columns: 80fr 20fr; gap: 2rem; align-items: center; margin-bottom: 3rem; }
-.ga4-total { display: flex; flex-direction: column; align-items: flex-start; justify-content: center; height: 100%; }
-.ga4-total-label { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
-.ga4-total-num { font-size: 72px; font-weight: 900; color: var(--navy); line-height: 1; }
-.ga4-total-sub { font-size: 13px; color: var(--muted); margin-top: 10px; }
+.ga4-row { display:grid; grid-template-columns:80fr 20fr; gap:2rem; align-items:center; margin-bottom:3rem; }
+.ga4-total { display:flex; flex-direction:column; justify-content:center; }
+.ga4-total-label { font-size:12px; color:var(--muted); text-transform:uppercase; letter-spacing:.5px; margin-bottom:8px; }
+.ga4-total-num { font-size:72px; font-weight:900; color:var(--navy); line-height:1; }
+.ga4-total-sub { font-size:13px; color:var(--muted); margin-top:10px; }
 
-/* Tasa conversión sin recuadro */
-.conv-row { display: flex; flex-wrap: wrap; gap: 3rem; margin-bottom: 3rem; }
-.conv-item { }
-.conv-codigo { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
-.conv-value { font-size: 54px; font-weight: 900; line-height: 1; }
-.conv-sub { font-size: 11px; color: var(--muted); margin-top: 4px; }
+.conv-row { display:flex; flex-wrap:wrap; gap:3rem; margin-bottom:3rem; }
+.conv-item .conv-codigo { font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:.5px; margin-bottom:4px; }
+.conv-item .conv-value { font-size:54px; font-weight:900; line-height:1; }
+.conv-item .conv-sub { font-size:11px; color:var(--muted); margin-top:4px; }
 
-/* Tabla de métricas con sparklines */
-.metrics-table { width: 100%; border-collapse: collapse; }
-.metrics-table th { text-align: left; padding: 10px 14px; color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: 0.4px; border-bottom: 2px solid var(--border); }
-.metrics-table th.right { text-align: right; }
-.metrics-table td { padding: 16px 14px; border-bottom: 1px solid var(--border); color: var(--text); vertical-align: middle; }
-.metrics-table td.right { text-align: right; }
-.metrics-table tr:last-child td { border-bottom: none; }
-.metrics-table .metric-label { font-size: 13px; font-weight: 600; color: var(--navy); }
-.metrics-table .col-val { font-size: 15px; font-weight: 700; text-align: right; }
-.metrics-table .col-best { font-weight: 800; }
-.spark-cell { width: 80px; padding: 10px 14px !important; }
-.spark-cell canvas { display: block; }
+/* Tabla con gráfico de línea inline */
+.metrics-table { width:100%; border-collapse:collapse; }
+.metrics-table th { text-align:left; padding:10px 14px; color:var(--muted); font-size:11px; text-transform:uppercase; letter-spacing:.4px; border-bottom:2px solid var(--border); }
+.metrics-table th.right { text-align:right; }
+.metrics-table td { padding:20px 14px; border-bottom:1px solid var(--border); vertical-align:middle; }
+.metrics-table tr:last-child td { border-bottom:none; }
+.metrics-table .metric-label { font-size:13px; font-weight:600; color:var(--navy); white-space:nowrap; }
+.metrics-table .col-val { font-size:15px; font-weight:700; text-align:right; color:var(--text); }
+.chart-cell { width:260px; padding:16px 14px !important; }
 
-/* KPI grid para pestañas de colegios */
-.kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 14px; margin-bottom: 2rem; }
-.kpi-card { padding: 1.25rem; border: 1px solid var(--border); border-radius: 10px; }
-.kpi-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
-.kpi-value { font-size: 33px; font-weight: 800; color: var(--text); }
-.kpi-sub { font-size: 12px; color: var(--muted); margin-top: 6px; }
-
-.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-bottom: 2rem; }
+.grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:2rem; margin-bottom:2rem; }
 @media(max-width:900px){ .grid-2,.ga4-row{ grid-template-columns:1fr; } }
 
-.c-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
-.colegio-badge { display: inline-flex; align-items: center; gap: 6px; }
-.colegio-avatar { width: 40px; height: 40px; border-radius: 9px; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; }
-.block-label { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 14px; }
+.kpi-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:14px; margin-bottom:2rem; }
+.kpi-card { padding:1.25rem; border:1px solid var(--border); border-radius:10px; }
+.kpi-label { font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:.5px; margin-bottom:8px; }
+.kpi-value { font-size:33px; font-weight:800; }
+.kpi-sub { font-size:12px; color:var(--muted); margin-top:6px; }
 
-table.simple { width: 100%; border-collapse: collapse; font-size: 13px; }
-table.simple th { padding: 8px 0; color: var(--muted); font-size: 11px; text-transform: uppercase; border-bottom: 1px solid var(--border); }
-table.simple td { padding: 10px 0; border-bottom: 1px solid var(--border); }
-table.simple tr:last-child td { border-bottom: none; }
+.block-label { font-size:12px; color:var(--muted); text-transform:uppercase; letter-spacing:.5px; margin-bottom:14px; }
+.c-dot { width:8px; height:8px; border-radius:50%; display:inline-block; }
+.colegio-badge { display:inline-flex; align-items:center; gap:6px; }
+.colegio-avatar { width:40px; height:40px; border-radius:9px; display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:700; }
+
+table.simple { width:100%; border-collapse:collapse; font-size:13px; }
+table.simple th { padding:8px 0; color:var(--muted); font-size:11px; text-transform:uppercase; border-bottom:1px solid var(--border); }
+table.simple td { padding:10px 0; border-bottom:1px solid var(--border); }
+table.simple tr:last-child td { border-bottom:none; }
 </style>
 </head>
 <body>
 
 <header>
   <div class="logo">
-    <div class="logo-img">
-      <img src="https://camilozunigac.github.io/bostoneduca-dashboard/logo.png" onerror="this.style.display='none';this.parentNode.innerHTML='BE'" alt="BE">
-    </div>
-    <div class="logo-text">
-      <h1>BostonEduca</h1>
-      <span>Monitoreo Marketing Digital</span>
-    </div>
+    <div class="logo-img"><img src="https://camilozunigac.github.io/bostoneduca-dashboard/logo.png" onerror="this.style.display='none';this.parentNode.innerHTML='BE'" alt="BE"></div>
+    <div class="logo-text"><h1>BostonEduca</h1><span>Monitoreo Marketing Digital</span></div>
   </div>
   <div style="display:flex;align-items:center;gap:12px">
     <span class="semana-badge" id="semana-display">Cargando...</span>
@@ -116,67 +97,45 @@ table.simple tr:last-child td { border-bottom: none; }
 <main>
   <div id="sec-consolidado" class="section active">
     <div class="section-title">Comparativa entre colegios</div>
-    <div class="section-subtitle">Última semana disponible</div>
+    <div class="ai-summary" id="ai-summary">Analizando datos...</div>
 
-    <!-- GA4 -->
     <div class="platform-block">
       <div class="platform-header">📊 Google Analytics</div>
-
       <div class="ga4-row">
-        <div>
-          <div class="block-label">Visitas por colegio y tipo</div>
-          <canvas id="chart-ga4-barras" style="max-height:260px"></canvas>
-        </div>
+        <div><div class="block-label">Visitas por colegio y tipo</div><canvas id="chart-ga4-barras" style="max-height:260px"></canvas></div>
         <div class="ga4-total">
           <div class="ga4-total-label">Total visitas</div>
           <div class="ga4-total-num" id="ga4-total-num">—</div>
           <div class="ga4-total-sub" id="ga4-total-sub">—</div>
         </div>
       </div>
-
-      <div class="block-label" style="margin-bottom:1.5rem">Tasa de conversión a admisión 2027</div>
+      <div class="block-label">Tasa de conversión a admisión 2027</div>
       <div class="conv-row" id="tasa-conversion-ga4"></div>
-
       <div class="block-label">Métricas por colegio</div>
       <table class="metrics-table" id="tabla-ga4-compare"></table>
     </div>
 
-    <!-- Meta -->
     <div class="platform-block">
       <div class="platform-header">📱 Meta</div>
       <div class="grid-2" style="margin-bottom:2rem">
-        <div>
-          <div class="block-label">Alcance por colegio</div>
-          <canvas id="chart-meta-alcance" style="max-height:220px"></canvas>
-        </div>
-        <div>
-          <div class="block-label">Presupuesto invertido (CLP)</div>
-          <canvas id="chart-meta-presupuesto" style="max-height:220px"></canvas>
-        </div>
+        <div><div class="block-label">Alcance por colegio</div><canvas id="chart-meta-alcance" style="max-height:220px"></canvas></div>
+        <div><div class="block-label">Presupuesto invertido (CLP)</div><canvas id="chart-meta-presupuesto" style="max-height:220px"></canvas></div>
       </div>
       <div class="block-label">Métricas por colegio</div>
       <table class="metrics-table" id="tabla-meta-compare"></table>
     </div>
 
-    <!-- Google Ads -->
     <div class="platform-block">
       <div class="platform-header">🔍 Google Ads</div>
       <div class="block-label">Métricas por colegio</div>
       <table class="metrics-table" id="tabla-gads-compare"></table>
     </div>
 
-    <!-- HubSpot -->
     <div class="platform-block">
       <div class="platform-header">🎯 HubSpot Admisiones</div>
       <div class="grid-2" style="margin-bottom:2rem">
-        <div>
-          <div class="block-label">Matriculados por colegio</div>
-          <canvas id="chart-hub-torta" style="max-height:220px"></canvas>
-        </div>
-        <div>
-          <div class="block-label">Postulaciones por colegio</div>
-          <canvas id="chart-hub-postulaciones" style="max-height:220px"></canvas>
-        </div>
+        <div><div class="block-label">Matriculados por colegio</div><canvas id="chart-hub-torta" style="max-height:220px"></canvas></div>
+        <div><div class="block-label">Postulaciones por colegio</div><canvas id="chart-hub-postulaciones" style="max-height:220px"></canvas></div>
       </div>
       <div class="block-label">Métricas por colegio</div>
       <table class="metrics-table" id="tabla-hub-compare"></table>
@@ -189,239 +148,249 @@ table.simple tr:last-child td { border-bottom: none; }
 <script>
 const SHEET_ID = "1ZU7L4IWlgJg-ff5Xovy5cwr4HVMuTT3ScUNXIZZsdDY";
 const COLEGIOS_CFG = [
-  { nombre:"Boston Academy Laguna del Sol",            codigo:"BALS", color:"#1a6bbf", accent:"#f3bc52", initials:"BA" },
-  { nombre:"Boston College Alto Macul",                codigo:"BCAM", color:"#214e97", accent:"#f3bc52", initials:"BC" },
-  { nombre:"Colegio Inmaculada Concepción de Vitacura",codigo:"CICV", color:"#4eade1", accent:"#205095", initials:"CI" },
-  { nombre:"Colegio San Francisco de Paine",           codigo:"CSFP", color:"#c13642", accent:"#355c82", initials:"SF" },
-  { nombre:"Colegio San Marcos de Macul",              codigo:"CSM",  color:"#e6b800", accent:"#000000", initials:"SM" },
+  { nombre:"Boston Academy Laguna del Sol",            codigo:"BALS", color:"#1a6bbf", initials:"BA" },
+  { nombre:"Boston College Alto Macul",                codigo:"BCAM", color:"#214e97", initials:"BC" },
+  { nombre:"Colegio Inmaculada Concepción de Vitacura",codigo:"CICV", color:"#4eade1", initials:"CI" },
+  { nombre:"Colegio San Francisco de Paine",           codigo:"CSFP", color:"#c13642", initials:"SF" },
+  { nombre:"Colegio San Marcos de Macul",              codigo:"CSM",  color:"#e6b800", initials:"SM" },
 ];
 
-let DATA = [], charts = {}, sparkCharts = {};
-function getCfg(n){ return COLEGIOS_CFG.find(c=>c.nombre===n)||{color:"#555",accent:"#fff",initials:"??",codigo:"??"}; }
+let DATA=[], charts={};
+function getCfg(n){ return COLEGIOS_CFG.find(c=>c.nombre===n)||{color:"#555",initials:"??",codigo:"??"}; }
 function fmt(n){ return Math.round(n||0).toLocaleString("es-CL").replace(/,/g,"."); }
 function fmtCLP(n){ return "$"+Math.round(n||0).toLocaleString("es-CL").replace(/,/g,"."); }
-function destroyChart(id){ if(charts[id]){ charts[id].destroy(); delete charts[id]; } if(sparkCharts[id]){ sparkCharts[id].destroy(); delete sparkCharts[id]; } }
+function destroyChart(id){ if(charts[id]){ charts[id].destroy(); delete charts[id]; } }
 
 const scaleOpts = {
   y:{ grid:{color:"rgba(0,0,0,0.04)"}, ticks:{color:"#7a90b5",font:{size:11}} },
   x:{ grid:{display:false}, ticks:{color:"#7a90b5",font:{size:11}} }
 };
 
-// Sparkline en canvas pequeño
-function makeSparkline(canvas, values, color) {
-  const id = canvas.id;
-  if(sparkCharts[id]){ sparkCharts[id].destroy(); }
-  sparkCharts[id] = new Chart(canvas, {
+// Gráfico de burbuja/línea estilo imagen adjunta
+// Puntos grandes con círculo interior, línea gris delgada, fondo oscuro
+function makeBubbleLine(canvasId, colegiosData, valueKey) {
+  destroyChart(canvasId);
+  const sorted = [...colegiosData].sort((a,b)=>(a[valueKey]||0)-(b[valueKey]||0));
+  const labels = sorted.map(r=>getCfg(r["Colegio"]).codigo);
+  const values = sorted.map(r=>r[valueKey]||0);
+  const colors = sorted.map(r=>getCfg(r["Colegio"]).color);
+
+  const canvas = document.getElementById(canvasId);
+  if(!canvas) return;
+
+  charts[canvasId] = new Chart(canvas, {
     type:"line",
     data:{
-      labels: values.map((_,i)=>i),
-      datasets:[{ data: values, borderColor: color, borderWidth: 2, pointRadius: 0, tension: 0.4, fill: false }]
+      labels,
+      datasets:[{
+        data: values,
+        borderColor: "rgba(150,160,180,0.5)",
+        borderWidth: 1,
+        pointBackgroundColor: "rgba(230,235,245,0.95)",
+        pointBorderColor: colors,
+        pointBorderWidth: 2,
+        pointRadius: 18,
+        pointHoverRadius: 20,
+        tension: 0,
+        fill: false
+      }]
     },
     options:{
-      animation: false,
-      plugins:{ legend:{display:false}, tooltip:{enabled:false} },
-      scales:{ x:{display:false}, y:{display:false} },
-      responsive: false
-    }
-  });
-}
-
-function makePie(id, labels, data, colors) {
-  destroyChart(id);
-  charts[id] = new Chart(document.getElementById(id), {
-    type:"doughnut",
-    data:{ labels, datasets:[{ data, backgroundColor:colors, borderWidth:2, borderColor:"#fff" }] },
-    options:{
-      cutout:"58%",
-      plugins:{ legend:{ display:true, position:"right", labels:{ color:"#0d2a5e", font:{size:11}, boxWidth:12,
-        generateLabels(chart){
-          const ds=chart.data.datasets[0];
-          return chart.data.labels.map((label,i)=>({
-            text: label+" · "+fmt(ds.data[i]),
-            fillStyle: ds.backgroundColor[i], strokeStyle:"#fff", lineWidth:2, index:i
-          }));
+      plugins:{
+        legend:{display:false},
+        tooltip:{
+          callbacks:{
+            label: ctx => " "+fmt(ctx.raw)
+          }
         }
-      }}},
-      responsive:true
+      },
+      scales:{
+        x:{ grid:{display:false}, ticks:{color:"#7a90b5",font:{size:11,weight:"600"}} },
+        y:{ display:false }
+      },
+      responsive:true,
+      layout:{ padding:{ top:24, bottom:8 } }
     }
   });
 }
 
-// Tabla de métricas con sparklines inline
-function makeMetricsTable(tableId, rows, colegiosData, colors) {
-  // rows: [{label, key, fmtFn}]
-  const d = colegiosData;
-  const cfgs = d.map(r => getCfg(r["Colegio"]));
+function makePie(id, labels, data, colors){
+  destroyChart(id);
+  charts[id]=new Chart(document.getElementById(id),{
+    type:"doughnut",
+    data:{labels,datasets:[{data,backgroundColor:colors,borderWidth:2,borderColor:"#fff"}]},
+    options:{cutout:"58%",plugins:{legend:{display:true,position:"right",labels:{color:"#0d2a5e",font:{size:11},boxWidth:12,
+      generateLabels(chart){const ds=chart.data.datasets[0];return chart.data.labels.map((label,i)=>({text:label+" · "+fmt(ds.data[i]),fillStyle:ds.backgroundColor[i],strokeStyle:"#fff",lineWidth:2,index:i}));}
+    }}},responsive:true}
+  });
+}
 
+function makeMetricsTable(tableId, rows, colegiosData){
+  const cfgs = colegiosData.map(r=>getCfg(r["Colegio"]));
   const headerCols = cfgs.map(c=>`<th class="right"><span class="colegio-badge"><span class="c-dot" style="background:${c.color}"></span>${c.codigo}</span></th>`).join("");
-  let html = `<tr><th>Métrica</th><th style="width:90px">Tendencia</th>${headerCols}</tr>`;
+  let html = `<tr><th>Métrica</th><th style="width:280px">Comparativa</th>${headerCols}</tr>`;
 
-  rows.forEach((row, ri) => {
-    const values = d.map(r => r[row.key]||0);
-    const best = Math.max(...values);
-    const sparkId = `spark-${tableId}-${ri}`;
-
-    const valCells = values.map((v,i) => {
-      const isBest = v===best && best>0;
-      return `<td class="col-val${isBest?' col-best':''}" style="${isBest?'color:'+cfgs[i].color:''}">${row.fmtFn(v)}</td>`;
-    }).join("");
-
+  rows.forEach((row,ri)=>{
+    const values = colegiosData.map(r=>r[row.key]||0);
+    const chartId = `lc-${tableId}-${ri}`;
+    const valCells = values.map((v,i)=>`<td class="col-val" style="color:${cfgs[i].color}">${row.fmtFn(v)}</td>`).join("");
     html += `<tr>
       <td class="metric-label">${row.label}</td>
-      <td class="spark-cell"><canvas id="${sparkId}" width="72" height="32"></canvas></td>
+      <td class="chart-cell"><canvas id="${chartId}" height="60"></canvas></td>
       ${valCells}
     </tr>`;
   });
 
   document.getElementById(tableId).innerHTML = html;
 
-  // Dibujar sparklines después de insertar el HTML
-  setTimeout(() => {
-    rows.forEach((row, ri) => {
-      const values = d.map(r => r[row.key]||0);
-      const canvas = document.getElementById(`spark-${tableId}-${ri}`);
-      if(canvas) makeSparkline(canvas, values, "#7a90b5");
+  setTimeout(()=>{
+    rows.forEach((_,ri)=>{
+      makeBubbleLine(`lc-${tableId}-${ri}`, colegiosData, rows[ri].key);
     });
-  }, 50);
+  }, 60);
 }
 
-async function loadData() {
-  const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=CONSOLIDADO`;
-  try {
-    const resp = await fetch(url);
-    const text = await resp.text();
-    const json = JSON.parse(text.match(/google\.visualization\.Query\.setResponse\(([\s\S]*?)\);?\s*$/)[1]);
-    const cols = json.table.cols.map(c=>c.label);
-    DATA = json.table.rows.map(r=>{
-      const obj={};
-      cols.forEach((col,i)=>{ obj[col]=r.c[i]?.v??0; });
-      return obj;
-    }).filter(r=>r["Colegio"]&&r["Colegio"]!=="Colegio");
+function generateSummary(d){
+  const totVisitas = d.reduce((s,r)=>s+(r["Visitas Totales"]||0),0);
+  const totAlcance = d.reduce((s,r)=>s+(r["Meta Alcance"]||0),0);
+  const totMatric  = d.reduce((s,r)=>s+(r["HS Matriculados"]||0),0);
+  const totPost    = d.reduce((s,r)=>s+(r["HS Postulaciones"]||0),0);
+  const convRate   = totPost ? ((totMatric/totPost)*100).toFixed(1) : 0;
+  const topVisitas = [...d].sort((a,b)=>(b["Visitas Totales"]||0)-(a["Visitas Totales"]||0))[0];
+  const topMeta    = [...d].sort((a,b)=>(b["Meta Alcance"]||0)-(a["Meta Alcance"]||0))[0];
+  const topMatric  = [...d].sort((a,b)=>(b["HS Matriculados"]||0)-(a["HS Matriculados"]||0))[0];
+  const topCfg1 = getCfg(topVisitas?.["Colegio"]);
+  const topCfg2 = getCfg(topMeta?.["Colegio"]);
+  const topCfg3 = getCfg(topMatric?.["Colegio"]);
 
+  return `La semana registró <strong>${fmt(totVisitas)} visitas totales</strong> entre todos los colegios, con 
+    <strong style="color:${topCfg1.color}">${topCfg1.codigo}</strong> liderando el tráfico web. 
+    En Meta, el alcance consolidado fue de <strong>${fmt(totAlcance)} personas</strong>, destacando 
+    <strong style="color:${topCfg2.color}">${topCfg2.codigo}</strong>. 
+    En admisiones, hay <strong>${fmt(totPost)} postulaciones activas</strong> con una conversión a matrícula del <strong>${convRate}%</strong> — 
+    <strong style="color:${topCfg3.color}">${topCfg3.codigo}</strong> lidera en matriculados con ${fmt(topMatric?.["HS Matriculados"]||0)}. 
+    Se recomienda revisar los colegios con menor tráfico a <em>/admision2027</em> y evaluar si el presupuesto Meta está siendo suficiente para los que tienen menor alcance.`;
+}
+
+async function loadData(){
+  const url=`https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=CONSOLIDADO`;
+  try{
+    const resp=await fetch(url);
+    const text=await resp.text();
+    const json=JSON.parse(text.match(/google\.visualization\.Query\.setResponse\(([\s\S]*?)\);?\s*$/)[1]);
+    const cols=json.table.cols.map(c=>c.label);
+    DATA=json.table.rows.map(r=>{const obj={};cols.forEach((col,i)=>{obj[col]=r.c[i]?.v??0;});return obj;}).filter(r=>r["Colegio"]&&r["Colegio"]!=="Colegio");
     document.getElementById("loading").style.display="none";
-    const semanas = [...new Set(DATA.map(r=>r["Semana"]))].filter(Boolean).sort();
-    if(semanas.length) document.getElementById("semana-display").textContent = "Semana: "+semanas[semanas.length-1];
-
+    const semanas=[...new Set(DATA.map(r=>r["Semana"]))].filter(Boolean).sort();
+    if(semanas.length) document.getElementById("semana-display").textContent="Semana: "+semanas[semanas.length-1];
     buildNavTabs();
     buildColegioSections();
     renderConsolidado();
     COLEGIOS_CFG.forEach(c=>renderColegio(c));
-  } catch(e) {
-    document.getElementById("loading").textContent = "Error al cargar";
-    console.error(e);
-  }
+  }catch(e){document.getElementById("loading").textContent="Error al cargar";console.error(e);}
 }
 
-function getLatest() {
-  const semanas = [...new Set(DATA.map(r=>r["Semana"]))].filter(Boolean).sort();
+function getLatest(){
+  const semanas=[...new Set(DATA.map(r=>r["Semana"]))].filter(Boolean).sort();
   return DATA.filter(r=>r["Semana"]===semanas[semanas.length-1]);
 }
 
-function renderConsolidado() {
-  const d = getLatest();
-  const labels = d.map(r=>getCfg(r["Colegio"]).codigo);
-  const colors = d.map(r=>getCfg(r["Colegio"]).color);
+function renderConsolidado(){
+  const d=getLatest();
+  const labels=d.map(r=>getCfg(r["Colegio"]).codigo);
+  const colors=d.map(r=>getCfg(r["Colegio"]).color);
+
+  // Resumen IA
+  document.getElementById("ai-summary").innerHTML = generateSummary(d);
 
   // GA4 barras
   destroyChart("ga4-barras");
-  charts["ga4-barras"] = new Chart(document.getElementById("chart-ga4-barras"),{
+  charts["ga4-barras"]=new Chart(document.getElementById("chart-ga4-barras"),{
     type:"bar",
-    data:{ labels, datasets:[
-      { label:"Visitas totales", data:d.map(r=>r["Visitas Totales"]||0), backgroundColor:colors },
-      { label:"Visitas nuevas",  data:d.map(r=>r["Visitas Nuevas"]||0),  backgroundColor:colors.map(c=>c+"77") },
-      { label:"Admisión 2027",   data:d.map(r=>r["Visitas /admision2027"]||0), backgroundColor:"#f3bc52" }
+    data:{labels,datasets:[
+      {label:"Visitas totales",data:d.map(r=>r["Visitas Totales"]||0),backgroundColor:colors},
+      {label:"Visitas nuevas", data:d.map(r=>r["Visitas Nuevas"]||0), backgroundColor:colors.map(c=>c+"77")},
+      {label:"Admisión 2027",  data:d.map(r=>r["Visitas /admision2027"]||0),backgroundColor:"#f3bc52"}
     ]},
-    options:{ plugins:{legend:{display:true,labels:{color:"#0d2a5e",font:{size:11},boxWidth:10}}}, scales:scaleOpts, responsive:true }
+    options:{plugins:{legend:{display:true,labels:{color:"#0d2a5e",font:{size:11},boxWidth:10}}},scales:scaleOpts,responsive:true}
   });
 
-  // GA4 total
-  const totVisitas = d.reduce((s,r)=>s+(r["Visitas Totales"]||0),0);
-  const totNuevas  = d.reduce((s,r)=>s+(r["Visitas Nuevas"]||0),0);
-  document.getElementById("ga4-total-num").textContent = fmt(totVisitas);
-  document.getElementById("ga4-total-sub").textContent = fmt(totNuevas)+" nuevas";
+  const totVisitas=d.reduce((s,r)=>s+(r["Visitas Totales"]||0),0);
+  const totNuevas =d.reduce((s,r)=>s+(r["Visitas Nuevas"]||0),0);
+  document.getElementById("ga4-total-num").textContent=fmt(totVisitas);
+  document.getElementById("ga4-total-sub").textContent=fmt(totNuevas)+" nuevas";
 
-  // Tasa conversión sin recuadro
-  document.getElementById("tasa-conversion-ga4").innerHTML = d.map(r=>{
-    const cfg = getCfg(r["Colegio"]);
-    const tasa = r["Visitas Totales"] ? ((r["Visitas /admision2027"]/r["Visitas Totales"])*100).toFixed(1)+"%" : "0%";
-    return `<div class="conv-item">
-      <div class="conv-codigo">${cfg.codigo}</div>
-      <div class="conv-value" style="color:${cfg.color}">${tasa}</div>
-      <div class="conv-sub">Visitas → admisión</div>
-    </div>`;
+  document.getElementById("tasa-conversion-ga4").innerHTML=d.map(r=>{
+    const cfg=getCfg(r["Colegio"]);
+    const tasa=r["Visitas Totales"]?((r["Visitas /admision2027"]/r["Visitas Totales"])*100).toFixed(1)+"%":"0%";
+    return `<div class="conv-item"><div class="conv-codigo">${cfg.codigo}</div><div class="conv-value" style="color:${cfg.color}">${tasa}</div><div class="conv-sub">Visitas → admisión</div></div>`;
   }).join("");
 
-  // GA4 tabla con sparklines
-  makeMetricsTable("tabla-ga4-compare", [
-    { label:"Visitas totales",       key:"Visitas Totales",         fmtFn:fmt },
-    { label:"Visitas nuevas",        key:"Visitas Nuevas",          fmtFn:fmt },
-    { label:"Visitas /admision2027", key:"Visitas /admision2027",   fmtFn:fmt },
-  ], d, colors);
+  makeMetricsTable("tabla-ga4-compare",[
+    {label:"Visitas totales",       key:"Visitas Totales",       fmtFn:fmt},
+    {label:"Visitas nuevas",        key:"Visitas Nuevas",        fmtFn:fmt},
+    {label:"Visitas /admision2027", key:"Visitas /admision2027", fmtFn:fmt},
+  ], d);
 
   // Meta
   destroyChart("meta-alcance");
-  charts["meta-alcance"] = new Chart(document.getElementById("chart-meta-alcance"),{
-    type:"bar", data:{labels, datasets:[{label:"Alcance",data:d.map(r=>r["Meta Alcance"]||0),backgroundColor:colors}]},
+  charts["meta-alcance"]=new Chart(document.getElementById("chart-meta-alcance"),{
+    type:"bar",data:{labels,datasets:[{label:"Alcance",data:d.map(r=>r["Meta Alcance"]||0),backgroundColor:colors}]},
     options:{plugins:{legend:{display:false}},scales:scaleOpts,responsive:true}
   });
   destroyChart("meta-presupuesto");
-  charts["meta-presupuesto"] = new Chart(document.getElementById("chart-meta-presupuesto"),{
-    type:"bar", data:{labels, datasets:[{label:"Presupuesto",data:d.map(r=>r["Meta Presupuesto"]||0),backgroundColor:colors}]},
+  charts["meta-presupuesto"]=new Chart(document.getElementById("chart-meta-presupuesto"),{
+    type:"bar",data:{labels,datasets:[{label:"Presupuesto",data:d.map(r=>r["Meta Presupuesto"]||0),backgroundColor:colors}]},
     options:{plugins:{legend:{display:false}},scales:scaleOpts,responsive:true}
   });
 
-  makeMetricsTable("tabla-meta-compare", [
-    { label:"Alcance",        key:"Meta Alcance",     fmtFn:fmt },
-    { label:"Presupuesto",    key:"Meta Presupuesto", fmtFn:fmtCLP },
-    { label:"CPR",            key:"Meta CPR",         fmtFn:v=>"$"+Math.round(v||0) },
-    { label:"Usuarios únicos",key:"Meta Usuarios",    fmtFn:fmt },
-  ], d, colors);
+  makeMetricsTable("tabla-meta-compare",[
+    {label:"Alcance",        key:"Meta Alcance",     fmtFn:fmt},
+    {label:"Presupuesto",    key:"Meta Presupuesto", fmtFn:fmtCLP},
+    {label:"CPR",            key:"Meta CPR",         fmtFn:v=>"$"+Math.round(v||0)},
+    {label:"Usuarios únicos",key:"Meta Usuarios",    fmtFn:fmt},
+  ], d);
 
-  // Google Ads
-  makeMetricsTable("tabla-gads-compare", [
-    { label:"Impresiones", key:"GAds Impresiones", fmtFn:fmt },
-    { label:"Clics",       key:"GAds Clics",       fmtFn:fmt },
-    { label:"Llamadas",    key:"GAds Llamadas",    fmtFn:fmt },
-  ], d, colors);
+  makeMetricsTable("tabla-gads-compare",[
+    {label:"Impresiones",key:"GAds Impresiones",fmtFn:fmt},
+    {label:"Clics",      key:"GAds Clics",      fmtFn:fmt},
+    {label:"Llamadas",   key:"GAds Llamadas",   fmtFn:fmt},
+  ], d);
 
-  // HubSpot tortas
-  makePie("chart-hub-torta",        labels, d.map(r=>r["HS Matriculados"]||0),  colors);
-  makePie("chart-hub-postulaciones",labels, d.map(r=>r["HS Postulaciones"]||0), colors);
+  makePie("chart-hub-torta",        labels,d.map(r=>r["HS Matriculados"]||0), colors);
+  makePie("chart-hub-postulaciones",labels,d.map(r=>r["HS Postulaciones"]||0),colors);
 
-  makeMetricsTable("tabla-hub-compare", [
-    { label:"Postulaciones", key:"HS Postulaciones", fmtFn:fmt },
-    { label:"Aceptados",     key:"HS Aceptados",     fmtFn:fmt },
-    { label:"Matriculados",  key:"HS Matriculados",  fmtFn:fmt },
-    { label:"Desiste",       key:"HS Desiste",       fmtFn:fmt },
-    { label:"Rechazados",    key:"HS Rechazados",    fmtFn:fmt },
-    { label:"Lista espera",  key:"HS Lista Espera",  fmtFn:fmt },
-  ], d, colors);
+  makeMetricsTable("tabla-hub-compare",[
+    {label:"Postulaciones",key:"HS Postulaciones",fmtFn:fmt},
+    {label:"Aceptados",    key:"HS Aceptados",    fmtFn:fmt},
+    {label:"Matriculados", key:"HS Matriculados", fmtFn:fmt},
+    {label:"Desiste",      key:"HS Desiste",      fmtFn:fmt},
+    {label:"Rechazados",   key:"HS Rechazados",   fmtFn:fmt},
+    {label:"Lista espera", key:"HS Lista Espera", fmtFn:fmt},
+  ], d);
 }
 
-function buildNavTabs() {
-  const nav = document.getElementById("main-nav");
+function buildNavTabs(){
+  const nav=document.getElementById("main-nav");
   COLEGIOS_CFG.forEach(c=>{
-    const tab = document.createElement("div");
-    tab.className = "nav-tab";
-    tab.innerHTML = `<span class="nav-dot" style="background:${c.color}"></span>${c.codigo}`;
-    tab.onclick = function(){ showTab("col-"+c.codigo, this); };
+    const tab=document.createElement("div");
+    tab.className="nav-tab";
+    tab.innerHTML=`<span class="nav-dot" style="background:${c.color}"></span>${c.codigo}`;
+    tab.onclick=function(){showTab("col-"+c.codigo,this);};
     nav.appendChild(tab);
   });
 }
 
-function buildColegioSections() {
-  const container = document.getElementById("sections-colegios");
+function buildColegioSections(){
+  const container=document.getElementById("sections-colegios");
   COLEGIOS_CFG.forEach(c=>{
-    const sec = document.createElement("div");
-    sec.id = "sec-col-"+c.codigo;
-    sec.className = "section";
-    sec.innerHTML = `
+    const sec=document.createElement("div");
+    sec.id="sec-col-"+c.codigo;
+    sec.className="section";
+    sec.innerHTML=`
       <div style="display:flex;align-items:center;gap:14px;margin-bottom:2.5rem">
-        <div class="colegio-avatar" style="background:${c.color};color:${c.accent}">${c.initials}</div>
-        <div>
-          <div class="section-title">${c.nombre}</div>
-          <div class="section-subtitle">Métricas detalladas — última semana</div>
-        </div>
+        <div class="colegio-avatar" style="background:${c.color};color:#fff">${c.initials}</div>
+        <div><div class="section-title">${c.nombre}</div></div>
       </div>
       <div class="kpi-grid" id="kpis-${c.codigo}"></div>
       <div class="platform-block">
@@ -451,10 +420,10 @@ function buildColegioSections() {
   });
 }
 
-function renderColegio(cfg) {
-  const d = getLatest().find(r=>r["Colegio"]===cfg.nombre);
+function renderColegio(cfg){
+  const d=getLatest().find(r=>r["Colegio"]===cfg.nombre);
   if(!d) return;
-  const c = cfg.color;
+  const c=cfg.color;
 
   document.getElementById("kpis-"+cfg.codigo).innerHTML=`
     <div class="kpi-card"><div class="kpi-label">Visitas totales</div><div class="kpi-value" style="color:${c}">${fmt(d["Visitas Totales"])}</div><div class="kpi-sub">${fmt(d["Visitas Nuevas"])} nuevas</div></div>
@@ -466,11 +435,10 @@ function renderColegio(cfg) {
   `;
 
   destroyChart("ga4-"+cfg.codigo);
-  charts["ga4-"+cfg.codigo] = new Chart(document.getElementById("chart-ga4-"+cfg.codigo),{
+  charts["ga4-"+cfg.codigo]=new Chart(document.getElementById("chart-ga4-"+cfg.codigo),{
     type:"bar",
-    data:{ labels:["Visitas totales","Visitas nuevas","Admisión 2027"],
-      datasets:[{ data:[d["Visitas Totales"]||0,d["Visitas Nuevas"]||0,d["Visitas /admision2027"]||0], backgroundColor:[c,c+"99","#f3bc52"] }] },
-    options:{ plugins:{legend:{display:false}}, scales:scaleOpts, responsive:true }
+    data:{labels:["Visitas totales","Visitas nuevas","Admisión 2027"],datasets:[{data:[d["Visitas Totales"]||0,d["Visitas Nuevas"]||0,d["Visitas /admision2027"]||0],backgroundColor:[c,c+"99","#f3bc52"]}]},
+    options:{plugins:{legend:{display:false}},scales:scaleOpts,responsive:true}
   });
 
   document.getElementById("tabla-ga4-"+cfg.codigo).innerHTML=`
@@ -495,14 +463,14 @@ function renderColegio(cfg) {
   `;
 
   destroyChart("hub-"+cfg.codigo);
-  charts["hub-"+cfg.codigo] = new Chart(document.getElementById("chart-hub-"+cfg.codigo),{
+  charts["hub-"+cfg.codigo]=new Chart(document.getElementById("chart-hub-"+cfg.codigo),{
     type:"doughnut",
-    data:{ labels:["Matriculados","Aceptados","Desiste","Rechazados","Lista espera"],
-      datasets:[{ data:[d["HS Matriculados"]||0,d["HS Aceptados"]||0,d["HS Desiste"]||0,d["HS Rechazados"]||0,d["HS Lista Espera"]||0],
-        backgroundColor:[c,c+"cc",c+"66",c+"44",c+"22"], borderWidth:2, borderColor:"#fff" }] },
-    options:{ cutout:"55%", plugins:{ legend:{ display:true, position:"right", labels:{ color:"#0d2a5e", font:{size:11}, boxWidth:12,
-      generateLabels(chart){ const ds=chart.data.datasets[0]; return chart.data.labels.map((label,i)=>({ text:label+" · "+fmt(ds.data[i]), fillStyle:ds.backgroundColor[i], strokeStyle:"#fff", lineWidth:2, index:i })); }
-    }}}, responsive:true }
+    data:{labels:["Matriculados","Aceptados","Desiste","Rechazados","Lista espera"],
+      datasets:[{data:[d["HS Matriculados"]||0,d["HS Aceptados"]||0,d["HS Desiste"]||0,d["HS Rechazados"]||0,d["HS Lista Espera"]||0],
+        backgroundColor:[c,c+"cc",c+"66",c+"44",c+"22"],borderWidth:2,borderColor:"#fff"}]},
+    options:{cutout:"55%",plugins:{legend:{display:true,position:"right",labels:{color:"#0d2a5e",font:{size:11},boxWidth:12,
+      generateLabels(chart){const ds=chart.data.datasets[0];return chart.data.labels.map((label,i)=>({text:label+" · "+fmt(ds.data[i]),fillStyle:ds.backgroundColor[i],strokeStyle:"#fff",lineWidth:2,index:i}));}
+    }}},responsive:true}
   });
 
   document.getElementById("tabla-hub-"+cfg.codigo).innerHTML=`
@@ -516,7 +484,7 @@ function renderColegio(cfg) {
   `;
 }
 
-function showTab(id, el) {
+function showTab(id,el){
   document.querySelectorAll(".section").forEach(s=>s.classList.remove("active"));
   document.querySelectorAll(".nav-tab").forEach(t=>t.classList.remove("active"));
   document.getElementById("sec-"+id).classList.add("active");
