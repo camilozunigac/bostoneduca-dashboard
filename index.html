@@ -215,72 +215,68 @@ function makePie(id, labels, data, colors){
 }
 
 function makeMetricsTable(tableId, rows, colegiosData){
-  const el = document.getElementById(tableId);
-  el.outerHTML = `<canvas id="${tableId}" style="max-height:320px"></canvas>`;
-  const canvas = document.getElementById(tableId);
-  if(!canvas) return;
+  const oldEl = document.getElementById(tableId);
+  const wrapper = document.createElement("div");
+  wrapper.id = tableId;
+  oldEl.replaceWith(wrapper);
 
   const labels = colegiosData.map(r => getCfg(r["Colegio"]).codigo);
   const lineColors = ["#214e97","#4eade1","#f3bc52"];
+  const LABEL_W = 160;
+  const PAD = 24;
+  const ROW_H = 100;
+  const W = 600;
+  const H = rows.length * ROW_H;
+  const colW = (W - PAD*2) / (labels.length - 1);
 
-  destroyChart(tableId);
-  charts[tableId] = new Chart(canvas, {
-    type:"line",
-    data:{
-      labels,
-      datasets: rows.map((row, i) => ({
-        label: row.label,
-        data: colegiosData.map(r => r[row.key]||0),
-        borderColor: lineColors[i % lineColors.length],
-        backgroundColor: lineColors[i % lineColors.length],
-        pointBackgroundColor: lineColors[i % lineColors.length],
-        pointBorderColor: "#fff",
-        pointBorderWidth: 2,
-        pointRadius: 8,
-        pointHoverRadius: 10,
-        tension: 0,
-        fill: false
-      }))
-    },
-    options:{
-      plugins:{
-        legend:{ display:true, position:"bottom", labels:{ color:"#0d2a5e", font:{size:12}, boxWidth:12, padding:20 } },
-        tooltip:{ enabled:true }
-      },
-      scales:{
-        x:{
-          grid:{ display:false },
-          ticks:{ color:"#7a90b5", font:{size:12, weight:"600"}, padding:16 }
-        },
-        y:{
-          display:false
-        }
-      },
-      responsive:true,
-      layout:{ padding:{ top:36, bottom:8, left:8, right:8 } }
-    },
-    plugins:[{
-      id:"datalabels-custom",
-      afterDatasetsDraw(chart){
-        const ctx = chart.ctx;
-        const offsets = [-14, 0, 14];
-        chart.data.datasets.forEach((ds, di) => {
-          const meta = chart.getDatasetMeta(di);
-          meta.data.forEach((point, i) => {
-            const val = ds.data[i];
-            if(!val) return;
-            ctx.save();
-            ctx.font = "bold 11px system-ui";
-            ctx.fillStyle = ds.borderColor;
-            ctx.textAlign = "center";
-            ctx.textBaseline = "bottom";
-            ctx.fillText(fmt(val), point.x, point.y - 10 + (offsets[di]||0));
-            ctx.restore();
-          });
-        });
-      }
-    }]
+  let svgContent = `<svg xmlns="http://www.w3.org/2000/svg" width="100%" viewBox="0 0 ${LABEL_W + W} ${H + 40}">`;
+
+  // Leyenda izquierda + línea por métrica
+  rows.forEach((row, ri) => {
+    const values = colegiosData.map(r => r[row.key]||0);
+    const allVals = rows.flatMap(r2 => colegiosData.map(d => d[r2.key]||0));
+    const globalMin = Math.min(...allVals);
+    const globalMax = Math.max(...allVals);
+    const range = globalMax - globalMin || 1;
+
+    const yBase = ri * ROW_H + PAD;
+    const yRange = ROW_H - PAD * 2;
+    const color = lineColors[ri];
+
+    // Etiqueta izquierda
+    svgContent += `
+      <text x="${LABEL_W - 12}" y="${yBase + yRange/2 + 5}" text-anchor="end" font-size="12" font-weight="600" fill="${color}">${row.label}</text>
+      <line x1="${LABEL_W - 4}" y1="${yBase + yRange/2}" x2="${LABEL_W + PAD - 8}" y2="${yBase + yRange/2}" stroke="${color}" stroke-width="1.5" stroke-dasharray="3,3"/>
+    `;
+
+    // Puntos y línea
+    const points = values.map((v, i) => {
+      const x = LABEL_W + PAD + i * colW;
+      const y = yBase + yRange - ((v - globalMin) / range) * yRange;
+      return {x, y, v};
+    });
+
+    // Línea
+    const pathD = points.map((p,i) => (i===0?`M${p.x},${p.y}`:`L${p.x},${p.y}`)).join(" ");
+    svgContent += `<path d="${pathD}" fill="none" stroke="${color}" stroke-width="2"/>`;
+
+    // Puntos + cifras
+    points.forEach((p, i) => {
+      svgContent += `
+        <circle cx="${p.x}" cy="${p.y}" r="6" fill="${color}" stroke="#fff" stroke-width="2"/>
+        <text x="${p.x}" y="${p.y - 12}" text-anchor="middle" font-size="11" font-weight="700" fill="${color}">${fmt(p.v)}</text>
+      `;
+    });
   });
+
+  // Etiquetas eje X (colegios)
+  labels.forEach((label, i) => {
+    const x = LABEL_W + PAD + i * colW;
+    svgContent += `<text x="${x}" y="${H + 28}" text-anchor="middle" font-size="12" font-weight="600" fill="#7a90b5">${label}</text>`;
+  });
+
+  svgContent += `</svg>`;
+  wrapper.innerHTML = svgContent;
 }
 
 function generateSummary(d){
