@@ -215,28 +215,67 @@ function makePie(id, labels, data, colors){
 }
 
 function makeMetricsTable(tableId, rows, colegiosData){
-  const cfgs = colegiosData.map(r=>getCfg(r["Colegio"]));
-  const headerCols = cfgs.map(c=>`<th class="right"><span class="colegio-badge"><span class="c-dot" style="background:${c.color}"></span>${c.codigo}</span></th>`).join("");
-  let html = `<tr><th>Métrica</th><th style="width:280px">Comparativa</th>${headerCols}</tr>`;
+  const el = document.getElementById(tableId);
+  el.outerHTML = `<canvas id="${tableId}" style="max-height:280px"></canvas>`;
+  const canvas = document.getElementById(tableId);
+  if(!canvas) return;
 
-  rows.forEach((row,ri)=>{
-    const values = colegiosData.map(r=>r[row.key]||0);
-    const chartId = `lc-${tableId}-${ri}`;
-    const valCells = values.map((v,i)=>`<td class="col-val" style="color:${cfgs[i].color}">${row.fmtFn(v)}</td>`).join("");
-    html += `<tr>
-      <td class="metric-label">${row.label}</td>
-      <td class="chart-cell"><canvas id="${chartId}" height="60"></canvas></td>
-      ${valCells}
-    </tr>`;
+  const labels = colegiosData.map(r => getCfg(r["Colegio"]).codigo);
+  const lineColors = ["#214e97","#4eade1","#f3bc52","#c13642","#7a90b5"];
+
+  destroyChart(tableId);
+  charts[tableId] = new Chart(canvas, {
+    type:"line",
+    data:{
+      labels,
+      datasets: rows.map((row, i) => ({
+        label: row.label,
+        data: colegiosData.map(r => r[row.key]||0),
+        borderColor: lineColors[i % lineColors.length],
+        backgroundColor: lineColors[i % lineColors.length],
+        pointBackgroundColor: lineColors[i % lineColors.length],
+        pointBorderColor: "#fff",
+        pointBorderWidth: 2,
+        pointRadius: 8,
+        pointHoverRadius: 10,
+        tension: 0,
+        fill: false
+      }))
+    },
+    options:{
+      plugins:{
+        legend:{ display:true, position:"bottom", labels:{ color:"#0d2a5e", font:{size:12}, boxWidth:12, padding:20 } },
+        tooltip:{ enabled:true },
+        datalabels: false
+      },
+      scales:{
+        x:{ grid:{color:"rgba(0,0,0,0.04)"}, ticks:{color:"#7a90b5", font:{size:12, weight:"600"}} },
+        y:{ grid:{color:"rgba(0,0,0,0.06)", borderDash:[4,4]}, ticks:{color:"#7a90b5", font:{size:11}} }
+      },
+      responsive:true,
+      layout:{ padding:{ top:30 } }
+    },
+    plugins:[{
+      id:"datalabels-custom",
+      afterDatasetsDraw(chart){
+        const ctx = chart.ctx;
+        chart.data.datasets.forEach((ds, di) => {
+          const meta = chart.getDatasetMeta(di);
+          meta.data.forEach((point, i) => {
+            const val = ds.data[i];
+            if(!val) return;
+            ctx.save();
+            ctx.font = "bold 11px system-ui";
+            ctx.fillStyle = ds.borderColor;
+            ctx.textAlign = "center";
+            ctx.textBaseline = "bottom";
+            ctx.fillText(fmt(val), point.x, point.y - 10);
+            ctx.restore();
+          });
+        });
+      }
+    }]
   });
-
-  document.getElementById(tableId).innerHTML = html;
-
-  setTimeout(()=>{
-    rows.forEach((_,ri)=>{
-      makeBubbleLine(`lc-${tableId}-${ri}`, colegiosData, rows[ri].key);
-    });
-  }, 60);
 }
 
 function generateSummary(d){
