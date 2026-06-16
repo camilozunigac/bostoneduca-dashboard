@@ -8,21 +8,21 @@
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 :root { --bg:#fff; --text:#0d2a5e; --muted:#7a90b5; --border:rgba(0,0,0,0.08); --navy:#1b2a4a; --gold:#f3bc52; }
-body { background:var(--bg); color:var(--text); font-family:system-ui,sans-serif; min-height:100vh; }
+body { background:#fff; color:#0d2a5e; font-family:system-ui,sans-serif; }
 
-header { background:#fff; border-bottom:1px solid var(--border); padding:1.2rem 2.5rem; display:flex; align-items:center; justify-content:space-between; position:sticky; top:0; z-index:100; }
+header { background:#fff; border-bottom:1px solid rgba(0,0,0,0.08); padding:1.2rem 2.5rem; display:flex; align-items:center; justify-content:space-between; position:sticky; top:0; z-index:100; }
 .logo { display:flex; align-items:center; gap:16px; }
-.logo-img { width:72px; height:72px; border-radius:10px; overflow:hidden; background:var(--navy); display:flex; align-items:center; justify-content:center; font-size:22px; font-weight:900; color:var(--gold); flex-shrink:0; }
+.logo-img { width:72px; height:72px; border-radius:10px; overflow:hidden; background:#1b2a4a; display:flex; align-items:center; justify-content:center; font-size:22px; font-weight:900; color:#f3bc52; flex-shrink:0; }
 .logo-img img { width:100%; height:100%; object-fit:cover; }
-.logo-text h1 { font-size:28px; font-weight:800; color:var(--navy); }
-.logo-text span { font-size:13px; color:var(--muted); }
-.semana-badge { background:#f5f7fa; border:1px solid var(--border); border-radius:6px; padding:6px 14px; font-size:13px; color:var(--muted); }
-#loading { font-size:13px; color:var(--gold); }
+.logo-text h1 { font-size:28px; font-weight:800; color:#1b2a4a; }
+.logo-text span { font-size:13px; color:#7a90b5; }
+.semana-badge { background:#f5f7fa; border:1px solid rgba(0,0,0,0.08); border-radius:6px; padding:6px 14px; font-size:13px; color:#7a90b5; }
+#loading { font-size:13px; color:#f3bc52; }
 
-nav { background:#fff; border-bottom:1px solid var(--border); padding:0 2.5rem; display:flex; overflow-x:auto; }
-.nav-tab { padding:14px 22px; font-size:13px; font-weight:500; color:var(--muted); border-bottom:2px solid transparent; cursor:pointer; white-space:nowrap; transition:all .2s; display:flex; align-items:center; gap:6px; }
-.nav-tab:hover { color:var(--navy); }
-.nav-tab.active { color:var(--navy); border-bottom-color:var(--navy); }
+nav { background:#fff; border-bottom:1px solid rgba(0,0,0,0.08); padding:0 2.5rem; display:flex; overflow-x:auto; }
+.nav-tab { padding:14px 22px; font-size:13px; font-weight:500; color:#7a90b5; border-bottom:2px solid transparent; cursor:pointer; white-space:nowrap; display:flex; align-items:center; gap:6px; }
+.nav-tab:hover { color:#1b2a4a; }
+.nav-tab.active { color:#1b2a4a; border-bottom-color:#1b2a4a; }
 .nav-dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; }
 
 main { padding:3rem 2.5rem; max-width:1440px; margin:0 auto; }
@@ -30,50 +30,38 @@ main { padding:3rem 2.5rem; max-width:1440px; margin:0 auto; }
 .section.active { display:block; }
 
 .platform-block { margin-bottom:4.5rem; }
-.platform-header { font-size:22px; font-weight:700; color:var(--navy); margin-bottom:2.25rem; }
+.platform-header { font-size:22px; font-weight:700; color:#1b2a4a; margin-bottom:2rem; }
+.block-label { font-size:11px; color:#7a90b5; text-transform:uppercase; letter-spacing:.5px; margin-bottom:14px; }
 
-.section-title { font-size:22px; font-weight:700; color:var(--navy); margin-bottom:12px; }
-.ai-summary { font-size:14px; color:var(--muted); line-height:1.7; margin-bottom:2.5rem; max-width:860px; }
-.ai-summary strong { color:var(--navy); }
+.section-title { font-size:22px; font-weight:700; color:#1b2a4a; margin-bottom:12px; }
+.ai-summary { font-size:14px; color:#7a90b5; line-height:1.7; margin-bottom:2.5rem; max-width:860px; }
+.ai-summary strong { color:#1b2a4a; }
 
 .ga4-row { display:grid; grid-template-columns:80fr 20fr; gap:2rem; align-items:center; margin-bottom:3rem; }
-.ga4-total { display:flex; flex-direction:column; justify-content:center; }
-.ga4-total-label { font-size:12px; color:var(--muted); text-transform:uppercase; letter-spacing:.5px; margin-bottom:8px; }
-.ga4-total-num { font-size:72px; font-weight:900; color:var(--navy); line-height:1; }
-.ga4-total-sub { font-size:13px; color:var(--muted); margin-top:10px; }
+.ga4-total-label { font-size:12px; color:#7a90b5; text-transform:uppercase; letter-spacing:.5px; margin-bottom:8px; }
+.ga4-total-num { font-size:72px; font-weight:900; color:#1b2a4a; line-height:1; }
+.ga4-total-sub { font-size:13px; color:#7a90b5; margin-top:10px; }
 
 .conv-row { display:flex; flex-wrap:wrap; gap:3rem; margin-bottom:3rem; }
-.conv-item .conv-codigo { font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:.5px; margin-bottom:4px; }
-.conv-item .conv-value { font-size:54px; font-weight:900; line-height:1; }
-.conv-item .conv-sub { font-size:11px; color:var(--muted); margin-top:4px; }
-
-/* Tabla con gráfico de línea inline */
-.metrics-table { width:100%; border-collapse:collapse; }
-.metrics-table th { text-align:left; padding:10px 14px; color:var(--muted); font-size:11px; text-transform:uppercase; letter-spacing:.4px; border-bottom:2px solid var(--border); }
-.metrics-table th.right { text-align:right; }
-.metrics-table td { padding:20px 14px; border-bottom:1px solid var(--border); vertical-align:middle; }
-.metrics-table tr:last-child td { border-bottom:none; }
-.metrics-table .metric-label { font-size:13px; font-weight:600; color:var(--navy); white-space:nowrap; }
-.metrics-table .col-val { font-size:15px; font-weight:700; text-align:right; color:var(--text); }
-.chart-cell { width:260px; padding:16px 14px !important; }
+.conv-codigo { font-size:11px; color:#7a90b5; text-transform:uppercase; letter-spacing:.5px; margin-bottom:4px; }
+.conv-value { font-size:54px; font-weight:900; line-height:1; }
+.conv-sub { font-size:11px; color:#7a90b5; margin-top:4px; }
 
 .grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:2rem; margin-bottom:2rem; }
 @media(max-width:900px){ .grid-2,.ga4-row{ grid-template-columns:1fr; } }
 
 .kpi-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:14px; margin-bottom:2rem; }
-.kpi-card { padding:1.25rem; border:1px solid var(--border); border-radius:10px; }
-.kpi-label { font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:.5px; margin-bottom:8px; }
+.kpi-card { padding:1.25rem; border:1px solid rgba(0,0,0,0.08); border-radius:10px; }
+.kpi-label { font-size:11px; color:#7a90b5; text-transform:uppercase; letter-spacing:.5px; margin-bottom:8px; }
 .kpi-value { font-size:33px; font-weight:800; }
-.kpi-sub { font-size:12px; color:var(--muted); margin-top:6px; }
+.kpi-sub { font-size:12px; color:#7a90b5; margin-top:6px; }
 
-.block-label { font-size:12px; color:var(--muted); text-transform:uppercase; letter-spacing:.5px; margin-bottom:14px; }
-.c-dot { width:8px; height:8px; border-radius:50%; display:inline-block; }
-.colegio-badge { display:inline-flex; align-items:center; gap:6px; }
 .colegio-avatar { width:40px; height:40px; border-radius:9px; display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:700; }
+.c-dot { width:8px; height:8px; border-radius:50%; display:inline-block; }
 
 table.simple { width:100%; border-collapse:collapse; font-size:13px; }
-table.simple th { padding:8px 0; color:var(--muted); font-size:11px; text-transform:uppercase; border-bottom:1px solid var(--border); }
-table.simple td { padding:10px 0; border-bottom:1px solid var(--border); }
+table.simple th { padding:8px 0; color:#7a90b5; font-size:11px; text-transform:uppercase; border-bottom:1px solid rgba(0,0,0,0.08); }
+table.simple td { padding:10px 0; border-bottom:1px solid rgba(0,0,0,0.08); }
 table.simple tr:last-child td { border-bottom:none; }
 </style>
 </head>
@@ -103,7 +91,7 @@ table.simple tr:last-child td { border-bottom:none; }
       <div class="platform-header">📊 Google Analytics</div>
       <div class="ga4-row">
         <div><div class="block-label">Visitas por colegio y tipo</div><canvas id="chart-ga4-barras" style="max-height:260px"></canvas></div>
-        <div class="ga4-total">
+        <div>
           <div class="ga4-total-label">Total visitas</div>
           <div class="ga4-total-num" id="ga4-total-num">—</div>
           <div class="ga4-total-sub" id="ga4-total-sub">—</div>
@@ -112,7 +100,7 @@ table.simple tr:last-child td { border-bottom:none; }
       <div class="block-label">Tasa de conversión a admisión 2027</div>
       <div class="conv-row" id="tasa-conversion-ga4"></div>
       <div class="block-label">Métricas por colegio</div>
-      <table class="metrics-table" id="tabla-ga4-compare"></table>
+      <div id="tabla-ga4-compare"></div>
     </div>
 
     <div class="platform-block">
@@ -122,13 +110,13 @@ table.simple tr:last-child td { border-bottom:none; }
         <div><div class="block-label">Presupuesto invertido (CLP)</div><canvas id="chart-meta-presupuesto" style="max-height:220px"></canvas></div>
       </div>
       <div class="block-label">Métricas por colegio</div>
-      <table class="metrics-table" id="tabla-meta-compare"></table>
+      <div id="tabla-meta-compare"></div>
     </div>
 
     <div class="platform-block">
       <div class="platform-header">🔍 Google Ads</div>
       <div class="block-label">Métricas por colegio</div>
-      <table class="metrics-table" id="tabla-gads-compare"></table>
+      <div id="tabla-gads-compare"></div>
     </div>
 
     <div class="platform-block">
@@ -138,7 +126,7 @@ table.simple tr:last-child td { border-bottom:none; }
         <div><div class="block-label">Postulaciones por colegio</div><canvas id="chart-hub-postulaciones" style="max-height:220px"></canvas></div>
       </div>
       <div class="block-label">Métricas por colegio</div>
-      <table class="metrics-table" id="tabla-hub-compare"></table>
+      <div id="tabla-hub-compare"></div>
     </div>
   </div>
 
@@ -148,157 +136,74 @@ table.simple tr:last-child td { border-bottom:none; }
 <script>
 const SHEET_ID = "1ZU7L4IWlgJg-ff5Xovy5cwr4HVMuTT3ScUNXIZZsdDY";
 const COLEGIOS_CFG = [
-  { nombre:"Boston Academy Laguna del Sol",            codigo:"BALS", color:"#1a6bbf", initials:"BA" },
-  { nombre:"Boston College Alto Macul",                codigo:"BCAM", color:"#214e97", initials:"BC" },
-  { nombre:"Colegio Inmaculada Concepción de Vitacura",codigo:"CICV", color:"#4eade1", initials:"CI" },
-  { nombre:"Colegio San Francisco de Paine",           codigo:"CSFP", color:"#c13642", initials:"SF" },
-  { nombre:"Colegio San Marcos de Macul",              codigo:"CSM",  color:"#e6b800", initials:"SM" },
+  { nombre:"Boston Academy Laguna del Sol",             codigo:"BALS", color:"#1a6bbf", initials:"BA" },
+  { nombre:"Boston College Alto Macul",                 codigo:"BCAM", color:"#214e97", initials:"BC" },
+  { nombre:"Colegio Inmaculada Concepción de Vitacura", codigo:"CICV", color:"#4eade1", initials:"CI" },
+  { nombre:"Colegio San Francisco de Paine",            codigo:"CSFP", color:"#c13642", initials:"SF" },
+  { nombre:"Colegio San Marcos de Macul",               codigo:"CSM",  color:"#e6b800", initials:"SM" },
 ];
 
-let DATA=[], charts={};
+let DATA = {}, charts = {};
 function getCfg(n){ return COLEGIOS_CFG.find(c=>c.nombre===n)||{color:"#555",initials:"??",codigo:"??"}; }
 function fmt(n){ return Math.round(n||0).toLocaleString("es-CL").replace(/,/g,"."); }
 function fmtCLP(n){ return "$"+Math.round(n||0).toLocaleString("es-CL").replace(/,/g,"."); }
-function destroyChart(id){ if(charts[id]){ charts[id].destroy(); delete charts[id]; } }
+function dc(id){ if(charts[id]){ charts[id].destroy(); delete charts[id]; } }
 
-const scaleOpts = {
+const SC = {
   y:{ grid:{color:"rgba(0,0,0,0.04)"}, ticks:{color:"#7a90b5",font:{size:11}} },
   x:{ grid:{display:false}, ticks:{color:"#7a90b5",font:{size:11}} }
 };
 
-// Gráfico de burbuja/línea estilo imagen adjunta
-// Puntos grandes con círculo interior, línea gris delgada, fondo oscuro
-function makeBubbleLine(canvasId, colegiosData, valueKey) {
-  const container = document.getElementById(canvasId).parentNode;
-  const existing = document.getElementById("svg-"+canvasId);
-  if(existing) existing.remove();
-  document.getElementById(canvasId).style.display = "none";
+// ── Gráfico de líneas SVG sin dasharray ──────────────────────
+function drawLineChart(containerId, rows, colegiosData){
+  const el = document.getElementById(containerId);
+  if(!el) return;
 
-  const values = colegiosData.map(r => r[valueKey]||0);
-  const colors = colegiosData.map(r => getCfg(r["Colegio"]).color);
   const labels = colegiosData.map(r => getCfg(r["Colegio"]).codigo);
+  const COLORS = ["#214e97","#4eade1","#f3bc52","#c13642","#5a7ab5"];
+  const LW = 120, PL = 40, PR = 40, RH = 80, VW = 1100;
+  const cw = (VW - LW - PL - PR) / (labels.length - 1);
+  const H = rows.length * RH;
 
-  const W = 280, H = 60;
-  const R = 10;
-  const min = Math.min(...values);
-  const max = Math.max(...values);
-  const range = max - min || 1;
-  const n = values.length;
-  const xs = values.map((_,i) => 20 + i * ((W-40)/(n-1)));
-  const ys = values.map(v => H - 10 - ((v - min) / range) * (H - 24));
+  let svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${VW} ${H+30}" style="width:100%;display:block">`;
 
-  let path = xs.map((x,i) => (i===0?`M${x},${ys[i]}`:`L${x},${ys[i]}`)).join(" ");
+  rows.forEach((row, ri) => {
+    const vals = colegiosData.map(r => +(r[row.key]||0));
+    const mn = Math.min(...vals), mx = Math.max(...vals), sp = mx-mn||1;
+    const col = COLORS[ri % COLORS.length];
+    const yt = ri*RH+12, yb = ri*RH+RH-12, ys = yb-yt;
 
-  let circles = values.map((v,i) => `
-    <circle cx="${xs[i]}" cy="${ys[i]}" r="${R}" fill="${colors[i]}" />
-    <text x="${xs[i]}" y="${ys[i]+R+11}" text-anchor="middle" font-size="9" font-weight="700" fill="${colors[i]}">${fmt(v)}</text>
-  `).join("");
+    // label izquierda — pequeño, sin línea
+    svg += `<text x="${LW-6}" y="${(yt+yb)/2+4}" text-anchor="end" font-size="9" font-weight="400" fill="${col}" opacity="0.6">${row.label}</text>`;
 
-  const svg = document.createElementNS("http://www.w3.org/2000/svg","svg");
-  svg.id = "svg-"+canvasId;
-  svg.setAttribute("viewBox", `0 0 ${W} ${H+18}`);
-  svg.setAttribute("width","100%");
-  svg.setAttribute("height","78");
-  svg.innerHTML = `<path d="${path}" fill="none" stroke="rgba(180,190,210,0.5)" stroke-width="1"/>${circles}`;
-  container.appendChild(svg);
+    const pts = vals.map((v,i)=>({ x: LW+PL+i*cw, y: yb-((v-mn)/sp)*ys, v }));
+
+    // línea sin dasharray
+    svg += `<polyline points="${pts.map(p=>`${p.x},${p.y}`).join(" ")}" fill="none" stroke="${col}" stroke-width="1"/>`;
+
+    pts.forEach(p=>{
+      svg += `<circle cx="${p.x}" cy="${p.y}" r="4" fill="${col}" stroke="#fff" stroke-width="1.5"/>`;
+      svg += `<text x="${p.x}" y="${p.y-8}" text-anchor="middle" font-size="10" font-weight="700" fill="${col}">${fmt(p.v)}</text>`;
+    });
+  });
+
+  labels.forEach((lbl,i)=>{
+    svg += `<text x="${LW+PL+i*cw}" y="${H+24}" text-anchor="middle" font-size="11" font-weight="600" fill="#7a90b5">${lbl}</text>`;
+  });
+
+  svg += `</svg>`;
+  el.innerHTML = svg;
 }
 
 function makePie(id, labels, data, colors){
-  destroyChart(id);
+  dc(id);
   charts[id]=new Chart(document.getElementById(id),{
     type:"doughnut",
     data:{labels,datasets:[{data,backgroundColor:colors,borderWidth:2,borderColor:"#fff"}]},
     options:{cutout:"58%",plugins:{legend:{display:true,position:"right",labels:{color:"#0d2a5e",font:{size:11},boxWidth:12,
-      generateLabels(chart){const ds=chart.data.datasets[0];return chart.data.labels.map((label,i)=>({text:label+" · "+fmt(ds.data[i]),fillStyle:ds.backgroundColor[i],strokeStyle:"#fff",lineWidth:2,index:i}));}
+      generateLabels(c){const ds=c.data.datasets[0];return c.data.labels.map((l,i)=>({text:l+" · "+fmt(ds.data[i]),fillStyle:ds.backgroundColor[i],strokeStyle:"#fff",lineWidth:2,index:i}));}
     }}},responsive:true}
   });
-}
-
-function makeMetricsTable(tableId, rows, colegiosData){
-  const oldEl = document.getElementById(tableId);
-  const wrapper = document.createElement("div");
-  wrapper.id = tableId;
-  oldEl.replaceWith(wrapper);
-
-  const labels = colegiosData.map(r => getCfg(r["Colegio"]).codigo);
-  const lineColors = ["#214e97","#4eade1","#f3bc52"];
-  const LABEL_W = 160;
-  const PAD = 24;
-  const ROW_H = 100;
-  const W = 600;
-  const H = rows.length * ROW_H;
-  const colW = (W - PAD*2) / (labels.length - 1);
-
-  let svgContent = `<svg xmlns="http://www.w3.org/2000/svg" width="100%" viewBox="0 0 ${LABEL_W + W} ${H + 40}">`;
-
-  // Leyenda izquierda + línea por métrica
-  rows.forEach((row, ri) => {
-    const values = colegiosData.map(r => r[row.key]||0);
-    const allVals = rows.flatMap(r2 => colegiosData.map(d => d[r2.key]||0));
-    const globalMin = Math.min(...allVals);
-    const globalMax = Math.max(...allVals);
-    const range = globalMax - globalMin || 1;
-
-    const yBase = ri * ROW_H + PAD;
-    const yRange = ROW_H - PAD * 2;
-    const color = lineColors[ri];
-
-    // Etiqueta izquierda
-    svgContent += `
-      <text x="${LABEL_W - 12}" y="${yBase + yRange/2 + 5}" text-anchor="end" font-size="12" font-weight="600" fill="${color}">${row.label}</text>
-      <line x1="${LABEL_W - 4}" y1="${yBase + yRange/2}" x2="${LABEL_W + PAD - 8}" y2="${yBase + yRange/2}" stroke="${color}" stroke-width="1.5" stroke-dasharray="3,3"/>
-    `;
-
-    // Puntos y línea
-    const points = values.map((v, i) => {
-      const x = LABEL_W + PAD + i * colW;
-      const y = yBase + yRange - ((v - globalMin) / range) * yRange;
-      return {x, y, v};
-    });
-
-    // Línea
-    const pathD = points.map((p,i) => (i===0?`M${p.x},${p.y}`:`L${p.x},${p.y}`)).join(" ");
-    svgContent += `<path d="${pathD}" fill="none" stroke="${color}" stroke-width="2"/>`;
-
-    // Puntos + cifras
-    points.forEach((p, i) => {
-      svgContent += `
-        <circle cx="${p.x}" cy="${p.y}" r="6" fill="${color}" stroke="#fff" stroke-width="2"/>
-        <text x="${p.x}" y="${p.y - 12}" text-anchor="middle" font-size="11" font-weight="700" fill="${color}">${fmt(p.v)}</text>
-      `;
-    });
-  });
-
-  // Etiquetas eje X (colegios)
-  labels.forEach((label, i) => {
-    const x = LABEL_W + PAD + i * colW;
-    svgContent += `<text x="${x}" y="${H + 28}" text-anchor="middle" font-size="12" font-weight="600" fill="#7a90b5">${label}</text>`;
-  });
-
-  svgContent += `</svg>`;
-  wrapper.innerHTML = svgContent;
-}
-
-function generateSummary(d){
-  const totVisitas = d.reduce((s,r)=>s+(r["Visitas Totales"]||0),0);
-  const totAlcance = d.reduce((s,r)=>s+(r["Meta Alcance"]||0),0);
-  const totMatric  = d.reduce((s,r)=>s+(r["HS Matriculados"]||0),0);
-  const totPost    = d.reduce((s,r)=>s+(r["HS Postulaciones"]||0),0);
-  const convRate   = totPost ? ((totMatric/totPost)*100).toFixed(1) : 0;
-  const topVisitas = [...d].sort((a,b)=>(b["Visitas Totales"]||0)-(a["Visitas Totales"]||0))[0];
-  const topMeta    = [...d].sort((a,b)=>(b["Meta Alcance"]||0)-(a["Meta Alcance"]||0))[0];
-  const topMatric  = [...d].sort((a,b)=>(b["HS Matriculados"]||0)-(a["HS Matriculados"]||0))[0];
-  const topCfg1 = getCfg(topVisitas?.["Colegio"]);
-  const topCfg2 = getCfg(topMeta?.["Colegio"]);
-  const topCfg3 = getCfg(topMatric?.["Colegio"]);
-
-  return `La semana registró <strong>${fmt(totVisitas)} visitas totales</strong> entre todos los colegios, con 
-    <strong style="color:${topCfg1.color}">${topCfg1.codigo}</strong> liderando el tráfico web. 
-    En Meta, el alcance consolidado fue de <strong>${fmt(totAlcance)} personas</strong>, destacando 
-    <strong style="color:${topCfg2.color}">${topCfg2.codigo}</strong>. 
-    En admisiones, hay <strong>${fmt(totPost)} postulaciones activas</strong> con una conversión a matrícula del <strong>${convRate}%</strong> — 
-    <strong style="color:${topCfg3.color}">${topCfg3.codigo}</strong> lidera en matriculados con ${fmt(topMatric?.["HS Matriculados"]||0)}. 
-    Se recomienda revisar los colegios con menor tráfico a <em>/admision2027</em> y evaluar si el presupuesto Meta está siendo suficiente para los que tienen menor alcance.`;
 }
 
 async function loadData(){
@@ -308,9 +213,10 @@ async function loadData(){
     const text=await resp.text();
     const json=JSON.parse(text.match(/google\.visualization\.Query\.setResponse\(([\s\S]*?)\);?\s*$/)[1]);
     const cols=json.table.cols.map(c=>c.label);
-    DATA=json.table.rows.map(r=>{const obj={};cols.forEach((col,i)=>{obj[col]=r.c[i]?.v??0;});return obj;}).filter(r=>r["Colegio"]&&r["Colegio"]!=="Colegio");
+    const rows=json.table.rows.map(r=>{const o={};cols.forEach((c,i)=>{o[c]=r.c[i]?.v??0;});return o;}).filter(r=>r["Colegio"]&&r["Colegio"]!=="Colegio");
+    DATA=rows;
     document.getElementById("loading").style.display="none";
-    const semanas=[...new Set(DATA.map(r=>r["Semana"]))].filter(Boolean).sort();
+    const semanas=[...new Set(rows.map(r=>r["Semana"]))].filter(Boolean).sort();
     if(semanas.length) document.getElementById("semana-display").textContent="Semana: "+semanas[semanas.length-1];
     buildNavTabs();
     buildColegioSections();
@@ -324,16 +230,26 @@ function getLatest(){
   return DATA.filter(r=>r["Semana"]===semanas[semanas.length-1]);
 }
 
+function generateSummary(d){
+  const totV=d.reduce((s,r)=>s+(r["Visitas Totales"]||0),0);
+  const totA=d.reduce((s,r)=>s+(r["Meta Alcance"]||0),0);
+  const totM=d.reduce((s,r)=>s+(r["HS Matriculados"]||0),0);
+  const totP=d.reduce((s,r)=>s+(r["HS Postulaciones"]||0),0);
+  const conv=totP?((totM/totP)*100).toFixed(1):0;
+  const topV=getCfg([...d].sort((a,b)=>(b["Visitas Totales"]||0)-(a["Visitas Totales"]||0))[0]?.["Colegio"]);
+  const topA=getCfg([...d].sort((a,b)=>(b["Meta Alcance"]||0)-(a["Meta Alcance"]||0))[0]?.["Colegio"]);
+  const topM=getCfg([...d].sort((a,b)=>(b["HS Matriculados"]||0)-(a["HS Matriculados"]||0))[0]?.["Colegio"]);
+  return `La semana registró <strong>${fmt(totV)} visitas totales</strong>, lideradas por <strong style="color:${topV.color}">${topV.codigo}</strong>. El alcance en Meta fue de <strong>${fmt(totA)} personas</strong>, destacando <strong style="color:${topA.color}">${topA.codigo}</strong>. En admisiones, hay <strong>${fmt(totP)} postulaciones</strong> con una conversión del <strong>${conv}%</strong> a matrícula — <strong style="color:${topM.color}">${topM.codigo}</strong> lidera con ${fmt(d.find(r=>getCfg(r["Colegio"]).codigo===topM.codigo)?.["HS Matriculados"]||0)} matriculados. Se recomienda reforzar la inversión en los colegios con menor tráfico a /admision2027.`;
+}
+
 function renderConsolidado(){
   const d=getLatest();
   const labels=d.map(r=>getCfg(r["Colegio"]).codigo);
   const colors=d.map(r=>getCfg(r["Colegio"]).color);
 
-  // Resumen IA
-  document.getElementById("ai-summary").innerHTML = generateSummary(d);
+  document.getElementById("ai-summary").innerHTML=generateSummary(d);
 
-  // GA4 barras
-  destroyChart("ga4-barras");
+  dc("ga4-barras");
   charts["ga4-barras"]=new Chart(document.getElementById("chart-ga4-barras"),{
     type:"bar",
     data:{labels,datasets:[
@@ -341,72 +257,71 @@ function renderConsolidado(){
       {label:"Visitas nuevas", data:d.map(r=>r["Visitas Nuevas"]||0), backgroundColor:colors.map(c=>c+"77")},
       {label:"Admisión 2027",  data:d.map(r=>r["Visitas /admision2027"]||0),backgroundColor:"#f3bc52"}
     ]},
-    options:{plugins:{legend:{display:true,labels:{color:"#0d2a5e",font:{size:11},boxWidth:10}}},scales:scaleOpts,responsive:true}
+    options:{plugins:{legend:{display:true,labels:{color:"#0d2a5e",font:{size:11},boxWidth:10}}},scales:SC,responsive:true}
   });
 
-  const totVisitas=d.reduce((s,r)=>s+(r["Visitas Totales"]||0),0);
-  const totNuevas =d.reduce((s,r)=>s+(r["Visitas Nuevas"]||0),0);
-  document.getElementById("ga4-total-num").textContent=fmt(totVisitas);
-  document.getElementById("ga4-total-sub").textContent=fmt(totNuevas)+" nuevas";
+  const totV=d.reduce((s,r)=>s+(r["Visitas Totales"]||0),0);
+  const totN=d.reduce((s,r)=>s+(r["Visitas Nuevas"]||0),0);
+  document.getElementById("ga4-total-num").textContent=fmt(totV);
+  document.getElementById("ga4-total-sub").textContent=fmt(totN)+" nuevas";
 
   document.getElementById("tasa-conversion-ga4").innerHTML=d.map(r=>{
     const cfg=getCfg(r["Colegio"]);
-    const tasa=r["Visitas Totales"]?((r["Visitas /admision2027"]/r["Visitas Totales"])*100).toFixed(1)+"%":"0%";
-    return `<div class="conv-item"><div class="conv-codigo">${cfg.codigo}</div><div class="conv-value" style="color:${cfg.color}">${tasa}</div><div class="conv-sub">Visitas → admisión</div></div>`;
+    const t=r["Visitas Totales"]?((r["Visitas /admision2027"]/r["Visitas Totales"])*100).toFixed(1)+"%":"0%";
+    return `<div><div class="conv-codigo">${cfg.codigo}</div><div class="conv-value" style="color:${cfg.color}">${t}</div><div class="conv-sub">Visitas → admisión</div></div>`;
   }).join("");
 
-  makeMetricsTable("tabla-ga4-compare",[
-    {label:"Visitas totales",       key:"Visitas Totales",       fmtFn:fmt},
-    {label:"Visitas nuevas",        key:"Visitas Nuevas",        fmtFn:fmt},
-    {label:"Visitas /admision2027", key:"Visitas /admision2027", fmtFn:fmt},
+  drawLineChart("tabla-ga4-compare",[
+    {label:"Visitas totales",       key:"Visitas Totales"},
+    {label:"Visitas nuevas",        key:"Visitas Nuevas"},
+    {label:"Visitas /admision2027", key:"Visitas /admision2027"},
   ], d);
 
-  // Meta
-  destroyChart("meta-alcance");
+  dc("meta-alcance");
   charts["meta-alcance"]=new Chart(document.getElementById("chart-meta-alcance"),{
     type:"bar",data:{labels,datasets:[{label:"Alcance",data:d.map(r=>r["Meta Alcance"]||0),backgroundColor:colors}]},
-    options:{plugins:{legend:{display:false}},scales:scaleOpts,responsive:true}
+    options:{plugins:{legend:{display:false}},scales:SC,responsive:true}
   });
-  destroyChart("meta-presupuesto");
+  dc("meta-presupuesto");
   charts["meta-presupuesto"]=new Chart(document.getElementById("chart-meta-presupuesto"),{
     type:"bar",data:{labels,datasets:[{label:"Presupuesto",data:d.map(r=>r["Meta Presupuesto"]||0),backgroundColor:colors}]},
-    options:{plugins:{legend:{display:false}},scales:scaleOpts,responsive:true}
+    options:{plugins:{legend:{display:false}},scales:SC,responsive:true}
   });
 
-  makeMetricsTable("tabla-meta-compare",[
-    {label:"Alcance",        key:"Meta Alcance",     fmtFn:fmt},
-    {label:"Presupuesto",    key:"Meta Presupuesto", fmtFn:fmtCLP},
-    {label:"CPR",            key:"Meta CPR",         fmtFn:v=>"$"+Math.round(v||0)},
-    {label:"Usuarios únicos",key:"Meta Usuarios",    fmtFn:fmt},
+  drawLineChart("tabla-meta-compare",[
+    {label:"Alcance",        key:"Meta Alcance"},
+    {label:"Presupuesto",    key:"Meta Presupuesto"},
+    {label:"CPR",            key:"Meta CPR"},
+    {label:"Usuarios únicos",key:"Meta Usuarios"},
   ], d);
 
-  makeMetricsTable("tabla-gads-compare",[
-    {label:"Impresiones",key:"GAds Impresiones",fmtFn:fmt},
-    {label:"Clics",      key:"GAds Clics",      fmtFn:fmt},
-    {label:"Llamadas",   key:"GAds Llamadas",   fmtFn:fmt},
+  drawLineChart("tabla-gads-compare",[
+    {label:"Impresiones", key:"GAds Impresiones"},
+    {label:"Clics",       key:"GAds Clics"},
+    {label:"Llamadas",    key:"GAds Llamadas"},
   ], d);
 
   makePie("chart-hub-torta",        labels,d.map(r=>r["HS Matriculados"]||0), colors);
   makePie("chart-hub-postulaciones",labels,d.map(r=>r["HS Postulaciones"]||0),colors);
 
-  makeMetricsTable("tabla-hub-compare",[
-    {label:"Postulaciones",key:"HS Postulaciones",fmtFn:fmt},
-    {label:"Aceptados",    key:"HS Aceptados",    fmtFn:fmt},
-    {label:"Matriculados", key:"HS Matriculados", fmtFn:fmt},
-    {label:"Desiste",      key:"HS Desiste",      fmtFn:fmt},
-    {label:"Rechazados",   key:"HS Rechazados",   fmtFn:fmt},
-    {label:"Lista espera", key:"HS Lista Espera", fmtFn:fmt},
+  drawLineChart("tabla-hub-compare",[
+    {label:"Postulaciones",key:"HS Postulaciones"},
+    {label:"Aceptados",    key:"HS Aceptados"},
+    {label:"Matriculados", key:"HS Matriculados"},
+    {label:"Desiste",      key:"HS Desiste"},
+    {label:"Rechazados",   key:"HS Rechazados"},
+    {label:"Lista espera", key:"HS Lista Espera"},
   ], d);
 }
 
 function buildNavTabs(){
   const nav=document.getElementById("main-nav");
   COLEGIOS_CFG.forEach(c=>{
-    const tab=document.createElement("div");
-    tab.className="nav-tab";
-    tab.innerHTML=`<span class="nav-dot" style="background:${c.color}"></span>${c.codigo}`;
-    tab.onclick=function(){showTab("col-"+c.codigo,this);};
-    nav.appendChild(tab);
+    const t=document.createElement("div");
+    t.className="nav-tab";
+    t.innerHTML=`<span class="nav-dot" style="background:${c.color}"></span>${c.codigo}`;
+    t.onclick=function(){showTab("col-"+c.codigo,this);};
+    nav.appendChild(t);
   });
 }
 
@@ -419,7 +334,7 @@ function buildColegioSections(){
     sec.innerHTML=`
       <div style="display:flex;align-items:center;gap:14px;margin-bottom:2.5rem">
         <div class="colegio-avatar" style="background:${c.color};color:#fff">${c.initials}</div>
-        <div><div class="section-title">${c.nombre}</div></div>
+        <div class="section-title">${c.nombre}</div>
       </div>
       <div class="kpi-grid" id="kpis-${c.codigo}"></div>
       <div class="platform-block">
@@ -440,8 +355,8 @@ function buildColegioSections(){
       <div class="platform-block">
         <div class="platform-header">🎯 HubSpot Admisiones</div>
         <div class="grid-2">
-          <div><div class="block-label">Embudo de admisión</div><canvas id="chart-hub-${c.codigo}" style="max-height:220px"></canvas></div>
-          <div><div class="block-label">Detalle por etapa</div><table class="simple" id="tabla-hub-${c.codigo}"></table></div>
+          <div><div class="block-label">Embudo</div><canvas id="chart-hub-${c.codigo}" style="max-height:220px"></canvas></div>
+          <div><div class="block-label">Detalle</div><table class="simple" id="tabla-hub-${c.codigo}"></table></div>
         </div>
       </div>
     `;
@@ -458,23 +373,23 @@ function renderColegio(cfg){
     <div class="kpi-card"><div class="kpi-label">Visitas totales</div><div class="kpi-value" style="color:${c}">${fmt(d["Visitas Totales"])}</div><div class="kpi-sub">${fmt(d["Visitas Nuevas"])} nuevas</div></div>
     <div class="kpi-card"><div class="kpi-label">Admisión 2027</div><div class="kpi-value" style="color:${c}">${fmt(d["Visitas /admision2027"])}</div><div class="kpi-sub">${d["Visitas Totales"]?((d["Visitas /admision2027"]/d["Visitas Totales"])*100).toFixed(1):0}% del total</div></div>
     <div class="kpi-card"><div class="kpi-label">Alcance Meta</div><div class="kpi-value" style="color:${c}">${fmt(d["Meta Alcance"])}</div></div>
-    <div class="kpi-card"><div class="kpi-label">Impresiones Google Ads</div><div class="kpi-value" style="color:${c}">${fmt(d["GAds Impresiones"])}</div></div>
+    <div class="kpi-card"><div class="kpi-label">Impresiones Ads</div><div class="kpi-value" style="color:${c}">${fmt(d["GAds Impresiones"])}</div></div>
     <div class="kpi-card"><div class="kpi-label">Postulaciones</div><div class="kpi-value" style="color:${c}">${fmt(d["HS Postulaciones"])}</div></div>
     <div class="kpi-card"><div class="kpi-label">Matriculados</div><div class="kpi-value" style="color:${c}">${fmt(d["HS Matriculados"])}</div></div>
   `;
 
-  destroyChart("ga4-"+cfg.codigo);
+  dc("ga4-"+cfg.codigo);
   charts["ga4-"+cfg.codigo]=new Chart(document.getElementById("chart-ga4-"+cfg.codigo),{
     type:"bar",
     data:{labels:["Visitas totales","Visitas nuevas","Admisión 2027"],datasets:[{data:[d["Visitas Totales"]||0,d["Visitas Nuevas"]||0,d["Visitas /admision2027"]||0],backgroundColor:[c,c+"99","#f3bc52"]}]},
-    options:{plugins:{legend:{display:false}},scales:scaleOpts,responsive:true}
+    options:{plugins:{legend:{display:false}},scales:SC,responsive:true}
   });
 
   document.getElementById("tabla-ga4-"+cfg.codigo).innerHTML=`
     <tr><th>Página</th><th>Visitas</th></tr>
-    <tr><td style="font-size:12px;color:var(--muted)">${d["Top Página 1"]||"-"}</td><td>${fmt(d["Visitas P1"])}</td></tr>
-    <tr><td style="font-size:12px;color:var(--muted)">${d["Top Página 2"]||"-"}</td><td>${fmt(d["Visitas P2"])}</td></tr>
-    <tr><td style="font-size:12px;color:var(--muted)">${d["Top Página 3"]||"-"}</td><td>${fmt(d["Visitas P3"])}</td></tr>
+    <tr><td style="font-size:12px;color:#7a90b5">${d["Top Página 1"]||"-"}</td><td>${fmt(d["Visitas P1"])}</td></tr>
+    <tr><td style="font-size:12px;color:#7a90b5">${d["Top Página 2"]||"-"}</td><td>${fmt(d["Visitas P2"])}</td></tr>
+    <tr><td style="font-size:12px;color:#7a90b5">${d["Top Página 3"]||"-"}</td><td>${fmt(d["Visitas P3"])}</td></tr>
   `;
 
   document.getElementById("kpis-meta-"+cfg.codigo).innerHTML=`
@@ -491,22 +406,22 @@ function renderColegio(cfg){
     <div class="kpi-card"><div class="kpi-label">Llamadas</div><div class="kpi-value" style="color:${c}">${fmt(d["GAds Llamadas"])}</div></div>
   `;
 
-  destroyChart("hub-"+cfg.codigo);
+  dc("hub-"+cfg.codigo);
   charts["hub-"+cfg.codigo]=new Chart(document.getElementById("chart-hub-"+cfg.codigo),{
     type:"doughnut",
     data:{labels:["Matriculados","Aceptados","Desiste","Rechazados","Lista espera"],
       datasets:[{data:[d["HS Matriculados"]||0,d["HS Aceptados"]||0,d["HS Desiste"]||0,d["HS Rechazados"]||0,d["HS Lista Espera"]||0],
         backgroundColor:[c,c+"cc",c+"66",c+"44",c+"22"],borderWidth:2,borderColor:"#fff"}]},
     options:{cutout:"55%",plugins:{legend:{display:true,position:"right",labels:{color:"#0d2a5e",font:{size:11},boxWidth:12,
-      generateLabels(chart){const ds=chart.data.datasets[0];return chart.data.labels.map((label,i)=>({text:label+" · "+fmt(ds.data[i]),fillStyle:ds.backgroundColor[i],strokeStyle:"#fff",lineWidth:2,index:i}));}
+      generateLabels(ch){const ds=ch.data.datasets[0];return ch.data.labels.map((l,i)=>({text:l+" · "+fmt(ds.data[i]),fillStyle:ds.backgroundColor[i],strokeStyle:"#fff",lineWidth:2,index:i}));}
     }}},responsive:true}
   });
 
   document.getElementById("tabla-hub-"+cfg.codigo).innerHTML=`
     <tr><th>Etapa</th><th>Actual</th><th>Año ant.</th></tr>
-    <tr><td>Postulaciones</td><td><strong>${fmt(d["HS Postulaciones"])}</strong></td><td style="color:var(--muted)">${fmt(d["HS Post. Año Ant."])}</td></tr>
+    <tr><td>Postulaciones</td><td><strong>${fmt(d["HS Postulaciones"])}</strong></td><td style="color:#7a90b5">${fmt(d["HS Post. Año Ant."])}</td></tr>
     <tr><td>Aceptados</td><td>${fmt(d["HS Aceptados"])}</td><td>-</td></tr>
-    <tr><td>Matriculados</td><td><strong style="color:${c}">${fmt(d["HS Matriculados"])}</strong></td><td style="color:var(--muted)">${fmt(d["HS Matric. Año Ant."])}</td></tr>
+    <tr><td>Matriculados</td><td><strong style="color:${c}">${fmt(d["HS Matriculados"])}</strong></td><td style="color:#7a90b5">${fmt(d["HS Matric. Año Ant."])}</td></tr>
     <tr><td>Desiste</td><td>${fmt(d["HS Desiste"])}</td><td>-</td></tr>
     <tr><td>Rechazados</td><td>${fmt(d["HS Rechazados"])}</td><td>-</td></tr>
     <tr><td>Lista espera</td><td>${fmt(d["HS Lista Espera"])}</td><td>-</td></tr>
