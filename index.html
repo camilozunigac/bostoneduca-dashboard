@@ -8,26 +8,27 @@
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 :root {
-  --bg: #0d2a5e;
+  --bg: #ffffff;
   --surface: #ffffff;
-  --surface2: #f8f9ff;
   --border: rgba(33,78,151,0.12);
   --text: #0d2a5e;
   --muted: #5a7ab5;
   --gold: #f3bc52;
-  --gold-light: #fdf3d8;
+  --gold-bg: rgba(243,188,82,0.3);
+  --navy: #1b2a4a;
 }
 body { background: var(--bg); color: var(--text); font-family: system-ui, sans-serif; min-height: 100vh; }
 
-header { background: #0d2a5e; border-bottom: 1px solid rgba(243,188,82,0.3); padding: 1rem 2rem; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
-.logo { display: flex; align-items: center; gap: 12px; }
-.logo-icon { width: 36px; height: 36px; background: var(--gold); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 14px; color: #0d2a5e; }
-.logo h1 { font-size: 16px; font-weight: 600; color: #fff; }
-.logo span { font-size: 12px; color: rgba(255,255,255,0.6); display: block; }
-.semana-badge { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 6px; padding: 6px 12px; font-size: 13px; color: rgba(255,255,255,0.8); }
+header { background: var(--navy); border-bottom: 2px solid var(--gold); padding: 1.2rem 2rem; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
+.logo { display: flex; align-items: center; gap: 16px; }
+.logo-img { width: 72px; height: 72px; border-radius: 10px; object-fit: cover; background: var(--gold); display: flex; align-items: center; justify-content: center; font-size: 22px; font-weight: 900; color: var(--navy); flex-shrink: 0; overflow: hidden; }
+.logo-img img { width: 100%; height: 100%; object-fit: cover; border-radius: 10px; }
+.logo-text h1 { font-size: 28px; font-weight: 800; color: #fff; letter-spacing: -0.5px; }
+.logo-text span { font-size: 13px; color: rgba(255,255,255,0.6); }
+.semana-badge { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 6px; padding: 6px 14px; font-size: 13px; color: rgba(255,255,255,0.8); }
 #loading { font-size: 13px; color: var(--gold); }
 
-nav { background: #0d2a5e; border-bottom: 1px solid rgba(243,188,82,0.2); padding: 0 2rem; display: flex; gap: 0; overflow-x: auto; }
+nav { background: var(--navy); border-bottom: 1px solid rgba(243,188,82,0.2); padding: 0 2rem; display: flex; gap: 0; overflow-x: auto; }
 .nav-tab { padding: 12px 20px; font-size: 13px; font-weight: 500; color: rgba(255,255,255,0.5); border-bottom: 2px solid transparent; cursor: pointer; white-space: nowrap; transition: all 0.2s; display: flex; align-items: center; gap: 6px; }
 .nav-tab:hover { color: rgba(255,255,255,0.9); }
 .nav-tab.active { color: var(--gold); border-bottom-color: var(--gold); }
@@ -37,11 +38,11 @@ main { padding: 1.5rem 2rem; max-width: 1400px; margin: 0 auto; }
 .section { display: none; }
 .section.active { display: block; }
 
-.card { background: linear-gradient(135deg, #ffffff 60%, #fdf3d8 100%); border: 1px solid rgba(243,188,82,0.25); border-radius: 12px; padding: 1.25rem; margin-bottom: 1rem; box-shadow: 0 2px 8px rgba(13,42,94,0.08); }
+.card { background: var(--gold-bg); border: 1px solid rgba(243,188,82,0.4); border-radius: 12px; padding: 1.25rem; margin-bottom: 1rem; }
 .card-title { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 1rem; }
 
 .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin-bottom: 1rem; }
-.kpi-card { background: linear-gradient(135deg, #ffffff 60%, #fdf3d8 100%); border: 1px solid rgba(243,188,82,0.25); border-radius: 12px; padding: 1rem 1.25rem; box-shadow: 0 2px 8px rgba(13,42,94,0.08); }
+.kpi-card { background: var(--gold-bg); border: 1px solid rgba(243,188,82,0.4); border-radius: 12px; padding: 1rem 1.25rem; }
 .kpi-label { font-size: 11px; color: var(--muted); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
 .kpi-value { font-size: 22px; font-weight: 700; color: var(--text); }
 .kpi-sub { font-size: 11px; color: var(--muted); margin-top: 4px; }
@@ -56,7 +57,7 @@ td { padding: 10px 10px; border-bottom: 1px solid var(--border); color: var(--te
 tr:last-child td { border-bottom: none; }
 
 .compare-table { width: 100%; border-collapse: collapse; font-size: 13px; }
-.compare-table th { padding: 10px 12px; color: var(--muted); font-size: 11px; text-transform: uppercase; border-bottom: 1px solid var(--border); text-align: right; background: rgba(243,188,82,0.08); }
+.compare-table th { padding: 10px 12px; color: var(--muted); font-size: 11px; text-transform: uppercase; border-bottom: 1px solid var(--border); text-align: right; background: rgba(243,188,82,0.15); }
 .compare-table th:first-child { text-align: left; }
 .compare-table td { padding: 12px 12px; border-bottom: 1px solid var(--border); text-align: right; color: var(--text); }
 .compare-table td:first-child { text-align: left; font-weight: 500; }
@@ -64,25 +65,26 @@ tr:last-child td { border-bottom: none; }
 .compare-table .best { color: #0d2a5e; font-weight: 700; }
 
 .platform-block { margin-bottom: 2rem; }
-.platform-header { font-size: 13px; font-weight: 700; color: #fff; text-transform: uppercase; letter-spacing: 0.5px; padding: 10px 14px; margin-bottom: 1rem; display: flex; align-items: center; gap: 8px; background: rgba(255,255,255,0.08); border-radius: 8px; border-left: 3px solid var(--gold); }
+.platform-header { font-size: 13px; font-weight: 700; color: var(--navy); text-transform: uppercase; letter-spacing: 0.5px; padding: 10px 14px; margin-bottom: 1rem; display: flex; align-items: center; gap: 8px; background: var(--gold-bg); border-radius: 8px; border-left: 3px solid var(--gold); }
 
-.section-title { font-size: 20px; font-weight: 700; color: #fff; margin-bottom: 4px; display: flex; align-items: center; gap: 10px; }
-.section-subtitle { font-size: 13px; color: rgba(255,255,255,0.6); margin-bottom: 1.5rem; }
+.section-title { font-size: 20px; font-weight: 700; color: var(--navy); margin-bottom: 4px; }
+.section-subtitle { font-size: 13px; color: var(--muted); margin-bottom: 1.5rem; }
 .colegio-avatar { width: 40px; height: 40px; border-radius: 9px; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; flex-shrink: 0; }
-
 .c-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; display: inline-block; }
 .colegio-badge { display: inline-flex; align-items: center; gap: 6px; }
-
 canvas { max-height: 220px; }
-.chart-sm { max-height: 180px; }
+.chart-sm { max-height: 200px; }
+
+.conv-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(140px,1fr)); gap: 10px; margin-top: 4px; }
+.conv-item { background: #fff; border: 1px solid rgba(243,188,82,0.4); border-radius: 10px; padding: 10px 14px; }
 </style>
 </head>
 <body>
 
 <header>
   <div class="logo">
-    <div class="logo-icon">BE</div>
-    <div>
+    <div class="logo-img" id="logo-container">BE</div>
+    <div class="logo-text">
       <h1>BostonEduca</h1>
       <span>Monitoreo Marketing Digital</span>
     </div>
@@ -106,17 +108,23 @@ canvas { max-height: 220px; }
       <div class="platform-header">📊 Google Analytics</div>
       <div class="grid-2">
         <div class="card">
-          <div class="card-title">Visitas por tipo — totales consolidados</div>
+          <div class="card-title">Visitas por colegio y tipo</div>
           <canvas id="chart-ga4-barras" class="chart-sm"></canvas>
         </div>
         <div class="card">
-          <div class="card-title">Distribución de visitas totales por colegio</div>
-          <canvas id="chart-ga4-torta" class="chart-sm"></canvas>
+          <div class="card-title">Distribución visitas totales</div>
+          <div style="position:relative">
+            <canvas id="chart-ga4-torta" class="chart-sm"></canvas>
+            <div id="torta-center" style="position:absolute;top:50%;left:30%;transform:translate(-50%,-50%);text-align:center;pointer-events:none">
+              <div style="font-size:11px;color:var(--muted);font-weight:600">TOTAL</div>
+              <div id="torta-total" style="font-size:20px;font-weight:800;color:var(--navy)">0</div>
+            </div>
+          </div>
         </div>
       </div>
       <div class="card">
         <div class="card-title">Tasa de conversión a admisión 2027</div>
-        <div id="tasa-conversion-ga4" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-top:4px"></div>
+        <div class="conv-grid" id="tasa-conversion-ga4"></div>
       </div>
       <div class="card" style="padding:0;overflow:hidden">
         <table class="compare-table" id="tabla-ga4-compare"></table>
@@ -144,14 +152,8 @@ canvas { max-height: 220px; }
     <div class="platform-block">
       <div class="platform-header">🎯 HubSpot Admisiones</div>
       <div class="grid-2">
-        <div class="card">
-          <div class="card-title">Matriculados por colegio</div>
-          <canvas id="chart-hub-torta" class="chart-sm"></canvas>
-        </div>
-        <div class="card">
-          <div class="card-title">Postulaciones por colegio</div>
-          <canvas id="chart-hub-postulaciones" class="chart-sm"></canvas>
-        </div>
+        <div class="card"><div class="card-title">Matriculados por colegio</div><canvas id="chart-hub-torta" class="chart-sm"></canvas></div>
+        <div class="card"><div class="card-title">Postulaciones por colegio</div><canvas id="chart-hub-postulaciones" class="chart-sm"></canvas></div>
       </div>
       <div class="card" style="padding:0;overflow:hidden">
         <table class="compare-table" id="tabla-hub-compare"></table>
@@ -164,97 +166,97 @@ canvas { max-height: 220px; }
 
 <script>
 const SHEET_ID = "1ZU7L4IWlgJg-ff5Xovy5cwr4HVMuTT3ScUNXIZZsdDY";
+const LOGO_URL = ""; // Pega aquí la URL de la imagen subida a GitHub
 
 const COLEGIOS_CFG = [
   { nombre:"Boston Academy Laguna del Sol",            codigo:"BALS", color:"#1a6bbf", accent:"#f3bc52", initials:"BA" },
   { nombre:"Boston College Alto Macul",                codigo:"BCAM", color:"#214e97", accent:"#f3bc52", initials:"BC" },
   { nombre:"Colegio Inmaculada Concepción de Vitacura",codigo:"CICV", color:"#4eade1", accent:"#205095", initials:"CI" },
   { nombre:"Colegio San Francisco de Paine",           codigo:"CSFP", color:"#c13642", accent:"#355c82", initials:"SF" },
-  { nombre:"Colegio San Marcos de Macul",              codigo:"CSM",  color:"#f8cd50", accent:"#000000", initials:"SM" },
+  { nombre:"Colegio San Marcos de Macul",              codigo:"CSM",  color:"#e6b800", accent:"#000000", initials:"SM" },
 ];
 
-let DATA = [];
-let charts = {};
-
-function getCfg(nombre) {
-  return COLEGIOS_CFG.find(c => c.nombre === nombre) || { color:"#555", accent:"#fff", initials:"??", codigo:"??" };
+if(LOGO_URL) {
+  const img = document.createElement("img");
+  img.src = LOGO_URL;
+  document.getElementById("logo-container").innerHTML = "";
+  document.getElementById("logo-container").appendChild(img);
 }
 
-function fmt(n) { return Math.round(n||0).toLocaleString("es-CL"); }
-function fmtCLP(n) { return "$" + Math.round(n||0).toLocaleString("es-CL"); }
-function fmtPct(n,d) { return d ? ((n/d)*100).toFixed(1)+"%" : "0%"; }
-function destroyChart(id) { if(charts[id]){ charts[id].destroy(); delete charts[id]; } }
+let DATA = [], charts = {};
 
-const chartDefaults = {
-  plugins: { legend: { display: false } },
-  scales: {
-    y: { grid:{color:"rgba(13,42,94,0.08)"}, ticks:{color:"#5a7ab5",font:{size:11}} },
-    x: { grid:{display:false}, ticks:{color:"#5a7ab5",font:{size:11}} }
-  },
-  responsive: true
+function getCfg(n){ return COLEGIOS_CFG.find(c=>c.nombre===n)||{color:"#555",accent:"#fff",initials:"??",codigo:"??"}; }
+function fmt(n){ return Math.round(n||0).toLocaleString("es-CL").replace(/,/g,"."); }
+function fmtCLP(n){ return "$"+Math.round(n||0).toLocaleString("es-CL").replace(/,/g,"."); }
+function fmtPct(n,d){ return d?((n/d)*100).toFixed(1)+"%":"0%"; }
+function destroyChart(id){ if(charts[id]){ charts[id].destroy(); delete charts[id]; } }
+
+const scaleOpts = {
+  y:{ grid:{color:"rgba(13,42,94,0.06)"}, ticks:{color:"#5a7ab5",font:{size:11}} },
+  x:{ grid:{display:false}, ticks:{color:"#5a7ab5",font:{size:11}} }
 };
 
-function barChart(id, labels, data, colors, opts={}) {
+function pieChart(id, labels, data, colors, centerText) {
   destroyChart(id);
-  charts[id] = new Chart(document.getElementById(id), {
-    type:"bar",
-    data:{ labels, datasets:[{ data, backgroundColor: colors }] },
-    options:{ ...chartDefaults, ...opts }
-  });
-}
-
-function pieChart(id, labels, data, colors) {
-  destroyChart(id);
+  const total = data.reduce((s,v)=>s+(v||0),0);
   charts[id] = new Chart(document.getElementById(id), {
     type:"doughnut",
-    data:{ labels, datasets:[{ data, backgroundColor: colors, borderWidth:2, borderColor:"#fff" }] },
-    options:{ plugins:{ legend:{ display:true, position:"right", labels:{ color:"#0d2a5e", font:{size:11}, boxWidth:12 } } }, responsive:true }
+    data:{ labels, datasets:[{ data, backgroundColor:colors, borderWidth:2, borderColor:"#fff" }] },
+    options:{
+      cutout:"60%",
+      plugins:{
+        legend:{ display:true, position:"right", labels:{ color:"#0d2a5e", font:{size:11}, boxWidth:12,
+          generateLabels: function(chart) {
+            const ds = chart.data.datasets[0];
+            return chart.data.labels.map((label,i) => ({
+              text: label + " · " + fmt(ds.data[i]),
+              fillStyle: ds.backgroundColor[i],
+              strokeStyle: "#fff",
+              lineWidth: 2,
+              index: i
+            }));
+          }
+        }}
+      },
+      responsive:true
+    }
   });
-}
-
-function bestVal(arr) { return Math.max(...arr.map(v=>v||0)); }
-
-function compareRow(label, values, fmtFn) {
-  const best = bestVal(values);
-  return `<tr><td>${label}</td>${values.map(v=>`<td class="${(v||0)===best&&best>0?'best':''}">${fmtFn(v)}</td>`).join("")}</tr>`;
+  if(centerText !== undefined) {
+    document.getElementById("torta-total").textContent = fmt(total);
+  }
 }
 
 async function loadData() {
-  const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=CONSOLIDADO`;
+  const url=`https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=CONSOLIDADO`;
   try {
-    const resp = await fetch(url);
-    const text = await resp.text();
-    const json = JSON.parse(text.match(/google\.visualization\.Query\.setResponse\(([\s\S]*?)\);?\s*$/)[1]);
-    const cols = json.table.cols.map(c=>c.label);
-    DATA = json.table.rows.map(r=>{
+    const resp=await fetch(url);
+    const text=await resp.text();
+    const json=JSON.parse(text.match(/google\.visualization\.Query\.setResponse\(([\s\S]*?)\);?\s*$/)[1]);
+    const cols=json.table.cols.map(c=>c.label);
+    DATA=json.table.rows.map(r=>{
       const obj={};
       cols.forEach((col,i)=>{ obj[col]=r.c[i]?.v??0; });
       return obj;
     }).filter(r=>r["Colegio"]&&r["Colegio"]!=="Colegio");
-
     document.getElementById("loading").style.display="none";
     const semanas=[...new Set(DATA.map(r=>r["Semana"]))].filter(Boolean).sort();
     if(semanas.length) document.getElementById("semana-display").textContent="Semana: "+semanas[semanas.length-1];
-
     buildNavTabs();
     buildColegioSections();
     renderConsolidado();
     COLEGIOS_CFG.forEach(c=>renderColegio(c));
-
-  } catch(e) {
+  } catch(e){
     document.getElementById("loading").textContent="Error al cargar";
-    document.getElementById("loading").style.color="#f03";
     console.error(e);
   }
 }
 
-function getLatest() {
+function getLatest(){
   const semanas=[...new Set(DATA.map(r=>r["Semana"]))].filter(Boolean).sort();
-  const ultima=semanas[semanas.length-1];
-  return DATA.filter(r=>r["Semana"]===ultima);
+  return DATA.filter(r=>r["Semana"]===semanas[semanas.length-1]);
 }
 
-function buildNavTabs() {
+function buildNavTabs(){
   const nav=document.getElementById("main-nav");
   COLEGIOS_CFG.forEach(c=>{
     const tab=document.createElement("div");
@@ -265,7 +267,7 @@ function buildNavTabs() {
   });
 }
 
-function buildColegioSections() {
+function buildColegioSections(){
   const container=document.getElementById("sections-colegios");
   COLEGIOS_CFG.forEach(c=>{
     const sec=document.createElement("div");
@@ -280,7 +282,6 @@ function buildColegioSections() {
         </div>
       </div>
       <div class="kpi-grid" id="kpis-${c.codigo}"></div>
-
       <div class="platform-block">
         <div class="platform-header">📊 Google Analytics</div>
         <div class="grid-2">
@@ -288,17 +289,14 @@ function buildColegioSections() {
           <div class="card" style="padding:0;overflow:hidden"><table id="tabla-ga4-${c.codigo}"></table></div>
         </div>
       </div>
-
       <div class="platform-block">
         <div class="platform-header">📱 Meta</div>
         <div class="kpi-grid" id="kpis-meta-${c.codigo}"></div>
       </div>
-
       <div class="platform-block">
         <div class="platform-header">🔍 Google Ads</div>
         <div class="kpi-grid" id="kpis-gads-${c.codigo}"></div>
       </div>
-
       <div class="platform-block">
         <div class="platform-header">🎯 HubSpot Admisiones</div>
         <div class="grid-2">
@@ -311,72 +309,91 @@ function buildColegioSections() {
   });
 }
 
-function renderConsolidado() {
-  const d = getLatest();
-  const labels = d.map(r=>getCfg(r["Colegio"]).codigo);
-  const colors = d.map(r=>getCfg(r["Colegio"]).color);
-  const headers = `<tr><th>Métrica</th>${d.map(r=>`<th><span class="colegio-badge"><span class="c-dot" style="background:${getCfg(r["Colegio"]).color}"></span>${getCfg(r["Colegio"]).codigo}</span></th>`).join("")}</tr>`;
+function renderConsolidado(){
+  const d=getLatest();
+  const labels=d.map(r=>getCfg(r["Colegio"]).codigo);
+  const colors=d.map(r=>getCfg(r["Colegio"]).color);
+  const headers=`<tr><th>Métrica</th>${d.map(r=>`<th><span class="colegio-badge"><span class="c-dot" style="background:${getCfg(r["Colegio"]).color}"></span>${getCfg(r["Colegio"]).codigo}</span></th>`).join("")}</tr>`;
 
-  // GA4 — barras por tipo (totales consolidados)
-  const totVisitas = d.reduce((s,r)=>s+(r["Visitas Totales"]||0),0);
-  const totNuevas  = d.reduce((s,r)=>s+(r["Visitas Nuevas"]||0),0);
-  const totAdmision= d.reduce((s,r)=>s+(r["Visitas /admision2027"]||0),0);
+  // GA4 — barras agrupadas por colegio (totales, nuevas, admisión)
+  destroyChart("ga4-barras");
+  charts["ga4-barras"]=new Chart(document.getElementById("chart-ga4-barras"),{
+    type:"bar",
+    data:{
+      labels,
+      datasets:[
+        {label:"Visitas totales", data:d.map(r=>r["Visitas Totales"]||0), backgroundColor:colors},
+        {label:"Visitas nuevas",  data:d.map(r=>r["Visitas Nuevas"]||0),  backgroundColor:colors.map(c=>c+"88")},
+        {label:"Admisión 2027",   data:d.map(r=>r["Visitas /admision2027"]||0), backgroundColor:"#f3bc52"}
+      ]
+    },
+    options:{
+      plugins:{legend:{display:true,labels:{color:"#0d2a5e",font:{size:11},boxWidth:12}}},
+      scales:scaleOpts, responsive:true
+    }
+  });
 
-  barChart("chart-ga4-barras",
-    ["Visitas totales","Visitas nuevas","Visitas admisión 2027"],
-    [totVisitas, totNuevas, totAdmision],
-    ["#214e97","#4eade1","#f3bc52"],
-    { plugins:{ legend:{ display:false } } }
-  );
+  // Torta visitas con cifras en leyenda
+  pieChart("chart-ga4-torta", labels, d.map(r=>r["Visitas Totales"]||0), colors, true);
 
-  pieChart("chart-ga4-torta", labels, d.map(r=>r["Visitas Totales"]||0), colors);
-
-  // Tasa de conversión GA4
-  document.getElementById("tasa-conversion-ga4").innerHTML = d.map(r=>{
+  // Tasa conversión
+  document.getElementById("tasa-conversion-ga4").innerHTML=d.map(r=>{
     const cfg=getCfg(r["Colegio"]);
-    const tasa=r["Visitas Totales"]?((r["Visitas /admision2027"]/r["Visitas Totales"])*100).toFixed(1)+"%" : "0%";
-    return `<div style="background:linear-gradient(135deg,#fff 60%,#fdf3d8);border:1px solid rgba(243,188,82,0.25);border-radius:10px;padding:10px 14px;border-top:3px solid ${cfg.color}">
+    const tasa=r["Visitas Totales"]?((r["Visitas /admision2027"]/r["Visitas Totales"])*100).toFixed(1)+"%":"0%";
+    return `<div class="conv-item" style="border-top:3px solid ${cfg.color}">
       <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px">${cfg.codigo}</div>
-      <div style="font-size:20px;font-weight:700;color:${cfg.color};margin-top:2px">${tasa}</div>
+      <div style="font-size:20px;font-weight:800;color:${cfg.color};margin-top:2px">${tasa}</div>
       <div style="font-size:10px;color:var(--muted)">visitas → admisión</div>
     </div>`;
   }).join("");
 
-  document.getElementById("tabla-ga4-compare").innerHTML = headers +
-    compareRow("Visitas totales", d.map(r=>r["Visitas Totales"]), fmt) +
-    compareRow("Visitas nuevas", d.map(r=>r["Visitas Nuevas"]), fmt) +
-    compareRow("Visitas /admision2027", d.map(r=>r["Visitas /admision2027"]), fmt);
+  document.getElementById("tabla-ga4-compare").innerHTML=headers+
+    compareRow("Visitas totales",d.map(r=>r["Visitas Totales"]),fmt)+
+    compareRow("Visitas nuevas",d.map(r=>r["Visitas Nuevas"]),fmt)+
+    compareRow("Visitas /admision2027",d.map(r=>r["Visitas /admision2027"]),fmt);
 
   // Meta
-  document.getElementById("tabla-meta-compare").innerHTML = headers +
-    compareRow("Alcance", d.map(r=>r["Meta Alcance"]), fmt) +
-    compareRow("Presupuesto", d.map(r=>r["Meta Presupuesto"]), fmtCLP) +
-    compareRow("CPR", d.map(r=>r["Meta CPR"]), v=>"$"+Math.round(v||0)) +
-    compareRow("Usuarios únicos", d.map(r=>r["Meta Usuarios"]), fmt);
+  destroyChart("meta-alcance");
+  charts["meta-alcance"]=new Chart(document.getElementById("chart-meta-alcance"),{
+    type:"bar", data:{labels,datasets:[{label:"Alcance",data:d.map(r=>r["Meta Alcance"]||0),backgroundColor:colors}]},
+    options:{plugins:{legend:{display:false}},scales:scaleOpts,responsive:true}
+  });
+  destroyChart("meta-presupuesto");
+  charts["meta-presupuesto"]=new Chart(document.getElementById("chart-meta-presupuesto"),{
+    type:"bar", data:{labels,datasets:[{label:"Presupuesto",data:d.map(r=>r["Meta Presupuesto"]||0),backgroundColor:colors}]},
+    options:{plugins:{legend:{display:false}},scales:scaleOpts,responsive:true}
+  });
 
-  barChart("chart-meta-alcance", labels, d.map(r=>r["Meta Alcance"]||0), colors);
-  barChart("chart-meta-presupuesto", labels, d.map(r=>r["Meta Presupuesto"]||0), colors);
+  document.getElementById("tabla-meta-compare").innerHTML=headers+
+    compareRow("Alcance",d.map(r=>r["Meta Alcance"]),fmt)+
+    compareRow("Presupuesto",d.map(r=>r["Meta Presupuesto"]),fmtCLP)+
+    compareRow("CPR",d.map(r=>r["Meta CPR"]),v=>"$"+Math.round(v||0))+
+    compareRow("Usuarios únicos",d.map(r=>r["Meta Usuarios"]),fmt);
 
-  // Google Ads
-  document.getElementById("tabla-gads-compare").innerHTML = headers +
-    compareRow("Impresiones", d.map(r=>r["GAds Impresiones"]), fmt) +
-    compareRow("Clics", d.map(r=>r["GAds Clics"]), fmt) +
-    compareRow("Llamadas", d.map(r=>r["GAds Llamadas"]), fmt);
+  document.getElementById("tabla-gads-compare").innerHTML=headers+
+    compareRow("Impresiones",d.map(r=>r["GAds Impresiones"]),fmt)+
+    compareRow("Clics",d.map(r=>r["GAds Clics"]),fmt)+
+    compareRow("Llamadas",d.map(r=>r["GAds Llamadas"]),fmt);
 
   // HubSpot tortas
   pieChart("chart-hub-torta", labels, d.map(r=>r["HS Matriculados"]||0), colors);
   pieChart("chart-hub-postulaciones", labels, d.map(r=>r["HS Postulaciones"]||0), colors);
 
-  document.getElementById("tabla-hub-compare").innerHTML = headers +
-    compareRow("Postulaciones", d.map(r=>r["HS Postulaciones"]), fmt) +
-    compareRow("Aceptados", d.map(r=>r["HS Aceptados"]), fmt) +
-    compareRow("Matriculados", d.map(r=>r["HS Matriculados"]), fmt) +
-    compareRow("Desiste", d.map(r=>r["HS Desiste"]), fmt) +
-    compareRow("Rechazados", d.map(r=>r["HS Rechazados"]), fmt) +
-    compareRow("Lista espera", d.map(r=>r["HS Lista Espera"]), fmt);
+  document.getElementById("tabla-hub-compare").innerHTML=headers+
+    compareRow("Postulaciones",d.map(r=>r["HS Postulaciones"]),fmt)+
+    compareRow("Aceptados",d.map(r=>r["HS Aceptados"]),fmt)+
+    compareRow("Matriculados",d.map(r=>r["HS Matriculados"]),fmt)+
+    compareRow("Desiste",d.map(r=>r["HS Desiste"]),fmt)+
+    compareRow("Rechazados",d.map(r=>r["HS Rechazados"]),fmt)+
+    compareRow("Lista espera",d.map(r=>r["HS Lista Espera"]),fmt);
 }
 
-function renderColegio(cfg) {
+function compareRow(label,values,fmtFn){
+  const best=Math.max(...values.map(v=>v||0));
+  return `<tr><td>${label}</td>${values.map(v=>`<td class="${(v||0)===best&&best>0?'best':''}">${fmtFn(v)}</td>`).join("")}</tr>`;
+}
+
+function renderColegio(cfg){
   const d=getLatest().find(r=>r["Colegio"]===cfg.nombre);
   if(!d) return;
   const c=cfg.color;
@@ -390,14 +407,13 @@ function renderColegio(cfg) {
     <div class="kpi-card"><div class="kpi-label">Matriculados</div><div class="kpi-value" style="color:${c}">${fmt(d["HS Matriculados"])}</div></div>
   `;
 
-  // GA4 barras por tipo
   destroyChart("ga4-"+cfg.codigo);
   charts["ga4-"+cfg.codigo]=new Chart(document.getElementById("chart-ga4-"+cfg.codigo),{
     type:"bar",
     data:{labels:["Visitas totales","Visitas nuevas","Admisión 2027"],
       datasets:[{data:[d["Visitas Totales"]||0,d["Visitas Nuevas"]||0,d["Visitas /admision2027"]||0],
-        backgroundColor:[c,c+"bb",c+"66"]}]},
-    options:{plugins:{legend:{display:false}},scales:{y:{grid:{color:"rgba(13,42,94,0.08)"},ticks:{color:"#5a7ab5",font:{size:11}}},x:{grid:{display:false},ticks:{color:"#5a7ab5",font:{size:11}}}},responsive:true}
+        backgroundColor:[c,c+"99","#f3bc52"]}]},
+    options:{plugins:{legend:{display:false}},scales:scaleOpts,responsive:true}
   });
 
   document.getElementById("tabla-ga4-"+cfg.codigo).innerHTML=`
@@ -424,9 +440,11 @@ function renderColegio(cfg) {
   destroyChart("hub-"+cfg.codigo);
   charts["hub-"+cfg.codigo]=new Chart(document.getElementById("chart-hub-"+cfg.codigo),{
     type:"doughnut",
-    data:{labels:["Matriculados","Aceptados","Postulantes","Desiste","Rechazados","Lista espera"],
+    data:{
+      labels:["Matriculados","Aceptados","Postulantes","Desiste","Rechazados","Lista espera"],
       datasets:[{data:[d["HS Matriculados"]||0,d["HS Aceptados"]||0,d["HS Postulantes"]||0,d["HS Desiste"]||0,d["HS Rechazados"]||0,d["HS Lista Espera"]||0],
-        backgroundColor:[c,c+"cc",c+"99",c+"66",c+"44",c+"22"],borderWidth:2,borderColor:"#fff"}]},
+        backgroundColor:[c,c+"cc",c+"99",c+"66",c+"44",c+"22"],borderWidth:2,borderColor:"#fff"}]
+    },
     options:{plugins:{legend:{display:true,position:"right",labels:{color:"#0d2a5e",font:{size:11},boxWidth:12}}},responsive:true}
   });
 
@@ -441,7 +459,7 @@ function renderColegio(cfg) {
   `;
 }
 
-function showTab(id,el) {
+function showTab(id,el){
   document.querySelectorAll(".section").forEach(s=>s.classList.remove("active"));
   document.querySelectorAll(".nav-tab").forEach(t=>t.classList.remove("active"));
   document.getElementById("sec-"+id).classList.add("active");
