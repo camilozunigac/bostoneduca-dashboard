@@ -14,81 +14,66 @@
   --border: rgba(0,0,0,0.08);
   --navy: #1b2a4a;
   --gold: #f3bc52;
-  --col: calc((100% - 7 * 24px) / 8);
 }
-body { background: var(--bg); color: var(--text); font-family: system-ui, sans-serif; }
+body { background: var(--bg); color: var(--text); font-family: system-ui, sans-serif; min-height: 100vh; }
 
-header { background: #fff; border-bottom: 1px solid var(--border); padding: 1.4rem 2.5rem; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
-.logo { display: flex; align-items: center; gap: 18px; }
+header { background: #fff; border-bottom: 1px solid var(--border); padding: 1.2rem 2rem; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
+.logo { display: flex; align-items: center; gap: 16px; }
 .logo-img { width: 72px; height: 72px; border-radius: 10px; overflow: hidden; background: var(--navy); display: flex; align-items: center; justify-content: center; font-size: 22px; font-weight: 900; color: var(--gold); flex-shrink: 0; }
 .logo-img img { width: 100%; height: 100%; object-fit: cover; }
-.logo-text h1 { font-size: 28px; font-weight: 800; color: var(--navy); }
+.logo-text h1 { font-size: 28px; font-weight: 800; color: var(--navy); letter-spacing: -0.5px; }
 .logo-text span { font-size: 13px; color: var(--muted); }
 .semana-badge { background: #f5f7fa; border: 1px solid var(--border); border-radius: 6px; padding: 6px 14px; font-size: 13px; color: var(--muted); }
 #loading { font-size: 13px; color: var(--gold); }
 
-nav { background: #fff; border-bottom: 1px solid var(--border); padding: 0 2.5rem; display: flex; overflow-x: auto; }
-.nav-tab { padding: 14px 22px; font-size: 13px; font-weight: 500; color: var(--muted); border-bottom: 2px solid transparent; cursor: pointer; white-space: nowrap; transition: all 0.2s; display: flex; align-items: center; gap: 6px; }
+nav { background: #fff; border-bottom: 1px solid var(--border); padding: 0 2rem; display: flex; overflow-x: auto; }
+.nav-tab { padding: 12px 20px; font-size: 13px; font-weight: 500; color: var(--muted); border-bottom: 2px solid transparent; cursor: pointer; white-space: nowrap; transition: all 0.2s; display: flex; align-items: center; gap: 6px; }
 .nav-tab:hover { color: var(--navy); }
 .nav-tab.active { color: var(--navy); border-bottom-color: var(--navy); }
 .nav-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
 
-main { padding: 2rem 2.5rem; max-width: 1440px; margin: 0 auto; }
+main { padding: 1.5rem 2rem; max-width: 1440px; margin: 0 auto; }
 .section { display: none; }
 .section.active { display: block; }
 
-/* 8-col grid */
-.grid8 { display: grid; grid-template-columns: repeat(8, 1fr); gap: 24px; margin-bottom: 2rem; align-items: start; }
-.col-2 { grid-column: span 2; }
-.col-3 { grid-column: span 3; }
-.col-4 { grid-column: span 4; }
-.col-5 { grid-column: span 5; }
-.col-6 { grid-column: span 6; }
-.col-8 { grid-column: span 8; }
-@media(max-width:900px){ .grid8{ grid-template-columns:1fr; } .col-2,.col-3,.col-4,.col-5,.col-6,.col-8{ grid-column:span 1; } }
+.kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin-bottom: 1rem; }
+.kpi-card { background: #fff; border: 1px solid var(--border); border-radius: 10px; padding: 1rem 1.25rem; }
+.kpi-label { font-size: 11px; color: var(--muted); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
+.kpi-value { font-size: 22px; font-weight: 700; color: var(--text); }
+.kpi-sub { font-size: 11px; color: var(--muted); margin-top: 4px; }
 
-.platform-block { margin-bottom: 3rem; border-top: 1px solid var(--border); padding-top: 2rem; }
-.platform-header { font-size: 22px; font-weight: 700; color: var(--navy); margin-bottom: 1.75rem; }
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1rem; }
+@media(max-width:900px){ .grid-2{ grid-template-columns:1fr; } }
 
-.section-title { font-size: 22px; font-weight: 700; color: var(--navy); margin-bottom: 4px; }
-.section-subtitle { font-size: 13px; color: var(--muted); margin-bottom: 2rem; }
+.card { background: #fff; padding: 1.25rem; margin-bottom: 1rem; }
+.card-title { font-size: 13px; color: var(--muted); margin-bottom: 1rem; }
 
-.block-label { font-size: 12px; color: var(--muted); margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.5px; }
+.platform-block { margin-bottom: 2.5rem; border-top: 1px solid var(--border); padding-top: 1.5rem; }
+.platform-header { font-size: 22px; font-weight: 700; color: var(--navy); margin-bottom: 1.25rem; display: flex; align-items: center; gap: 10px; }
 
-/* KPI column left */
-.kpi-stack { display: flex; flex-direction: column; gap: 20px; }
-.kpi-item { }
-.kpi-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
-.kpi-value { font-size: 28px; font-weight: 800; color: var(--text); line-height: 1; }
-.kpi-sub { font-size: 12px; color: var(--muted); margin-top: 4px; }
-.kpi-divider { height: 1px; background: var(--border); }
-
-/* Total visitas big number */
-.big-total { display: flex; flex-direction: column; justify-content: center; height: 100%; }
-.big-total-label { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
-.big-total-num { font-size: 56px; font-weight: 900; color: var(--navy); line-height: 1; }
-.big-total-sub { font-size: 13px; color: var(--muted); margin-top: 8px; }
-
-/* Conversión sin recuadro */
-.conv-row { display: flex; flex-wrap: wrap; gap: 32px; margin-bottom: 2rem; }
-.conv-item { }
-.conv-codigo { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 2px; }
-.conv-value { font-size: 42px; font-weight: 900; line-height: 1; }
-.conv-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+.section-title { font-size: 20px; font-weight: 700; color: var(--navy); margin-bottom: 4px; }
+.section-subtitle { font-size: 13px; color: var(--muted); margin-bottom: 1.5rem; }
+.colegio-avatar { width: 40px; height: 40px; border-radius: 9px; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; flex-shrink: 0; }
+.c-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+.colegio-badge { display: inline-flex; align-items: center; gap: 6px; }
 
 table { width: 100%; border-collapse: collapse; font-size: 13px; }
-th { text-align: left; padding: 8px 0; color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: 0.4px; border-bottom: 1px solid var(--border); }
-td { padding: 10px 0; border-bottom: 1px solid var(--border); color: var(--text); }
+th { text-align: left; padding: 8px 10px; color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: 0.4px; border-bottom: 1px solid var(--border); }
+td { padding: 10px 10px; border-bottom: 1px solid var(--border); color: var(--text); }
 tr:last-child td { border-bottom: none; }
-.compare-table th, .compare-table td { padding: 10px 12px; }
-.compare-table th { text-align: right; background: #fafafa; }
+.compare-table th { text-align: right; }
 .compare-table th:first-child { text-align: left; }
 .compare-table td { text-align: right; }
 .compare-table td:first-child { text-align: left; font-weight: 500; }
 .compare-table .best { font-weight: 700; }
 
-.colegio-avatar { width: 40px; height: 40px; border-radius: 9px; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; }
-.c-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+.conv-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(130px,1fr)); gap: 10px; margin-top: 4px; }
+.conv-item { background: #fff; border: 1px solid var(--border); border-radius: 10px; padding: 10px 14px; border-top-width: 3px; }
+
+.torta-wrap { position: relative; }
+.torta-center { position: absolute; top: 50%; left: 35%; transform: translate(-50%,-50%); text-align: center; pointer-events: none; }
+canvas { max-height: 220px; }
+.chart-sm { max-height: 200px; }
 </style>
 </head>
 <body>
@@ -116,79 +101,78 @@ tr:last-child td { border-bottom: none; }
 <main>
   <div id="sec-consolidado" class="section active">
     <div class="section-title">Comparativa entre colegios</div>
-    <div class="section-subtitle">Última semana disponible — todos los colegios</div>
+    <div class="section-subtitle">Última semana disponible</div>
 
-    <!-- GA4 -->
     <div class="platform-block">
       <div class="platform-header">📊 Google Analytics</div>
-
-      <!-- Barras 6col + total 2col -->
-      <div class="grid8" style="margin-bottom:1.5rem">
-        <div class="col-6">
-          <div class="block-label">Visitas por colegio y tipo</div>
-          <canvas id="chart-ga4-barras" style="max-height:240px"></canvas>
+      <div class="grid-2">
+        <div>
+          <div class="card-title">Visitas por colegio y tipo</div>
+          <canvas id="chart-ga4-barras" class="chart-sm"></canvas>
         </div>
-        <div class="col-2">
-          <div id="ga4-total-block" class="big-total"></div>
-        </div>
-      </div>
-
-      <!-- Tasa conversión sin recuadro -->
-      <div class="block-label">Tasa de conversión a admisión 2027</div>
-      <div class="conv-row" id="tasa-conversion-ga4"></div>
-
-      <!-- Gráfico de líneas + KPIs -->
-      <div class="grid8">
-        <div class="col-2">
-          <div class="kpi-stack" id="kpis-ga4-left"></div>
-        </div>
-        <div class="col-6">
-          <div class="block-label">Evolución de visitas</div>
-          <canvas id="chart-ga4-lineas" style="max-height:220px"></canvas>
+        <div>
+          <div class="card-title">Distribución de visitas totales</div>
+          <div class="torta-wrap">
+            <canvas id="chart-ga4-torta" class="chart-sm"></canvas>
+            <div class="torta-center">
+              <div style="font-size:10px;color:var(--muted);font-weight:600;text-transform:uppercase">Total</div>
+              <div id="torta-ga4-total" style="font-size:18px;font-weight:800;color:var(--navy)">0</div>
+            </div>
+          </div>
         </div>
       </div>
+      <div style="margin-bottom:1rem">
+        <div class="card-title">Tasa de conversión a admisión 2027</div>
+        <div class="conv-grid" id="tasa-conversion-ga4"></div>
+      </div>
+      <table class="compare-table" id="tabla-ga4-compare"></table>
     </div>
 
-    <!-- Meta -->
     <div class="platform-block">
       <div class="platform-header">📱 Meta</div>
-      <div class="grid8">
-        <div class="col-2">
-          <div class="kpi-stack" id="kpis-meta-left"></div>
+      <div class="grid-2">
+        <div>
+          <div class="card-title">Alcance por colegio</div>
+          <canvas id="chart-meta-alcance" class="chart-sm"></canvas>
         </div>
-        <div class="col-6">
-          <div class="block-label">Alcance y presupuesto por colegio</div>
-          <canvas id="chart-meta-lineas" style="max-height:220px"></canvas>
+        <div>
+          <div class="card-title">Presupuesto invertido (CLP)</div>
+          <canvas id="chart-meta-presupuesto" class="chart-sm"></canvas>
         </div>
       </div>
+      <table class="compare-table" id="tabla-meta-compare"></table>
     </div>
 
-    <!-- Google Ads -->
     <div class="platform-block">
       <div class="platform-header">🔍 Google Ads</div>
-      <div class="grid8">
-        <div class="col-2">
-          <div class="kpi-stack" id="kpis-gads-left"></div>
-        </div>
-        <div class="col-6">
-          <div class="block-label">Impresiones, clics y llamadas por colegio</div>
-          <canvas id="chart-gads-lineas" style="max-height:220px"></canvas>
-        </div>
-      </div>
+      <table class="compare-table" id="tabla-gads-compare"></table>
     </div>
 
-    <!-- HubSpot -->
     <div class="platform-block">
       <div class="platform-header">🎯 HubSpot Admisiones</div>
-      <div class="grid8">
-        <div class="col-2">
-          <div class="kpi-stack" id="kpis-hub-left"></div>
+      <div class="grid-2">
+        <div>
+          <div class="card-title">Matriculados por colegio</div>
+          <div class="torta-wrap">
+            <canvas id="chart-hub-torta" class="chart-sm"></canvas>
+            <div class="torta-center">
+              <div style="font-size:10px;color:var(--muted);font-weight:600;text-transform:uppercase">Total</div>
+              <div id="torta-hub-total" style="font-size:18px;font-weight:800;color:var(--navy)">0</div>
+            </div>
+          </div>
         </div>
-        <div class="col-6">
-          <div class="block-label">Postulaciones y matriculados por colegio</div>
-          <canvas id="chart-hub-lineas" style="max-height:220px"></canvas>
+        <div>
+          <div class="card-title">Postulaciones por colegio</div>
+          <div class="torta-wrap">
+            <canvas id="chart-hub-postulaciones" class="chart-sm"></canvas>
+            <div class="torta-center">
+              <div style="font-size:10px;color:var(--muted);font-weight:600;text-transform:uppercase">Total</div>
+              <div id="torta-hub-post-total" style="font-size:18px;font-weight:800;color:var(--navy)">0</div>
+            </div>
+          </div>
         </div>
       </div>
+      <table class="compare-table" id="tabla-hub-compare"></table>
     </div>
   </div>
 
@@ -210,6 +194,7 @@ let DATA = [], charts = {};
 function getCfg(n){ return COLEGIOS_CFG.find(c=>c.nombre===n)||{color:"#555",accent:"#fff",initials:"??",codigo:"??"}; }
 function fmt(n){ return Math.round(n||0).toLocaleString("es-CL").replace(/,/g,"."); }
 function fmtCLP(n){ return "$"+Math.round(n||0).toLocaleString("es-CL").replace(/,/g,"."); }
+function fmtPct(n,d){ return d?((n/d)*100).toFixed(1)+"%":"0%"; }
 function destroyChart(id){ if(charts[id]){ charts[id].destroy(); delete charts[id]; } }
 
 const scaleOpts = {
@@ -217,24 +202,23 @@ const scaleOpts = {
   x:{ grid:{display:false}, ticks:{color:"#7a90b5",font:{size:11}} }
 };
 
-// Datalabels para barras
 const datalabelsPlugin = {
   id:"datalabels",
   afterDatasetsDraw(chart){
-    if(chart.config.type !== "bar") return;
-    const ctx = chart.ctx;
+    if(chart.config.type!=="bar") return;
+    const ctx=chart.ctx;
     chart.data.datasets.forEach((ds,di)=>{
-      const meta = chart.getDatasetMeta(di);
+      const meta=chart.getDatasetMeta(di);
       if(meta.hidden) return;
       meta.data.forEach((bar,i)=>{
-        const val = ds.data[i];
+        const val=ds.data[i];
         if(!val) return;
         ctx.save();
-        ctx.font = "bold 10px system-ui";
-        ctx.fillStyle = "#0d2a5e";
-        ctx.textAlign = "center";
-        ctx.textBaseline = "bottom";
-        ctx.fillText(fmt(val), bar.x, bar.y - 3);
+        ctx.font="bold 10px system-ui";
+        ctx.fillStyle="#0d2a5e";
+        ctx.textAlign="center";
+        ctx.textBaseline="bottom";
+        ctx.fillText(fmt(val),bar.x,bar.y-3);
         ctx.restore();
       });
     });
@@ -242,398 +226,16 @@ const datalabelsPlugin = {
 };
 Chart.register(datalabelsPlugin);
 
-async function loadData(){
-  const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=CONSOLIDADO`;
-  try {
-    const resp = await fetch(url);
-    const text = await resp.text();
-    const json = JSON.parse(text.match(/google\.visualization\.Query\.setResponse\(([\s\S]*?)\);?\s*$/)[1]);
-    const cols = json.table.cols.map(c=>c.label);
-    DATA = json.table.rows.map(r=>{
-      const obj={};
-      cols.forEach((col,i)=>{ obj[col]=r.c[i]?.v??0; });
-      return obj;
-    }).filter(r=>r["Colegio"]&&r["Colegio"]!=="Colegio");
-
-    document.getElementById("loading").style.display="none";
-    const semanas = [...new Set(DATA.map(r=>r["Semana"]))].filter(Boolean).sort();
-    if(semanas.length) document.getElementById("semana-display").textContent = "Semana: "+semanas[semanas.length-1];
-
-    buildNavTabs();
-    buildColegioSections();
-    renderConsolidado();
-    COLEGIOS_CFG.forEach(c=>renderColegio(c));
-  } catch(e){
-    document.getElementById("loading").textContent = "Error al cargar";
-    console.error(e);
-  }
-}
-
-function getLatest(){
-  const semanas = [...new Set(DATA.map(r=>r["Semana"]))].filter(Boolean).sort();
-  return DATA.filter(r=>r["Semana"]===semanas[semanas.length-1]);
-}
-
-function getAllSemanas(){
-  return [...new Set(DATA.map(r=>r["Semana"]))].filter(Boolean).sort();
-}
-
-function renderConsolidado(){
-  const d = getLatest();
-  const semanas = getAllSemanas();
-  const labels = d.map(r=>getCfg(r["Colegio"]).codigo);
-  const colors = d.map(r=>getCfg(r["Colegio"]).color);
-
-  // ── GA4 barras agrupadas ──
-  destroyChart("ga4-barras");
-  charts["ga4-barras"] = new Chart(document.getElementById("chart-ga4-barras"),{
-    type:"bar",
-    data:{
-      labels,
-      datasets:[
-        { label:"Visitas totales", data:d.map(r=>r["Visitas Totales"]||0), backgroundColor:colors },
-        { label:"Visitas nuevas",  data:d.map(r=>r["Visitas Nuevas"]||0),  backgroundColor:colors.map(c=>c+"77") },
-        { label:"Admisión 2027",   data:d.map(r=>r["Visitas /admision2027"]||0), backgroundColor:"#f3bc52" }
-      ]
-    },
-    options:{ plugins:{legend:{display:true,labels:{color:"#0d2a5e",font:{size:11},boxWidth:10}}}, scales:scaleOpts, responsive:true }
-  });
-
-  // ── GA4 total big number ──
-  const totVisitas = d.reduce((s,r)=>s+(r["Visitas Totales"]||0),0);
-  const totNuevas  = d.reduce((s,r)=>s+(r["Visitas Nuevas"]||0),0);
-  document.getElementById("ga4-total-block").innerHTML = `
-    <div class="big-total-label">Total visitas</div>
-    <div class="big-total-num">${fmt(totVisitas)}</div>
-    <div class="big-total-sub">${fmt(totNuevas)} nuevas</div>
-  `;
-
-  // ── Tasa conversión ──
-  document.getElementById("tasa-conversion-ga4").innerHTML = d.map(r=>{
-    const cfg = getCfg(r["Colegio"]);
-    const tasa = r["Visitas Totales"] ? ((r["Visitas /admision2027"]/r["Visitas Totales"])*100).toFixed(1)+"%" : "0%";
-    return `<div class="conv-item">
-      <div class="conv-codigo">${cfg.codigo}</div>
-      <div class="conv-value" style="color:${cfg.color}">${tasa}</div>
-      <div class="conv-sub">Visitas → admisión</div>
-    </div>`;
-  }).join("");
-
-  // ── GA4 KPIs izquierda ──
-  document.getElementById("kpis-ga4-left").innerHTML = `
-    <div class="kpi-item"><div class="kpi-label">Visitas totales</div><div class="kpi-value">${fmt(totVisitas)}</div></div>
-    <div class="kpi-divider"></div>
-    <div class="kpi-item"><div class="kpi-label">Visitas nuevas</div><div class="kpi-value">${fmt(totNuevas)}</div></div>
-    <div class="kpi-divider"></div>
-    <div class="kpi-item"><div class="kpi-label">Admisión 2027</div><div class="kpi-value">${fmt(d.reduce((s,r)=>s+(r["Visitas /admision2027"]||0),0))}</div></div>
-  `;
-
-  // ── GA4 líneas históricas ──
-  destroyChart("ga4-lineas");
-  charts["ga4-lineas"] = new Chart(document.getElementById("chart-ga4-lineas"),{
-    type:"line",
-    data:{
-      labels: semanas,
-      datasets: COLEGIOS_CFG.map(c=>({
-        label: c.codigo,
-        data: semanas.map(s=>{
-          const row = DATA.find(r=>r["Semana"]===s&&r["Colegio"]===c.nombre);
-          return row ? (row["Visitas Totales"]||0) : null;
-        }),
-        borderColor: c.color,
-        backgroundColor: c.color+"22",
-        tension: 0.4,
-        pointRadius: 4,
-        fill: false
-      }))
-    },
-    options:{ plugins:{legend:{display:true,labels:{color:"#0d2a5e",font:{size:11},boxWidth:10}}}, scales:scaleOpts, responsive:true }
-  });
-
-  // ── Meta KPIs ──
-  const totAlcance = d.reduce((s,r)=>s+(r["Meta Alcance"]||0),0);
-  const totPresup  = d.reduce((s,r)=>s+(r["Meta Presupuesto"]||0),0);
-  const totUsuarios= d.reduce((s,r)=>s+(r["Meta Usuarios"]||0),0);
-  document.getElementById("kpis-meta-left").innerHTML = `
-    <div class="kpi-item"><div class="kpi-label">Alcance total</div><div class="kpi-value">${fmt(totAlcance)}</div></div>
-    <div class="kpi-divider"></div>
-    <div class="kpi-item"><div class="kpi-label">Presupuesto total</div><div class="kpi-value" style="font-size:20px">${fmtCLP(totPresup)}</div></div>
-    <div class="kpi-divider"></div>
-    <div class="kpi-item"><div class="kpi-label">Usuarios únicos</div><div class="kpi-value">${fmt(totUsuarios)}</div></div>
-  `;
-
-  // ── Meta líneas ──
-  destroyChart("meta-lineas");
-  charts["meta-lineas"] = new Chart(document.getElementById("chart-meta-lineas"),{
-    type:"line",
-    data:{
-      labels: semanas,
-      datasets: COLEGIOS_CFG.map(c=>({
-        label: c.codigo,
-        data: semanas.map(s=>{
-          const row = DATA.find(r=>r["Semana"]===s&&r["Colegio"]===c.nombre);
-          return row ? (row["Meta Alcance"]||0) : null;
-        }),
-        borderColor: c.color,
-        backgroundColor: c.color+"22",
-        tension: 0.4,
-        pointRadius: 4,
-        fill: false
-      }))
-    },
-    options:{ plugins:{legend:{display:true,labels:{color:"#0d2a5e",font:{size:11},boxWidth:10}}}, scales:scaleOpts, responsive:true }
-  });
-
-  // ── Google Ads KPIs ──
-  const totImp   = d.reduce((s,r)=>s+(r["GAds Impresiones"]||0),0);
-  const totClics = d.reduce((s,r)=>s+(r["GAds Clics"]||0),0);
-  const totLlam  = d.reduce((s,r)=>s+(r["GAds Llamadas"]||0),0);
-  document.getElementById("kpis-gads-left").innerHTML = `
-    <div class="kpi-item"><div class="kpi-label">Impresiones</div><div class="kpi-value">${fmt(totImp)}</div></div>
-    <div class="kpi-divider"></div>
-    <div class="kpi-item"><div class="kpi-label">Clics</div><div class="kpi-value">${fmt(totClics)}</div></div>
-    <div class="kpi-divider"></div>
-    <div class="kpi-item"><div class="kpi-label">Llamadas</div><div class="kpi-value">${fmt(totLlam)}</div></div>
-  `;
-
-  // ── Ads líneas ──
-  destroyChart("gads-lineas");
-  charts["gads-lineas"] = new Chart(document.getElementById("chart-gads-lineas"),{
-    type:"line",
-    data:{
-      labels: semanas,
-      datasets: COLEGIOS_CFG.map(c=>({
-        label: c.codigo,
-        data: semanas.map(s=>{
-          const row = DATA.find(r=>r["Semana"]===s&&r["Colegio"]===c.nombre);
-          return row ? (row["GAds Impresiones"]||0) : null;
-        }),
-        borderColor: c.color,
-        backgroundColor: c.color+"22",
-        tension: 0.4,
-        pointRadius: 4,
-        fill: false
-      }))
-    },
-    options:{ plugins:{legend:{display:true,labels:{color:"#0d2a5e",font:{size:11},boxWidth:10}}}, scales:scaleOpts, responsive:true }
-  });
-
-  // ── HubSpot KPIs ──
-  const totPost  = d.reduce((s,r)=>s+(r["HS Postulaciones"]||0),0);
-  const totMatric= d.reduce((s,r)=>s+(r["HS Matriculados"]||0),0);
-  const totAcept = d.reduce((s,r)=>s+(r["HS Aceptados"]||0),0);
-  document.getElementById("kpis-hub-left").innerHTML = `
-    <div class="kpi-item"><div class="kpi-label">Postulaciones</div><div class="kpi-value">${fmt(totPost)}</div></div>
-    <div class="kpi-divider"></div>
-    <div class="kpi-item"><div class="kpi-label">Aceptados</div><div class="kpi-value">${fmt(totAcept)}</div></div>
-    <div class="kpi-divider"></div>
-    <div class="kpi-item"><div class="kpi-label">Matriculados</div><div class="kpi-value">${fmt(totMatric)}</div></div>
-  `;
-
-  // ── HubSpot líneas ──
-  destroyChart("hub-lineas");
-  charts["hub-lineas"] = new Chart(document.getElementById("chart-hub-lineas"),{
-    type:"line",
-    data:{
-      labels: semanas,
-      datasets:[
-        ...COLEGIOS_CFG.map(c=>({
-          label: c.codigo+" Postulaciones",
-          data: semanas.map(s=>{
-            const row = DATA.find(r=>r["Semana"]===s&&r["Colegio"]===c.nombre);
-            return row ? (row["HS Postulaciones"]||0) : null;
-          }),
-          borderColor: c.color,
-          backgroundColor: c.color+"11",
-          tension: 0.4,
-          pointRadius: 4,
-          fill: false,
-          borderDash: []
-        })),
-        ...COLEGIOS_CFG.map(c=>({
-          label: c.codigo+" Matriculados",
-          data: semanas.map(s=>{
-            const row = DATA.find(r=>r["Semana"]===s&&r["Colegio"]===c.nombre);
-            return row ? (row["HS Matriculados"]||0) : null;
-          }),
-          borderColor: c.color,
-          backgroundColor: c.color+"11",
-          tension: 0.4,
-          pointRadius: 3,
-          fill: false,
-          borderDash: [4,4]
-        }))
-      ]
-    },
-    options:{ plugins:{legend:{display:true,labels:{color:"#0d2a5e",font:{size:10},boxWidth:10}}}, scales:scaleOpts, responsive:true }
-  });
-}
-
-function buildNavTabs(){
-  const nav = document.getElementById("main-nav");
-  COLEGIOS_CFG.forEach(c=>{
-    const tab = document.createElement("div");
-    tab.className = "nav-tab";
-    tab.innerHTML = `<span class="nav-dot" style="background:${c.color}"></span>${c.codigo}`;
-    tab.onclick = function(){ showTab("col-"+c.codigo, this); };
-    nav.appendChild(tab);
-  });
-}
-
-function buildColegioSections(){
-  const container = document.getElementById("sections-colegios");
-  COLEGIOS_CFG.forEach(c=>{
-    const sec = document.createElement("div");
-    sec.id = "sec-col-"+c.codigo;
-    sec.className = "section";
-    sec.innerHTML = `
-      <div style="display:flex;align-items:center;gap:14px;margin-bottom:2rem">
-        <div class="colegio-avatar" style="background:${c.color};color:${c.accent}">${c.initials}</div>
-        <div>
-          <div class="section-title">${c.nombre}</div>
-          <div class="section-subtitle">Métricas detalladas — última semana</div>
-        </div>
-      </div>
-
-      <div class="platform-block">
-        <div class="platform-header">📊 Google Analytics</div>
-        <div class="grid8">
-          <div class="col-2">
-            <div class="kpi-stack">
-              <div class="kpi-item"><div class="kpi-label">Visitas totales</div><div class="kpi-value" id="v-ga4-tot-${c.codigo}">—</div></div>
-              <div class="kpi-divider"></div>
-              <div class="kpi-item"><div class="kpi-label">Visitas nuevas</div><div class="kpi-value" id="v-ga4-new-${c.codigo}">—</div></div>
-              <div class="kpi-divider"></div>
-              <div class="kpi-item"><div class="kpi-label">Admisión 2027</div><div class="kpi-value" id="v-ga4-adm-${c.codigo}">—</div></div>
-            </div>
-          </div>
-          <div class="col-6">
-            <div class="block-label">Visitas por tipo</div>
-            <canvas id="chart-ga4-col-${c.codigo}" style="max-height:220px"></canvas>
-          </div>
-        </div>
-      </div>
-
-      <div class="platform-block">
-        <div class="platform-header">📱 Meta</div>
-        <div class="grid8">
-          <div class="col-2">
-            <div class="kpi-stack">
-              <div class="kpi-item"><div class="kpi-label">Alcance</div><div class="kpi-value" id="v-meta-alc-${c.codigo}">—</div></div>
-              <div class="kpi-divider"></div>
-              <div class="kpi-item"><div class="kpi-label">Presupuesto</div><div class="kpi-value" style="font-size:20px" id="v-meta-pre-${c.codigo}">—</div></div>
-              <div class="kpi-divider"></div>
-              <div class="kpi-item"><div class="kpi-label">CPR</div><div class="kpi-value" id="v-meta-cpr-${c.codigo}">—</div></div>
-              <div class="kpi-divider"></div>
-              <div class="kpi-item"><div class="kpi-label">Usuarios únicos</div><div class="kpi-value" id="v-meta-usr-${c.codigo}">—</div></div>
-            </div>
-          </div>
-          <div class="col-6">
-            <div class="block-label">Campaña activa</div>
-            <div id="v-meta-camp-${c.codigo}" style="font-size:15px;font-weight:600;color:${c.color};margin-bottom:1rem">—</div>
-          </div>
-        </div>
-      </div>
-
-      <div class="platform-block">
-        <div class="platform-header">🔍 Google Ads</div>
-        <div class="grid8">
-          <div class="col-2">
-            <div class="kpi-stack">
-              <div class="kpi-item"><div class="kpi-label">Impresiones</div><div class="kpi-value" id="v-gads-imp-${c.codigo}">—</div></div>
-              <div class="kpi-divider"></div>
-              <div class="kpi-item"><div class="kpi-label">Clics</div><div class="kpi-value" id="v-gads-cli-${c.codigo}">—</div></div>
-              <div class="kpi-divider"></div>
-              <div class="kpi-item"><div class="kpi-label">Llamadas</div><div class="kpi-value" id="v-gads-lla-${c.codigo}">—</div></div>
-            </div>
-          </div>
-          <div class="col-6"></div>
-        </div>
-      </div>
-
-      <div class="platform-block">
-        <div class="platform-header">🎯 HubSpot Admisiones</div>
-        <div class="grid8">
-          <div class="col-2">
-            <div class="kpi-stack">
-              <div class="kpi-item"><div class="kpi-label">Postulaciones</div><div class="kpi-value" id="v-hub-pos-${c.codigo}">—</div></div>
-              <div class="kpi-divider"></div>
-              <div class="kpi-item"><div class="kpi-label">Aceptados</div><div class="kpi-value" id="v-hub-ace-${c.codigo}">—</div></div>
-              <div class="kpi-divider"></div>
-              <div class="kpi-item"><div class="kpi-label">Matriculados</div><div class="kpi-value" id="v-hub-mat-${c.codigo}" style="color:${c.color}">—</div></div>
-              <div class="kpi-divider"></div>
-              <div class="kpi-item"><div class="kpi-label">Desiste</div><div class="kpi-value" id="v-hub-des-${c.codigo}">—</div></div>
-              <div class="kpi-divider"></div>
-              <div class="kpi-item"><div class="kpi-label">Rechazados</div><div class="kpi-value" id="v-hub-rec-${c.codigo}">—</div></div>
-            </div>
-          </div>
-          <div class="col-6">
-            <div class="block-label">Embudo de admisión</div>
-            <canvas id="chart-hub-col-${c.codigo}" style="max-height:220px"></canvas>
-          </div>
-        </div>
-      </div>
-    `;
-    container.appendChild(sec);
-  });
-}
-
-function renderColegio(cfg){
-  const d = getLatest().find(r=>r["Colegio"]===cfg.nombre);
-  if(!d) return;
-  const c = cfg.color;
-
-  // GA4
-  document.getElementById("v-ga4-tot-"+cfg.codigo).textContent = fmt(d["Visitas Totales"]);
-  document.getElementById("v-ga4-tot-"+cfg.codigo).style.color = c;
-  document.getElementById("v-ga4-new-"+cfg.codigo).textContent = fmt(d["Visitas Nuevas"]);
-  document.getElementById("v-ga4-adm-"+cfg.codigo).textContent = fmt(d["Visitas /admision2027"]);
-
-  destroyChart("ga4-col-"+cfg.codigo);
-  charts["ga4-col-"+cfg.codigo] = new Chart(document.getElementById("chart-ga4-col-"+cfg.codigo),{
-    type:"bar",
-    data:{
-      labels:["Visitas totales","Visitas nuevas","Admisión 2027"],
-      datasets:[{data:[d["Visitas Totales"]||0,d["Visitas Nuevas"]||0,d["Visitas /admision2027"]||0],
-        backgroundColor:[c,c+"99","#f3bc52"]}]
-    },
-    options:{plugins:{legend:{display:false}},scales:scaleOpts,responsive:true}
-  });
-
-  // Meta
-  document.getElementById("v-meta-alc-"+cfg.codigo).textContent = fmt(d["Meta Alcance"]);
-  document.getElementById("v-meta-pre-"+cfg.codigo).textContent = fmtCLP(d["Meta Presupuesto"]);
-  document.getElementById("v-meta-cpr-"+cfg.codigo).textContent = "$"+Math.round(d["Meta CPR"]||0);
-  document.getElementById("v-meta-usr-"+cfg.codigo).textContent = fmt(d["Meta Usuarios"]);
-  document.getElementById("v-meta-camp-"+cfg.codigo).textContent = d["Meta Nombre Campaña"]||"-";
-
-  // Ads
-  document.getElementById("v-gads-imp-"+cfg.codigo).textContent = fmt(d["GAds Impresiones"]);
-  document.getElementById("v-gads-cli-"+cfg.codigo).textContent = fmt(d["GAds Clics"]);
-  document.getElementById("v-gads-lla-"+cfg.codigo).textContent = fmt(d["GAds Llamadas"]);
-
-  // HubSpot
-  document.getElementById("v-hub-pos-"+cfg.codigo).textContent = fmt(d["HS Postulaciones"]);
-  document.getElementById("v-hub-ace-"+cfg.codigo).textContent = fmt(d["HS Aceptados"]);
-  document.getElementById("v-hub-mat-"+cfg.codigo).textContent = fmt(d["HS Matriculados"]);
-  document.getElementById("v-hub-des-"+cfg.codigo).textContent = fmt(d["HS Desiste"]);
-  document.getElementById("v-hub-rec-"+cfg.codigo).textContent = fmt(d["HS Rechazados"]);
-
-  destroyChart("hub-col-"+cfg.codigo);
-  charts["hub-col-"+cfg.codigo] = new Chart(document.getElementById("chart-hub-col-"+cfg.codigo),{
+function makePie(id,labels,data,colors,centerId){
+  destroyChart(id);
+  const total=data.reduce((s,v)=>s+(v||0),0);
+  if(centerId) document.getElementById(centerId).textContent=fmt(total);
+  charts[id]=new Chart(document.getElementById(id),{
     type:"doughnut",
-    data:{
-      labels:["Matriculados","Aceptados","Desiste","Rechazados","Lista espera"],
-      datasets:[{
-        data:[d["HS Matriculados"]||0,d["HS Aceptados"]||0,d["HS Desiste"]||0,d["HS Rechazados"]||0,d["HS Lista Espera"]||0],
-        backgroundColor:[c,c+"cc",c+"66",c+"44",c+"22"],
-        borderWidth:2,borderColor:"#fff"
-      }]
-    },
+    data:{labels,datasets:[{data,backgroundColor:colors,borderWidth:2,borderColor:"#fff"}]},
     options:{
-      cutout:"55%",
-      plugins:{legend:{display:true,position:"right",labels:{
-        color:"#0d2a5e",font:{size:11},boxWidth:12,
+      cutout:"58%",
+      plugins:{legend:{display:true,position:"right",labels:{color:"#0d2a5e",font:{size:11},boxWidth:12,
         generateLabels(chart){
           const ds=chart.data.datasets[0];
           return chart.data.labels.map((label,i)=>({
@@ -641,9 +243,239 @@ function renderColegio(cfg){
             fillStyle:ds.backgroundColor[i],strokeStyle:"#fff",lineWidth:2,index:i
           }));
         }
-      }}},responsive:true
+      }}},
+      responsive:true
     }
   });
+}
+
+function compareRow(label,values,fmtFn,colors){
+  const best=Math.max(...values.map(v=>v||0));
+  return `<tr><td>${label}</td>${values.map((v,i)=>`<td class="${(v||0)===best&&best>0?'best':''}" style="${colors?'color:'+colors[i]:''}">${fmtFn(v)}</td>`).join("")}</tr>`;
+}
+
+async function loadData(){
+  const url=`https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=CONSOLIDADO`;
+  try {
+    const resp=await fetch(url);
+    const text=await resp.text();
+    const json=JSON.parse(text.match(/google\.visualization\.Query\.setResponse\(([\s\S]*?)\);?\s*$/)[1]);
+    const cols=json.table.cols.map(c=>c.label);
+    DATA=json.table.rows.map(r=>{
+      const obj={};
+      cols.forEach((col,i)=>{ obj[col]=r.c[i]?.v??0; });
+      return obj;
+    }).filter(r=>r["Colegio"]&&r["Colegio"]!=="Colegio");
+    document.getElementById("loading").style.display="none";
+    const semanas=[...new Set(DATA.map(r=>r["Semana"]))].filter(Boolean).sort();
+    if(semanas.length) document.getElementById("semana-display").textContent="Semana: "+semanas[semanas.length-1];
+    buildNavTabs();
+    buildColegioSections();
+    renderConsolidado();
+    COLEGIOS_CFG.forEach(c=>renderColegio(c));
+  } catch(e){
+    document.getElementById("loading").textContent="Error al cargar";
+    console.error(e);
+  }
+}
+
+function getLatest(){
+  const semanas=[...new Set(DATA.map(r=>r["Semana"]))].filter(Boolean).sort();
+  return DATA.filter(r=>r["Semana"]===semanas[semanas.length-1]);
+}
+
+function buildNavTabs(){
+  const nav=document.getElementById("main-nav");
+  COLEGIOS_CFG.forEach(c=>{
+    const tab=document.createElement("div");
+    tab.className="nav-tab";
+    tab.innerHTML=`<span class="nav-dot" style="background:${c.color}"></span>${c.codigo}`;
+    tab.onclick=function(){ showTab("col-"+c.codigo,this); };
+    nav.appendChild(tab);
+  });
+}
+
+function buildColegioSections(){
+  const container=document.getElementById("sections-colegios");
+  COLEGIOS_CFG.forEach(c=>{
+    const sec=document.createElement("div");
+    sec.id="sec-col-"+c.codigo;
+    sec.className="section";
+    sec.innerHTML=`
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:1.5rem">
+        <div class="colegio-avatar" style="background:${c.color};color:${c.accent}">${c.initials}</div>
+        <div>
+          <div class="section-title">${c.nombre}</div>
+          <div class="section-subtitle">Métricas detalladas — última semana</div>
+        </div>
+      </div>
+      <div class="kpi-grid" id="kpis-${c.codigo}"></div>
+      <div class="platform-block">
+        <div class="platform-header">📊 Google Analytics</div>
+        <div class="grid-2">
+          <div><div class="card-title">Visitas por tipo</div><canvas id="chart-ga4-${c.codigo}" class="chart-sm"></canvas></div>
+          <div><div class="card-title">Top páginas</div><table id="tabla-ga4-${c.codigo}"></table></div>
+        </div>
+      </div>
+      <div class="platform-block">
+        <div class="platform-header">📱 Meta</div>
+        <div class="kpi-grid" id="kpis-meta-${c.codigo}"></div>
+      </div>
+      <div class="platform-block">
+        <div class="platform-header">🔍 Google Ads</div>
+        <div class="kpi-grid" id="kpis-gads-${c.codigo}"></div>
+      </div>
+      <div class="platform-block">
+        <div class="platform-header">🎯 HubSpot Admisiones</div>
+        <div class="grid-2">
+          <div><div class="card-title">Embudo de admisión</div><canvas id="chart-hub-${c.codigo}" class="chart-sm"></canvas></div>
+          <div><div class="card-title">Detalle por etapa</div><table id="tabla-hub-${c.codigo}"></table></div>
+        </div>
+      </div>
+    `;
+    container.appendChild(sec);
+  });
+}
+
+function renderConsolidado(){
+  const d=getLatest();
+  const labels=d.map(r=>getCfg(r["Colegio"]).codigo);
+  const colors=d.map(r=>getCfg(r["Colegio"]).color);
+  const headers=`<tr><th>Métrica</th>${d.map(r=>`<th><span class="colegio-badge"><span class="c-dot" style="background:${getCfg(r["Colegio"]).color}"></span>${getCfg(r["Colegio"]).codigo}</span></th>`).join("")}</tr>`;
+
+  destroyChart("ga4-barras");
+  charts["ga4-barras"]=new Chart(document.getElementById("chart-ga4-barras"),{
+    type:"bar",
+    data:{labels,datasets:[
+      {label:"Visitas totales",data:d.map(r=>r["Visitas Totales"]||0),backgroundColor:colors},
+      {label:"Visitas nuevas", data:d.map(r=>r["Visitas Nuevas"]||0), backgroundColor:colors.map(c=>c+"77")},
+      {label:"Admisión 2027",  data:d.map(r=>r["Visitas /admision2027"]||0),backgroundColor:"#f3bc52"}
+    ]},
+    options:{plugins:{legend:{display:true,labels:{color:"#0d2a5e",font:{size:11},boxWidth:10}}},scales:scaleOpts,responsive:true}
+  });
+
+  makePie("chart-ga4-torta",labels,d.map(r=>r["Visitas Totales"]||0),colors,"torta-ga4-total");
+
+  document.getElementById("tasa-conversion-ga4").innerHTML=d.map(r=>{
+    const cfg=getCfg(r["Colegio"]);
+    const tasa=r["Visitas Totales"]?((r["Visitas /admision2027"]/r["Visitas Totales"])*100).toFixed(1)+"%":"0%";
+    return `<div class="conv-item" style="border-top-color:${cfg.color}">
+      <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px">${cfg.codigo}</div>
+      <div style="font-size:20px;font-weight:800;color:${cfg.color};margin-top:2px">${tasa}</div>
+      <div style="font-size:11px;color:var(--muted)">Visitas → admisión</div>
+    </div>`;
+  }).join("");
+
+  document.getElementById("tabla-ga4-compare").innerHTML=headers+
+    compareRow("Visitas totales",d.map(r=>r["Visitas Totales"]),fmt,colors)+
+    compareRow("Visitas nuevas",d.map(r=>r["Visitas Nuevas"]),fmt,colors)+
+    compareRow("Visitas /admision2027",d.map(r=>r["Visitas /admision2027"]),fmt,colors);
+
+  destroyChart("meta-alcance");
+  charts["meta-alcance"]=new Chart(document.getElementById("chart-meta-alcance"),{
+    type:"bar",data:{labels,datasets:[{label:"Alcance",data:d.map(r=>r["Meta Alcance"]||0),backgroundColor:colors}]},
+    options:{plugins:{legend:{display:false}},scales:scaleOpts,responsive:true}
+  });
+  destroyChart("meta-presupuesto");
+  charts["meta-presupuesto"]=new Chart(document.getElementById("chart-meta-presupuesto"),{
+    type:"bar",data:{labels,datasets:[{label:"Presupuesto",data:d.map(r=>r["Meta Presupuesto"]||0),backgroundColor:colors}]},
+    options:{plugins:{legend:{display:false}},scales:scaleOpts,responsive:true}
+  });
+
+  document.getElementById("tabla-meta-compare").innerHTML=headers+
+    compareRow("Alcance",d.map(r=>r["Meta Alcance"]),fmt,colors)+
+    compareRow("Presupuesto",d.map(r=>r["Meta Presupuesto"]),fmtCLP,colors)+
+    compareRow("CPR",d.map(r=>r["Meta CPR"]),v=>"$"+Math.round(v||0),colors)+
+    compareRow("Usuarios únicos",d.map(r=>r["Meta Usuarios"]),fmt,colors);
+
+  document.getElementById("tabla-gads-compare").innerHTML=headers+
+    compareRow("Impresiones",d.map(r=>r["GAds Impresiones"]),fmt,colors)+
+    compareRow("Clics",d.map(r=>r["GAds Clics"]),fmt,colors)+
+    compareRow("Llamadas",d.map(r=>r["GAds Llamadas"]),fmt,colors);
+
+  makePie("chart-hub-torta",labels,d.map(r=>r["HS Matriculados"]||0),colors,"torta-hub-total");
+  makePie("chart-hub-postulaciones",labels,d.map(r=>r["HS Postulaciones"]||0),colors,"torta-hub-post-total");
+
+  document.getElementById("tabla-hub-compare").innerHTML=headers+
+    compareRow("Postulaciones",d.map(r=>r["HS Postulaciones"]),fmt,colors)+
+    compareRow("Aceptados",d.map(r=>r["HS Aceptados"]),fmt,colors)+
+    compareRow("Matriculados",d.map(r=>r["HS Matriculados"]),fmt,colors)+
+    compareRow("Desiste",d.map(r=>r["HS Desiste"]),fmt,colors)+
+    compareRow("Rechazados",d.map(r=>r["HS Rechazados"]),fmt,colors)+
+    compareRow("Lista espera",d.map(r=>r["HS Lista Espera"]),fmt,colors);
+}
+
+function renderColegio(cfg){
+  const d=getLatest().find(r=>r["Colegio"]===cfg.nombre);
+  if(!d) return;
+  const c=cfg.color;
+
+  document.getElementById("kpis-"+cfg.codigo).innerHTML=`
+    <div class="kpi-card"><div class="kpi-label">Visitas totales</div><div class="kpi-value" style="color:${c}">${fmt(d["Visitas Totales"])}</div><div class="kpi-sub">${fmt(d["Visitas Nuevas"])} nuevas</div></div>
+    <div class="kpi-card"><div class="kpi-label">Admisión 2027</div><div class="kpi-value" style="color:${c}">${fmt(d["Visitas /admision2027"])}</div><div class="kpi-sub">${d["Visitas Totales"]?((d["Visitas /admision2027"]/d["Visitas Totales"])*100).toFixed(1):0}% del total</div></div>
+    <div class="kpi-card"><div class="kpi-label">Alcance Meta</div><div class="kpi-value" style="color:${c}">${fmt(d["Meta Alcance"])}</div></div>
+    <div class="kpi-card"><div class="kpi-label">Impresiones Google Ads</div><div class="kpi-value" style="color:${c}">${fmt(d["GAds Impresiones"])}</div></div>
+    <div class="kpi-card"><div class="kpi-label">Postulaciones</div><div class="kpi-value" style="color:${c}">${fmt(d["HS Postulaciones"])}</div></div>
+    <div class="kpi-card"><div class="kpi-label">Matriculados</div><div class="kpi-value" style="color:${c}">${fmt(d["HS Matriculados"])}</div></div>
+  `;
+
+  destroyChart("ga4-"+cfg.codigo);
+  charts["ga4-"+cfg.codigo]=new Chart(document.getElementById("chart-ga4-"+cfg.codigo),{
+    type:"bar",
+    data:{labels:["Visitas totales","Visitas nuevas","Admisión 2027"],
+      datasets:[{data:[d["Visitas Totales"]||0,d["Visitas Nuevas"]||0,d["Visitas /admision2027"]||0],
+        backgroundColor:[c,c+"99","#f3bc52"]}]},
+    options:{plugins:{legend:{display:false}},scales:scaleOpts,responsive:true}
+  });
+
+  document.getElementById("tabla-ga4-"+cfg.codigo).innerHTML=`
+    <tr><th>Página</th><th>Visitas</th></tr>
+    <tr><td style="font-size:12px;color:var(--muted)">${d["Top Página 1"]||"-"}</td><td>${fmt(d["Visitas P1"])}</td></tr>
+    <tr><td style="font-size:12px;color:var(--muted)">${d["Top Página 2"]||"-"}</td><td>${fmt(d["Visitas P2"])}</td></tr>
+    <tr><td style="font-size:12px;color:var(--muted)">${d["Top Página 3"]||"-"}</td><td>${fmt(d["Visitas P3"])}</td></tr>
+  `;
+
+  document.getElementById("kpis-meta-"+cfg.codigo).innerHTML=`
+    <div class="kpi-card"><div class="kpi-label">Campaña</div><div class="kpi-value" style="font-size:13px;color:${c}">${d["Meta Nombre Campaña"]||"-"}</div></div>
+    <div class="kpi-card"><div class="kpi-label">Alcance</div><div class="kpi-value" style="color:${c}">${fmt(d["Meta Alcance"])}</div></div>
+    <div class="kpi-card"><div class="kpi-label">Presupuesto</div><div class="kpi-value" style="color:${c}">${fmtCLP(d["Meta Presupuesto"])}</div></div>
+    <div class="kpi-card"><div class="kpi-label">CPR</div><div class="kpi-value" style="color:${c}">$${Math.round(d["Meta CPR"]||0)}</div></div>
+    <div class="kpi-card"><div class="kpi-label">Usuarios únicos</div><div class="kpi-value" style="color:${c}">${fmt(d["Meta Usuarios"])}</div></div>
+  `;
+
+  document.getElementById("kpis-gads-"+cfg.codigo).innerHTML=`
+    <div class="kpi-card"><div class="kpi-label">Impresiones</div><div class="kpi-value" style="color:${c}">${fmt(d["GAds Impresiones"])}</div></div>
+    <div class="kpi-card"><div class="kpi-label">Clics</div><div class="kpi-value" style="color:${c}">${fmt(d["GAds Clics"])}</div></div>
+    <div class="kpi-card"><div class="kpi-label">Llamadas</div><div class="kpi-value" style="color:${c}">${fmt(d["GAds Llamadas"])}</div></div>
+  `;
+
+  destroyChart("hub-"+cfg.codigo);
+  charts["hub-"+cfg.codigo]=new Chart(document.getElementById("chart-hub-"+cfg.codigo),{
+    type:"doughnut",
+    data:{
+      labels:["Matriculados","Aceptados","Desiste","Rechazados","Lista espera"],
+      datasets:[{data:[d["HS Matriculados"]||0,d["HS Aceptados"]||0,d["HS Desiste"]||0,d["HS Rechazados"]||0,d["HS Lista Espera"]||0],
+        backgroundColor:[c,c+"cc",c+"66",c+"44",c+"22"],borderWidth:2,borderColor:"#fff"}]
+    },
+    options:{cutout:"55%",plugins:{legend:{display:true,position:"right",labels:{color:"#0d2a5e",font:{size:11},boxWidth:12,
+      generateLabels(chart){
+        const ds=chart.data.datasets[0];
+        return chart.data.labels.map((label,i)=>({
+          text:label+" · "+fmt(ds.data[i]),fillStyle:ds.backgroundColor[i],strokeStyle:"#fff",lineWidth:2,index:i
+        }));
+      }
+    }}},responsive:true}
+  });
+
+  document.getElementById("tabla-hub-"+cfg.codigo).innerHTML=`
+    <tr><th>Etapa</th><th>Actual</th><th>Año ant.</th></tr>
+    <tr><td>Postulaciones</td><td><strong>${fmt(d["HS Postulaciones"])}</strong></td><td style="color:var(--muted)">${fmt(d["HS Post. Año Ant."])}</td></tr>
+    <tr><td>Aceptados</td><td>${fmt(d["HS Aceptados"])}</td><td>-</td></tr>
+    <tr><td>Matriculados</td><td><strong style="color:${c}">${fmt(d["HS Matriculados"])}</strong></td><td style="color:var(--muted)">${fmt(d["HS Matric. Año Ant."])}</td></tr>
+    <tr><td>Desiste</td><td>${fmt(d["HS Desiste"])}</td><td>-</td></tr>
+    <tr><td>Rechazados</td><td>${fmt(d["HS Rechazados"])}</td><td>-</td></tr>
+    <tr><td>Lista espera</td><td>${fmt(d["HS Lista Espera"])}</td><td>-</td></tr>
+  `;
 }
 
 function showTab(id,el){
