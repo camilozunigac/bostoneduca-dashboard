@@ -29,7 +29,7 @@ main { padding:3rem 2.5rem; max-width:1440px; margin:0 auto; }
 .section { display:none; }
 .section.active { display:block; }
 
-.platform-block { margin-bottom:4.5rem; }
+.platform-block { margin-bottom:4.5rem; border-top:2px solid #0d2a5e; padding-top:2rem; }
 .platform-header { font-size:22px; font-weight:700; color:#1b2a4a; margin-bottom:2rem; }
 .block-label { font-size:11px; color:#7a90b5; text-transform:uppercase; letter-spacing:.5px; margin-bottom:14px; }
 
@@ -161,7 +161,7 @@ function drawLineChart(containerId, rows, colegiosData){
 
   const labels = colegiosData.map(r => getCfg(r["Colegio"]).codigo);
   const COLORS = ["#214e97","#4eade1","#f3bc52","#c13642","#5a7ab5"];
-  const LW = 120, PL = 40, PR = 40, RH = 80, VW = 1100;
+  const LW=120, PL=20, PR=60, RH=80, VW=1100;
   const cw = (VW - LW - PL - PR) / (labels.length - 1);
   const H = rows.length * RH;
 
@@ -173,12 +173,16 @@ function drawLineChart(containerId, rows, colegiosData){
     const col = COLORS[ri % COLORS.length];
     const yt = ri*RH+12, yb = ri*RH+RH-12, ys = yb-yt;
 
-    // label izquierda — pequeño, sin línea
+    // Línea gris sutil entre métricas (excepto la primera)
+    if(ri > 0){
+      svg += `<line x1="0" y1="${ri*RH}" x2="${VW}" y2="${ri*RH}" stroke="rgba(0,0,0,0.06)" stroke-width="1"/>`;
+    }
+
+    // Label
     svg += `<text x="${LW-6}" y="${(yt+yb)/2+4}" text-anchor="end" font-size="9" font-weight="400" fill="${col}" opacity="0.6">${row.label}</text>`;
 
     const pts = vals.map((v,i)=>({ x: LW+PL+i*cw, y: yb-((v-mn)/sp)*ys, v }));
 
-    // línea sin dasharray
     svg += `<polyline points="${pts.map(p=>`${p.x},${p.y}`).join(" ")}" fill="none" stroke="${col}" stroke-width="1"/>`;
 
     pts.forEach(p=>{
