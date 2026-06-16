@@ -170,12 +170,12 @@ const scaleOpts = {
 // Puntos grandes con círculo interior, línea gris delgada, fondo oscuro
 function makeBubbleLine(canvasId, colegiosData, valueKey) {
   destroyChart(canvasId);
+  const canvas = document.getElementById(canvasId);
+  if(!canvas) return;
+
   const labels = colegiosData.map(r=>getCfg(r["Colegio"]).codigo);
   const values = colegiosData.map(r=>r[valueKey]||0);
   const colors = colegiosData.map(r=>getCfg(r["Colegio"]).color);
-
-  const canvas = document.getElementById(canvasId);
-  if(!canvas) return;
 
   charts[canvasId] = new Chart(canvas, {
     type:"line",
@@ -183,32 +183,54 @@ function makeBubbleLine(canvasId, colegiosData, valueKey) {
       labels,
       datasets:[{
         data: values,
-        borderColor: "rgba(150,160,180,0.5)",
-        borderWidth: 1,
-        pointBackgroundColor: "rgba(230,235,245,0.95)",
+        borderColor: "transparent",
+        pointBackgroundColor: colors,
         pointBorderColor: colors,
-        pointBorderWidth: 2,
-        pointRadius: 18,
-        pointHoverRadius: 20,
-        tension: 0,
-        fill: false
+        pointBorderWidth: 0,
+        pointRadius: 20,
+        pointHoverRadius: 22,
+        tension: 0.3,
+        fill: false,
+        segment:{ borderColor: ctx => "rgba(180,190,210,0.4)", borderWidth: 1 }
       }]
     },
     options:{
       plugins:{
         legend:{display:false},
-        tooltip:{
-          callbacks:{
-            label: ctx => " "+fmt(ctx.raw)
-          }
-        }
+        tooltip:{enabled:false}
       },
       scales:{
-        x:{ grid:{display:false}, ticks:{color:"#7a90b5",font:{size:11,weight:"600"}} },
+        x:{
+          grid:{display:false},
+          ticks:{
+            color: colors,
+            font:{size:11, weight:"600"},
+            padding: 8
+          }
+        },
         y:{ display:false }
       },
+      layout:{ padding:{ top:28, bottom:28, left:16, right:16 } },
       responsive:true,
-      layout:{ padding:{ top:24, bottom:8 } }
+      animation:false,
+      plugins:{
+        afterDraw: chart => {
+          const ctx = chart.ctx;
+          chart.data.datasets.forEach((ds, di) => {
+            const meta = chart.getDatasetMeta(di);
+            meta.data.forEach((point, i) => {
+              const val = ds.data[i];
+              ctx.save();
+              ctx.font = "bold 11px system-ui";
+              ctx.fillStyle = colors[i];
+              ctx.textAlign = "center";
+              ctx.textBaseline = "top";
+              ctx.fillText(fmt(val), point.x, point.y + 24);
+              ctx.restore();
+            });
+          });
+        }
+      }
     }
   });
 }
