@@ -170,10 +170,9 @@ const scaleOpts = {
 // Puntos grandes con círculo interior, línea gris delgada, fondo oscuro
 function makeBubbleLine(canvasId, colegiosData, valueKey) {
   destroyChart(canvasId);
-  const sorted = [...colegiosData].sort((a,b)=>(a[valueKey]||0)-(b[valueKey]||0));
-  const labels = sorted.map(r=>getCfg(r["Colegio"]).codigo);
-  const values = sorted.map(r=>r[valueKey]||0);
-  const colors = sorted.map(r=>getCfg(r["Colegio"]).color);
+  const labels = colegiosData.map(r=>getCfg(r["Colegio"]).codigo);
+  const values = colegiosData.map(r=>r[valueKey]||0);
+  const colors = colegiosData.map(r=>getCfg(r["Colegio"]).color);
 
   const canvas = document.getElementById(canvasId);
   if(!canvas) return;
