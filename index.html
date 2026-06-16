@@ -161,25 +161,29 @@ function drawLineChart(containerId, rows, colegiosData){
 
   const labels = colegiosData.map(r => getCfg(r["Colegio"]).codigo);
   const COLORS = ["#214e97","#4eade1","#f3bc52","#c13642","#5a7ab5"];
-  const LW=120, PL=20, PR=60, RH=80, VW=1100;
+  const LW=120, PL=20, PR=100, RH=100, VW=1100;
   const cw = (VW - LW - PL - PR) / (labels.length - 1);
   const H = rows.length * RH;
 
-  let svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${VW} ${H+30}" style="width:100%;display:block">`;
+  let svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${VW} ${H+46}" style="width:100%;display:block">`;
+
+  // Nombres de colegios ARRIBA
+  labels.forEach((lbl,i)=>{
+    svg += `<text x="${LW+PL+i*cw}" y="16" text-anchor="middle" font-size="11" font-weight="700" fill="#7a90b5">${lbl}</text>`;
+  });
 
   rows.forEach((row, ri) => {
     const vals = colegiosData.map(r => +(r[row.key]||0));
     const mn = Math.min(...vals), mx = Math.max(...vals), sp = mx-mn||1;
     const col = COLORS[ri % COLORS.length];
-    const yt = ri*RH+12, yb = ri*RH+RH-12, ys = yb-yt;
+    const yt = ri*RH+28, yb = ri*RH+RH+14, ys = yb-yt;
 
-    // Línea gris sutil entre métricas (excepto la primera)
     if(ri > 0){
-      svg += `<line x1="0" y1="${ri*RH}" x2="${VW}" y2="${ri*RH}" stroke="rgba(0,0,0,0.06)" stroke-width="1"/>`;
+      svg += `<line x1="0" y1="${ri*RH+26}" x2="${VW}" y2="${ri*RH+26}" stroke="rgba(0,0,0,0.06)" stroke-width="1"/>`;
     }
 
-    // Label
-    svg += `<text x="${LW-6}" y="${(yt+yb)/2+4}" text-anchor="end" font-size="9" font-weight="400" fill="${col}" opacity="0.6">${row.label}</text>`;
+    // Label más bold
+    svg += `<text x="${LW-6}" y="${(yt+yb)/2+4}" text-anchor="end" font-size="10" font-weight="700" fill="${col}" opacity="0.8">${row.label}</text>`;
 
     const pts = vals.map((v,i)=>({ x: LW+PL+i*cw, y: yb-((v-mn)/sp)*ys, v }));
 
@@ -191,10 +195,6 @@ function drawLineChart(containerId, rows, colegiosData){
     });
   });
 
-  labels.forEach((lbl,i)=>{
-    svg += `<text x="${LW+PL+i*cw}" y="${H+24}" text-anchor="middle" font-size="11" font-weight="600" fill="#7a90b5">${lbl}</text>`;
-  });
-
   svg += `</svg>`;
   el.innerHTML = svg;
 }
@@ -204,7 +204,7 @@ function makePie(id, labels, data, colors){
   charts[id]=new Chart(document.getElementById(id),{
     type:"doughnut",
     data:{labels,datasets:[{data,backgroundColor:colors,borderWidth:2,borderColor:"#fff"}]},
-    options:{cutout:"58%",plugins:{legend:{display:true,position:"right",labels:{color:"#0d2a5e",font:{size:11},boxWidth:12,
+    options:{cutout:"58%",plugins:{legend:{display:true,position:"right",labels:{color:"#0d2a5e",font:{size:11},boxWidth:8,borderRadius:50,
       generateLabels(c){const ds=c.data.datasets[0];return c.data.labels.map((l,i)=>({text:l+" · "+fmt(ds.data[i]),fillStyle:ds.backgroundColor[i],strokeStyle:"#fff",lineWidth:2,index:i}));}
     }}},responsive:true}
   });
