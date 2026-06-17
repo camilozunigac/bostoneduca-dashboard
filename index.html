@@ -93,7 +93,7 @@ table.simple tr:last-child td { border-bottom:none; }
         <div><div class="block-label">Visitas por colegio y tipo</div><canvas id="chart-ga4-barras" style="max-height:260px"></canvas></div>
         <div>
           <div class="ga4-total-label">Total visitas</div>
-          <div class="ga4-total-num" id="ga4-total-num">—</div>
+          <div class="ga4-total-num" id="ga4-total-num" style="font-size:54px">—</div>
           <div class="ga4-total-sub" id="ga4-total-sub">—</div>
         </div>
       </div>
@@ -199,14 +199,60 @@ function drawLineChart(containerId, rows, colegiosData){
   });
 }
 
-function makePie(id, labels, data, colors){
+// Plugin datalabels para barras
+const datalabelsBar = {
+  id:"datalabelsBar",
+  afterDatasetsDraw(chart){
+    if(chart.config.type !== "bar") return;
+    const ctx = chart.ctx;
+    chart.data.datasets.forEach((ds, di) => {
+      const meta = chart.getDatasetMeta(di);
+      if(meta.hidden) return;
+      meta.data.forEach((bar, i) => {
+        const val = ds.data[i];
+        if(!val) return;
+        ctx.save();
+        ctx.font = "400 13px system-ui";
+        ctx.fillStyle = "#7a90b5";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "bottom";
+        ctx.fillText(fmt(val), bar.x, bar.y - 4);
+        ctx.restore();
+      });
+    });
+  }
+};
+Chart.register(datalabelsBar);
+
+function makePie(id, labels, data, colors, centerId){
   dc(id);
+  const total = data.reduce((s,v)=>s+(v||0),0);
   charts[id]=new Chart(document.getElementById(id),{
     type:"doughnut",
     data:{labels,datasets:[{data,backgroundColor:colors,borderWidth:2,borderColor:"#fff"}]},
-    options:{cutout:"58%",plugins:{legend:{display:true,position:"right",labels:{color:"#0d2a5e",font:{size:11},boxWidth:8,borderRadius:50,
-      generateLabels(c){const ds=c.data.datasets[0];return c.data.labels.map((l,i)=>({text:l+" · "+fmt(ds.data[i]),fillStyle:ds.backgroundColor[i],strokeStyle:"#fff",lineWidth:2,index:i}));}
-    }}},responsive:true}
+    options:{
+      cutout:"62%",
+      plugins:{
+        legend:{display:true,position:"right",labels:{color:"#0d2a5e",font:{size:11},boxWidth:8,borderRadius:50,
+          generateLabels(c){const ds=c.data.datasets[0];return c.data.labels.map((l,i)=>({text:l+" · "+fmt(ds.data[i]),fillStyle:ds.backgroundColor[i],strokeStyle:"#fff",lineWidth:2,index:i}));}
+        }}
+      },
+      responsive:true
+    },
+    plugins:[{
+      id:"centerText-"+id,
+      afterDraw(chart){
+        const {ctx,chartArea:{top,bottom,left,right}} = chart;
+        const cx = (left+right)/2, cy = (top+bottom)/2;
+        ctx.save();
+        ctx.font = "800 22px system-ui";
+        ctx.fillStyle = "#1b2a4a";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText(fmt(total), cx, cy);
+        ctx.restore();
+      }
+    }]
   });
 }
 
@@ -257,9 +303,9 @@ function renderConsolidado(){
   charts["ga4-barras"]=new Chart(document.getElementById("chart-ga4-barras"),{
     type:"bar",
     data:{labels,datasets:[
-      {label:"Visitas totales",data:d.map(r=>r["Visitas Totales"]||0),backgroundColor:colors},
-      {label:"Visitas nuevas", data:d.map(r=>r["Visitas Nuevas"]||0), backgroundColor:colors.map(c=>c+"77")},
-      {label:"Admisión 2027",  data:d.map(r=>r["Visitas /admision2027"]||0),backgroundColor:"#f3bc52"}
+      {label:"Visitas totales",data:d.map(r=>r["Visitas Totales"]||0),backgroundColor:colors,borderRadius:4},
+      {label:"Visitas nuevas", data:d.map(r=>r["Visitas Nuevas"]||0), backgroundColor:colors.map(c=>c+"77"),borderRadius:4},
+      {label:"Admisión 2027",  data:d.map(r=>r["Visitas /admision2027"]||0),backgroundColor:"#f3bc52",borderRadius:4}
     ]},
     options:{plugins:{legend:{display:true,labels:{color:"#0d2a5e",font:{size:11},boxWidth:10}}},scales:SC,responsive:true}
   });
@@ -283,12 +329,12 @@ function renderConsolidado(){
 
   dc("meta-alcance");
   charts["meta-alcance"]=new Chart(document.getElementById("chart-meta-alcance"),{
-    type:"bar",data:{labels,datasets:[{label:"Alcance",data:d.map(r=>r["Meta Alcance"]||0),backgroundColor:colors}]},
+    type:"bar",data:{labels,datasets:[{label:"Alcance",data:d.map(r=>r["Meta Alcance"]||0),backgroundColor:colors,borderRadius:4}]},
     options:{plugins:{legend:{display:false}},scales:SC,responsive:true}
   });
   dc("meta-presupuesto");
   charts["meta-presupuesto"]=new Chart(document.getElementById("chart-meta-presupuesto"),{
-    type:"bar",data:{labels,datasets:[{label:"Presupuesto",data:d.map(r=>r["Meta Presupuesto"]||0),backgroundColor:colors}]},
+    type:"bar",data:{labels,datasets:[{label:"Presupuesto",data:d.map(r=>r["Meta Presupuesto"]||0),backgroundColor:colors,borderRadius:4}]},
     options:{plugins:{legend:{display:false}},scales:SC,responsive:true}
   });
 
@@ -305,8 +351,8 @@ function renderConsolidado(){
     {label:"Llamadas",    key:"GAds Llamadas"},
   ], d);
 
-  makePie("chart-hub-torta",        labels,d.map(r=>r["HS Matriculados"]||0), colors);
-  makePie("chart-hub-postulaciones",labels,d.map(r=>r["HS Postulaciones"]||0),colors);
+  makePie("chart-hub-torta",        labels,d.map(r=>r["HS Matriculados"]||0), colors, "hub-total");
+  makePie("chart-hub-postulaciones",labels,d.map(r=>r["HS Postulaciones"]||0),colors, "hub-post-total");
 
   drawLineChart("tabla-hub-compare",[
     {label:"Postulaciones",key:"HS Postulaciones"},
