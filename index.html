@@ -199,20 +199,16 @@ function makePie(id,labels,data,colors){
     options:{cutout:"62%",plugins:{legend:{display:true,position:"right",labels:{color:"#0d2a5e",font:{size:11},boxWidth:8,borderRadius:50,
       generateLabels(c){const ds=c.data.datasets[0];return c.data.labels.map((l,i)=>({text:l+" · "+fmt(ds.data[i]),fillStyle:ds.backgroundColor[i],strokeStyle:"#fff",lineWidth:2,index:i}));}
     }}},responsive:true},
-    plugins:[{
-      id:"ct-"+id,
-      afterDraw(chart){
-        const {ctx,chartArea:{top,bottom,left,right}}=chart;
-        const cx=(left+right)/2,cy=(top+bottom)/2;
-        ctx.save();ctx.font="800 22px system-ui";ctx.fillStyle="#1b2a4a";
-        ctx.textAlign="center";ctx.textBaseline="middle";
-        ctx.fillText(fmt(total),cx,cy);ctx.restore();
-      }
-    }]
+    plugins:[{id:"ct-"+id,afterDraw(chart){
+      const {ctx,chartArea:{top,bottom,left,right}}=chart;
+      const cx=(left+right)/2,cy=(top+bottom)/2;
+      ctx.save();ctx.font="800 22px system-ui";ctx.fillStyle="#1b2a4a";
+      ctx.textAlign="center";ctx.textBaseline="middle";ctx.fillText(fmt(total),cx,cy);ctx.restore();
+    }}]
   });
 }
 
-function drawBarChart(containerId, rows, colegiosData){
+function drawBarChart(containerId,rows,colegiosData){
   const el=document.getElementById(containerId);
   if(!el) return;
   const labels=colegiosData.map(r=>getCfg(r["Colegio"]).codigo);
@@ -376,7 +372,7 @@ function buildColegioSections(){
         </div>
         <div class="block-label">Tasa de conversión a admisión 2027</div>
         <div id="conv-${c.codigo}" style="margin-bottom:2rem"></div>
-        <div class="block-label">Top páginas</div>
+        <div class="block-label">Top 5 páginas</div>
         <table class="simple" id="tabla-ga4-${c.codigo}"></table>
       </div>
       <div class="platform-block">
@@ -434,6 +430,8 @@ function renderColegio(cfg){
     <tr><td style="font-size:12px;color:#7a90b5">${d["Top Página 1"]||"-"}</td><td>${fmt(d["Visitas P1"])}</td></tr>
     <tr><td style="font-size:12px;color:#7a90b5">${d["Top Página 2"]||"-"}</td><td>${fmt(d["Visitas P2"])}</td></tr>
     <tr><td style="font-size:12px;color:#7a90b5">${d["Top Página 3"]||"-"}</td><td>${fmt(d["Visitas P3"])}</td></tr>
+    <tr><td style="font-size:12px;color:#7a90b5">${d["Top Página 4"]||"-"}</td><td>${fmt(d["Visitas P4"])}</td></tr>
+    <tr><td style="font-size:12px;color:#7a90b5">${d["Top Página 5"]||"-"}</td><td>${fmt(d["Visitas P5"])}</td></tr>
   `;
 
   document.getElementById("kpis-meta-"+cfg.codigo).innerHTML=`
