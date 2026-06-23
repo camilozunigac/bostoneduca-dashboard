@@ -16,7 +16,7 @@ header { background:#fff; border-bottom:1px solid rgba(0,0,0,0.08); padding:1.2r
 .logo-img img { width:100%; height:100%; object-fit:cover; }
 .logo-text h1 { font-size:28px; font-weight:800; color:#1b2a4a; }
 .logo-text span { font-size:13px; color:#7a90b5; }
-.semana-badge { background:#f5f7fa; border:1px solid rgba(0,0,0,0.08); border-radius:6px; padding:6px 14px; font-size:13px; color:#7a90b5; }
+#semana-select { background:#f5f7fa; border:1px solid rgba(0,0,0,0.08); border-radius:6px; padding:6px 14px; font-size:13px; color:#0d2a5e; cursor:pointer; }
 #loading { font-size:13px; color:#f3bc52; }
 
 nav { background:#fff; border-bottom:1px solid rgba(0,0,0,0.08); padding:0 2.5rem; display:flex; overflow-x:auto; }
@@ -29,7 +29,7 @@ main { padding:3rem 2.5rem; max-width:1440px; margin:0 auto; }
 .section { display:none; }
 .section.active { display:block; }
 
-.platform-block { margin-bottom:4.5rem; border-top:2px solid #0d2a5e; padding-top:2rem; }
+.platform-block { margin-bottom:4.5rem; border-top:2px solid #1b2a4a; padding-top:2rem; }
 .platform-header { font-size:22px; font-weight:700; color:#1b2a4a; margin-bottom:2rem; }
 .block-label { font-size:11px; color:#7a90b5; text-transform:uppercase; letter-spacing:.5px; margin-bottom:14px; }
 
@@ -39,7 +39,7 @@ main { padding:3rem 2.5rem; max-width:1440px; margin:0 auto; }
 
 .ga4-row { display:grid; grid-template-columns:80fr 20fr; gap:2rem; align-items:center; margin-bottom:3rem; }
 .ga4-total-label { font-size:12px; color:#7a90b5; text-transform:uppercase; letter-spacing:.5px; margin-bottom:8px; }
-.ga4-total-num { font-size:72px; font-weight:900; color:#1b2a4a; line-height:1; }
+.ga4-total-num { font-size:54px; font-weight:900; color:#1b2a4a; line-height:1; }
 .ga4-total-sub { font-size:13px; color:#7a90b5; margin-top:10px; }
 
 .conv-row { display:flex; flex-wrap:wrap; gap:3rem; margin-bottom:3rem; }
@@ -53,7 +53,7 @@ main { padding:3rem 2.5rem; max-width:1440px; margin:0 auto; }
 .kpi-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:14px; margin-bottom:2rem; }
 .kpi-card { padding:1.25rem; }
 .kpi-label { font-size:11px; color:#7a90b5; text-transform:uppercase; letter-spacing:.5px; margin-bottom:8px; }
-.kpi-value { font-size:33px; font-weight:800; }
+.kpi-value { font-size:54px; font-weight:800; }
 .kpi-sub { font-size:12px; color:#7a90b5; margin-top:6px; }
 
 .colegio-avatar { width:40px; height:40px; border-radius:9px; display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:700; }
@@ -73,7 +73,7 @@ table.simple tr:last-child td { border-bottom:none; }
     <div class="logo-text"><h1>BostonEduca</h1><span>Monitoreo Marketing Digital</span></div>
   </div>
   <div style="display:flex;align-items:center;gap:12px">
-    <span class="semana-badge" id="semana-display">Cargando...</span>
+    <select id="semana-select" onchange="cambiarSemana(this.value)"></select>
     <span id="loading">Conectando...</span>
   </div>
 </header>
@@ -93,7 +93,7 @@ table.simple tr:last-child td { border-bottom:none; }
         <div><div class="block-label">Visitas por colegio y tipo</div><canvas id="chart-ga4-barras" style="max-height:260px"></canvas></div>
         <div>
           <div class="ga4-total-label">Total visitas</div>
-          <div class="ga4-total-num" id="ga4-total-num" style="font-size:54px">—</div>
+          <div class="ga4-total-num" id="ga4-total-num">—</div>
           <div class="ga4-total-sub" id="ga4-total-sub">—</div>
         </div>
       </div>
@@ -136,14 +136,14 @@ table.simple tr:last-child td { border-bottom:none; }
 <script>
 const SHEET_ID = "1ZU7L4IWlgJg-ff5Xovy5cwr4HVMuTT3ScUNXIZZsdDY";
 const COLEGIOS_CFG = [
-  { nombre:"Boston Academy Laguna del Sol",             codigo:"BALS", color:"#1a6bbf", initials:"BA" },
-  { nombre:"Boston College Alto Macul",                 codigo:"BCAM", color:"#214e97", initials:"BC" },
-  { nombre:"Colegio Inmaculada Concepción de Vitacura", codigo:"CICV", color:"#4eade1", initials:"CI" },
-  { nombre:"Colegio San Francisco de Paine",            codigo:"CSFP", color:"#c13642", initials:"SF" },
-  { nombre:"Colegio San Marcos de Macul",               codigo:"CSM",  color:"#e6b800", initials:"SM" },
+  { nombre:"Boston Academy Laguna del Sol",            codigo:"BALS", color:"#1a6bbf", initials:"BA" },
+  { nombre:"Boston College Alto Macul",                codigo:"BCAM", color:"#214e97", initials:"BC" },
+  { nombre:"Colegio Inmaculada Concepción de Vitacura",codigo:"CICV", color:"#4eade1", initials:"CI" },
+  { nombre:"Colegio San Francisco de Paine",           codigo:"CSFP", color:"#c13642", initials:"SF" },
+  { nombre:"Colegio San Marcos de Macul",              codigo:"CSM",  color:"#e6b800", initials:"SM" },
 ];
 
-let DATA = {}, charts = {};
+let DATA=[], charts={}, SEMANA_ACTUAL=null;
 function getCfg(n){ return COLEGIOS_CFG.find(c=>c.nombre===n)||{color:"#555",initials:"??",codigo:"??"}; }
 function fmt(n){ return Math.round(n||0).toLocaleString("es-CL").replace(/,/g,"."); }
 function fmtCLP(n){ return "$"+Math.round(n||0).toLocaleString("es-CL").replace(/,/g,"."); }
@@ -154,69 +154,23 @@ const SC = {
   x:{ grid:{display:false}, ticks:{color:"#7a90b5",font:{size:11}} }
 };
 
-// ── Gráfico de líneas SVG sin dasharray ──────────────────────
-function drawLineChart(containerId, rows, colegiosData){
-  const el = document.getElementById(containerId);
-  if(!el) return;
-
-  const labels = colegiosData.map(r => getCfg(r["Colegio"]).codigo);
-  const colors = colegiosData.map(r => getCfg(r["Colegio"]).color);
-  const rowColors = ["#214e97","#4eade1","#f3bc52","#c13642","#5a7ab5"];
-
-  dc(containerId+"-chart");
-  const canvas = document.createElement("canvas");
-  canvas.id = containerId+"-chart";
-  canvas.style.maxHeight = "280px";
-  el.innerHTML = "";
-  el.appendChild(canvas);
-
-  charts[containerId+"-chart"] = new Chart(canvas, {
-    type: "bar",
-    data: {
-      labels,
-      datasets: rows.map((row, ri) => ({
-        label: row.label,
-        data: colegiosData.map(r => +(r[row.key]||0)),
-        backgroundColor: rowColors[ri % rowColors.length],
-        borderRadius: 3,
-        barPercentage: 0.7,
-      }))
-    },
-    options: {
-      plugins: {
-        legend: {
-          display: true,
-          position: "top",
-          labels: { color:"#0d2a5e", font:{size:11}, boxWidth:10, padding:16 }
-        }
-      },
-      scales: {
-        x: { grid:{display:false}, ticks:{color:"#7a90b5", font:{size:11, weight:"600"}} },
-        y: { grid:{color:"rgba(0,0,0,0.04)"}, ticks:{color:"#7a90b5", font:{size:11}} }
-      },
-      responsive: true
-    }
-  });
-}
-
-// Plugin datalabels para barras
 const datalabelsBar = {
   id:"datalabelsBar",
   afterDatasetsDraw(chart){
-    if(chart.config.type !== "bar") return;
-    const ctx = chart.ctx;
-    chart.data.datasets.forEach((ds, di) => {
-      const meta = chart.getDatasetMeta(di);
+    if(chart.config.type!=="bar") return;
+    const ctx=chart.ctx;
+    chart.data.datasets.forEach((ds,di)=>{
+      const meta=chart.getDatasetMeta(di);
       if(meta.hidden) return;
-      meta.data.forEach((bar, i) => {
-        const val = ds.data[i];
+      meta.data.forEach((bar,i)=>{
+        const val=ds.data[i];
         if(!val) return;
         ctx.save();
-        ctx.font = "400 13px system-ui";
-        ctx.fillStyle = "#7a90b5";
-        ctx.textAlign = "center";
-        ctx.textBaseline = "bottom";
-        ctx.fillText(fmt(val), bar.x, bar.y - 4);
+        ctx.font="400 13px system-ui";
+        ctx.fillStyle="#7a90b5";
+        ctx.textAlign="center";
+        ctx.textBaseline="bottom";
+        ctx.fillText(fmt(val),bar.x,bar.y-4);
         ctx.restore();
       });
     });
@@ -224,60 +178,62 @@ const datalabelsBar = {
 };
 Chart.register(datalabelsBar);
 
-function makePie(id, labels, data, colors, centerId){
+function getLatest(){
+  const semanas=[...new Set(DATA.map(r=>r["Semana"]))].filter(Boolean).sort();
+  const semana=SEMANA_ACTUAL||semanas[semanas.length-1];
+  return DATA.filter(r=>r["Semana"]===semana);
+}
+
+function cambiarSemana(semana){
+  SEMANA_ACTUAL=semana;
+  renderConsolidado();
+  COLEGIOS_CFG.forEach(c=>renderColegio(c));
+}
+
+function makePie(id,labels,data,colors){
   dc(id);
-  const total = data.reduce((s,v)=>s+(v||0),0);
+  const total=data.reduce((s,v)=>s+(v||0),0);
   charts[id]=new Chart(document.getElementById(id),{
     type:"doughnut",
     data:{labels,datasets:[{data,backgroundColor:colors,borderWidth:2,borderColor:"#fff"}]},
-    options:{
-      cutout:"62%",
-      plugins:{
-        legend:{display:true,position:"right",labels:{color:"#0d2a5e",font:{size:11},boxWidth:8,borderRadius:50,
-          generateLabels(c){const ds=c.data.datasets[0];return c.data.labels.map((l,i)=>({text:l+" · "+fmt(ds.data[i]),fillStyle:ds.backgroundColor[i],strokeStyle:"#fff",lineWidth:2,index:i}));}
-        }}
-      },
-      responsive:true
-    },
+    options:{cutout:"62%",plugins:{legend:{display:true,position:"right",labels:{color:"#0d2a5e",font:{size:11},boxWidth:8,borderRadius:50,
+      generateLabels(c){const ds=c.data.datasets[0];return c.data.labels.map((l,i)=>({text:l+" · "+fmt(ds.data[i]),fillStyle:ds.backgroundColor[i],strokeStyle:"#fff",lineWidth:2,index:i}));}
+    }}},responsive:true},
     plugins:[{
-      id:"centerText-"+id,
+      id:"ct-"+id,
       afterDraw(chart){
-        const {ctx,chartArea:{top,bottom,left,right}} = chart;
-        const cx = (left+right)/2, cy = (top+bottom)/2;
-        ctx.save();
-        ctx.font = "800 22px system-ui";
-        ctx.fillStyle = "#1b2a4a";
-        ctx.textAlign = "center";
-        ctx.textBaseline = "middle";
-        ctx.fillText(fmt(total), cx, cy);
-        ctx.restore();
+        const {ctx,chartArea:{top,bottom,left,right}}=chart;
+        const cx=(left+right)/2,cy=(top+bottom)/2;
+        ctx.save();ctx.font="800 22px system-ui";ctx.fillStyle="#1b2a4a";
+        ctx.textAlign="center";ctx.textBaseline="middle";
+        ctx.fillText(fmt(total),cx,cy);ctx.restore();
       }
     }]
   });
 }
 
-async function loadData(){
-  const url=`https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=CONSOLIDADO`;
-  try{
-    const resp=await fetch(url);
-    const text=await resp.text();
-    const json=JSON.parse(text.match(/google\.visualization\.Query\.setResponse\(([\s\S]*?)\);?\s*$/)[1]);
-    const cols=json.table.cols.map(c=>c.label);
-    const rows=json.table.rows.map(r=>{const o={};cols.forEach((c,i)=>{o[c]=r.c[i]?.v??0;});return o;}).filter(r=>r["Colegio"]&&r["Colegio"]!=="Colegio");
-    DATA=rows;
-    document.getElementById("loading").style.display="none";
-    const semanas=[...new Set(rows.map(r=>r["Semana"]))].filter(Boolean).sort();
-    if(semanas.length) document.getElementById("semana-display").textContent="Semana: "+semanas[semanas.length-1];
-    buildNavTabs();
-    buildColegioSections();
-    renderConsolidado();
-    COLEGIOS_CFG.forEach(c=>renderColegio(c));
-  }catch(e){document.getElementById("loading").textContent="Error al cargar";console.error(e);}
-}
-
-function getLatest(){
-  const semanas=[...new Set(DATA.map(r=>r["Semana"]))].filter(Boolean).sort();
-  return DATA.filter(r=>r["Semana"]===semanas[semanas.length-1]);
+function drawBarChart(containerId, rows, colegiosData){
+  const el=document.getElementById(containerId);
+  if(!el) return;
+  const labels=colegiosData.map(r=>getCfg(r["Colegio"]).codigo);
+  const rowColors=["#214e97","#4eade1","#f3bc52","#c13642","#5a7ab5"];
+  dc(containerId+"-chart");
+  const canvas=document.createElement("canvas");
+  canvas.id=containerId+"-chart";
+  canvas.style.maxHeight="280px";
+  el.innerHTML="";
+  el.appendChild(canvas);
+  charts[containerId+"-chart"]=new Chart(canvas,{
+    type:"bar",
+    data:{labels,datasets:rows.map((row,ri)=>({
+      label:row.label,
+      data:colegiosData.map(r=>+(r[row.key]||0)),
+      backgroundColor:rowColors[ri%rowColors.length],
+      borderRadius:4,
+      barPercentage:0.7,
+    }))},
+    options:{plugins:{legend:{display:true,position:"top",labels:{color:"#0d2a5e",font:{size:11},boxWidth:10,padding:16}}},scales:SC,responsive:true}
+  });
 }
 
 function generateSummary(d){
@@ -289,7 +245,28 @@ function generateSummary(d){
   const topV=getCfg([...d].sort((a,b)=>(b["Visitas Totales"]||0)-(a["Visitas Totales"]||0))[0]?.["Colegio"]);
   const topA=getCfg([...d].sort((a,b)=>(b["Meta Alcance"]||0)-(a["Meta Alcance"]||0))[0]?.["Colegio"]);
   const topM=getCfg([...d].sort((a,b)=>(b["HS Matriculados"]||0)-(a["HS Matriculados"]||0))[0]?.["Colegio"]);
-  return `La semana registró <strong>${fmt(totV)} visitas totales</strong>, lideradas por <strong style="color:${topV.color}">${topV.codigo}</strong>. El alcance en Meta fue de <strong>${fmt(totA)} personas</strong>, destacando <strong style="color:${topA.color}">${topA.codigo}</strong>. En admisiones, hay <strong>${fmt(totP)} postulaciones</strong> con una conversión del <strong>${conv}%</strong> a matrícula — <strong style="color:${topM.color}">${topM.codigo}</strong> lidera con ${fmt(d.find(r=>getCfg(r["Colegio"]).codigo===topM.codigo)?.["HS Matriculados"]||0)} matriculados. Se recomienda reforzar la inversión en los colegios con menor tráfico a /admision2027.`;
+  const topMrow=d.find(r=>getCfg(r["Colegio"]).codigo===topM.codigo);
+  return `La semana registró <strong>${fmt(totV)} visitas totales</strong>, lideradas por <strong style="color:${topV.color}">${topV.codigo}</strong>. El alcance en Meta fue de <strong>${fmt(totA)} personas</strong>, destacando <strong style="color:${topA.color}">${topA.codigo}</strong>. En admisiones, hay <strong>${fmt(totP)} postulaciones</strong> con una conversión del <strong>${conv}%</strong> a matrícula — <strong style="color:${topM.color}">${topM.codigo}</strong> lidera con ${fmt(topMrow?.["HS Matriculados"]||0)} matriculados. Se recomienda reforzar la inversión en los colegios con menor tráfico a /admision2027.`;
+}
+
+async function loadData(){
+  const url=`https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=CONSOLIDADO`;
+  try{
+    const resp=await fetch(url);
+    const text=await resp.text();
+    const json=JSON.parse(text.match(/google\.visualization\.Query\.setResponse\(([\s\S]*?)\);?\s*$/)[1]);
+    const cols=json.table.cols.map(c=>c.label);
+    DATA=json.table.rows.map(r=>{const obj={};cols.forEach((col,i)=>{obj[col]=r.c[i]?.v??0;});return obj;}).filter(r=>r["Colegio"]&&r["Colegio"]!=="Colegio");
+    document.getElementById("loading").style.display="none";
+    const semanas=[...new Set(DATA.map(r=>r["Semana"]))].filter(Boolean).sort().reverse();
+    SEMANA_ACTUAL=semanas[0];
+    const select=document.getElementById("semana-select");
+    select.innerHTML=semanas.map(s=>`<option value="${s}">${s}</option>`).join("");
+    buildNavTabs();
+    buildColegioSections();
+    renderConsolidado();
+    COLEGIOS_CFG.forEach(c=>renderColegio(c));
+  }catch(e){document.getElementById("loading").textContent="Error al cargar";console.error(e);}
 }
 
 function renderConsolidado(){
@@ -321,11 +298,11 @@ function renderConsolidado(){
     return `<div><div class="conv-codigo">${cfg.codigo}</div><div class="conv-value" style="color:${cfg.color}">${t}</div><div class="conv-sub">Visitas → admisión</div></div>`;
   }).join("");
 
-  drawLineChart("tabla-ga4-compare",[
-    {label:"Visitas totales",       key:"Visitas Totales"},
-    {label:"Visitas nuevas",        key:"Visitas Nuevas"},
-    {label:"Visitas /admision2027", key:"Visitas /admision2027"},
-  ], d);
+  drawBarChart("tabla-ga4-compare",[
+    {label:"Visitas totales",key:"Visitas Totales"},
+    {label:"Visitas nuevas",key:"Visitas Nuevas"},
+    {label:"Visitas /admision2027",key:"Visitas /admision2027"},
+  ],d);
 
   dc("meta-alcance");
   charts["meta-alcance"]=new Chart(document.getElementById("chart-meta-alcance"),{
@@ -338,30 +315,30 @@ function renderConsolidado(){
     options:{plugins:{legend:{display:false}},scales:SC,responsive:true}
   });
 
-  drawLineChart("tabla-meta-compare",[
-    {label:"Alcance",        key:"Meta Alcance"},
-    {label:"Presupuesto",    key:"Meta Presupuesto"},
-    {label:"CPR",            key:"Meta CPR"},
+  drawBarChart("tabla-meta-compare",[
+    {label:"Alcance",key:"Meta Alcance"},
+    {label:"Presupuesto",key:"Meta Presupuesto"},
+    {label:"CPR",key:"Meta CPR"},
     {label:"Usuarios únicos",key:"Meta Usuarios"},
-  ], d);
+  ],d);
 
-  drawLineChart("tabla-gads-compare",[
-    {label:"Impresiones", key:"GAds Impresiones"},
-    {label:"Clics",       key:"GAds Clics"},
-    {label:"Llamadas",    key:"GAds Llamadas"},
-  ], d);
+  drawBarChart("tabla-gads-compare",[
+    {label:"Impresiones",key:"GAds Impresiones"},
+    {label:"Clics",key:"GAds Clics"},
+    {label:"Llamadas",key:"GAds Llamadas"},
+  ],d);
 
-  makePie("chart-hub-torta",        labels,d.map(r=>r["HS Matriculados"]||0), colors, "hub-total");
-  makePie("chart-hub-postulaciones",labels,d.map(r=>r["HS Postulaciones"]||0),colors, "hub-post-total");
+  makePie("chart-hub-torta",labels,d.map(r=>r["HS Matriculados"]||0),colors);
+  makePie("chart-hub-postulaciones",labels,d.map(r=>r["HS Postulaciones"]||0),colors);
 
-  drawLineChart("tabla-hub-compare",[
+  drawBarChart("tabla-hub-compare",[
     {label:"Postulaciones",key:"HS Postulaciones"},
-    {label:"Aceptados",    key:"HS Aceptados"},
-    {label:"Matriculados", key:"HS Matriculados"},
-    {label:"Desiste",      key:"HS Desiste"},
-    {label:"Rechazados",   key:"HS Rechazados"},
-    {label:"Lista espera", key:"HS Lista Espera"},
-  ], d);
+    {label:"Aceptados",key:"HS Aceptados"},
+    {label:"Matriculados",key:"HS Matriculados"},
+    {label:"Desiste",key:"HS Desiste"},
+    {label:"Rechazados",key:"HS Rechazados"},
+    {label:"Lista espera",key:"HS Lista Espera"},
+  ],d);
 }
 
 function buildNavTabs(){
@@ -389,10 +366,18 @@ function buildColegioSections(){
       <div class="kpi-grid" id="kpis-${c.codigo}"></div>
       <div class="platform-block">
         <div class="platform-header">📊 Google Analytics</div>
-        <div class="grid-2">
-          <div><div class="block-label">Visitas por tipo</div><canvas id="chart-ga4-${c.codigo}" style="max-height:220px"></canvas></div>
-          <div><div class="block-label">Top páginas</div><table class="simple" id="tabla-ga4-${c.codigo}"></table></div>
+        <div style="display:grid;grid-template-columns:80fr 20fr;gap:2rem;align-items:center;margin-bottom:2rem">
+          <div><div class="block-label">Visitas por tipo</div><canvas id="chart-ga4-${c.codigo}" style="max-height:260px"></canvas></div>
+          <div>
+            <div class="ga4-total-label">Total visitas</div>
+            <div id="ga4-total-${c.codigo}" style="font-size:54px;font-weight:900;color:#1b2a4a;line-height:1">—</div>
+            <div id="ga4-nuevas-${c.codigo}" style="font-size:13px;color:#7a90b5;margin-top:8px">—</div>
+          </div>
         </div>
+        <div class="block-label">Tasa de conversión a admisión 2027</div>
+        <div id="conv-${c.codigo}" style="margin-bottom:2rem"></div>
+        <div class="block-label">Top páginas</div>
+        <table class="simple" id="tabla-ga4-${c.codigo}"></table>
       </div>
       <div class="platform-block">
         <div class="platform-header">📱 Meta</div>
@@ -405,8 +390,8 @@ function buildColegioSections(){
       <div class="platform-block">
         <div class="platform-header">🎯 HubSpot Admisiones</div>
         <div class="grid-2">
-          <div><div class="block-label">Embudo</div><canvas id="chart-hub-${c.codigo}" style="max-height:220px"></canvas></div>
-          <div><div class="block-label">Detalle</div><table class="simple" id="tabla-hub-${c.codigo}"></table></div>
+          <div><div class="block-label">Distribución por etapa</div><canvas id="chart-hub-${c.codigo}" style="max-height:220px"></canvas></div>
+          <div><div class="block-label">Detalle por etapa</div><table class="simple" id="tabla-hub-${c.codigo}"></table></div>
         </div>
       </div>
     `;
@@ -420,28 +405,29 @@ function renderColegio(cfg){
   const c=cfg.color;
 
   document.getElementById("kpis-"+cfg.codigo).innerHTML=`
-    <div class="kpi-card"><div class="kpi-label">Visitas totales</div><div class="kpi-value" style="color:${c};font-size:54px">${fmt(d["Visitas Totales"])}</div><div class="kpi-sub">${fmt(d["Visitas Nuevas"])} nuevas</div></div>
-    <div class="kpi-card"><div class="kpi-label">Admisión 2027</div><div class="kpi-value" style="color:${c};font-size:54px">${fmt(d["Visitas /admision2027"])}</div><div class="kpi-sub">${d["Visitas Totales"]?((d["Visitas /admision2027"]/d["Visitas Totales"])*100).toFixed(1):0}% del total</div></div>
-    <div class="kpi-card"><div class="kpi-label">Alcance Meta</div><div class="kpi-value" style="color:${c};font-size:54px">${fmt(d["Meta Alcance"])}</div></div>
-    <div class="kpi-card"><div class="kpi-label">Impresiones Ads</div><div class="kpi-value" style="color:${c};font-size:54px">${fmt(d["GAds Impresiones"])}</div></div>
-    <div class="kpi-card"><div class="kpi-label">Postulaciones</div><div class="kpi-value" style="color:${c};font-size:54px">${fmt(d["HS Postulaciones"])}</div></div>
-    <div class="kpi-card"><div class="kpi-label">Matriculados</div><div class="kpi-value" style="color:${c};font-size:54px">${fmt(d["HS Matriculados"])}</div></div>
+    <div class="kpi-card"><div class="kpi-label">Visitas totales</div><div class="kpi-value" style="color:${c}">${fmt(d["Visitas Totales"])}</div><div class="kpi-sub">${fmt(d["Visitas Nuevas"])} nuevas</div></div>
+    <div class="kpi-card"><div class="kpi-label">Admisión 2027</div><div class="kpi-value" style="color:${c}">${fmt(d["Visitas /admision2027"])}</div><div class="kpi-sub">${d["Visitas Totales"]?((d["Visitas /admision2027"]/d["Visitas Totales"])*100).toFixed(1):0}% del total</div></div>
+    <div class="kpi-card"><div class="kpi-label">Alcance Meta</div><div class="kpi-value" style="color:${c}">${fmt(d["Meta Alcance"])}</div></div>
+    <div class="kpi-card"><div class="kpi-label">Impresiones Ads</div><div class="kpi-value" style="color:${c}">${fmt(d["GAds Impresiones"])}</div></div>
+    <div class="kpi-card"><div class="kpi-label">Postulaciones</div><div class="kpi-value" style="color:${c}">${fmt(d["HS Postulaciones"])}</div></div>
+    <div class="kpi-card"><div class="kpi-label">Matriculados</div><div class="kpi-value" style="color:${c}">${fmt(d["HS Matriculados"])}</div></div>
   `;
 
-  // GA4 barras con bordes redondeados y cifras
+  document.getElementById("ga4-total-"+cfg.codigo).textContent=fmt(d["Visitas Totales"]);
+  document.getElementById("ga4-nuevas-"+cfg.codigo).textContent=fmt(d["Visitas Nuevas"])+" nuevas";
+
   dc("ga4-"+cfg.codigo);
   charts["ga4-"+cfg.codigo]=new Chart(document.getElementById("chart-ga4-"+cfg.codigo),{
     type:"bar",
-    data:{
-      labels:["Visitas totales","Visitas nuevas","Admisión 2027"],
-      datasets:[{
-        data:[d["Visitas Totales"]||0,d["Visitas Nuevas"]||0,d["Visitas /admision2027"]||0],
-        backgroundColor:[c,c+"99","#f3bc52"],
-        borderRadius:4
-      }]
-    },
+    data:{labels:["Visitas totales","Visitas nuevas","Admisión 2027"],datasets:[{data:[d["Visitas Totales"]||0,d["Visitas Nuevas"]||0,d["Visitas /admision2027"]||0],backgroundColor:[c,c+"99","#f3bc52"],borderRadius:4}]},
     options:{plugins:{legend:{display:false}},scales:SC,responsive:true}
   });
+
+  const tasa=d["Visitas Totales"]?((d["Visitas /admision2027"]/d["Visitas Totales"])*100).toFixed(1)+"%":"0%";
+  document.getElementById("conv-"+cfg.codigo).innerHTML=`
+    <div style="display:flex;gap:3rem">
+      <div><div class="conv-codigo">${cfg.codigo}</div><div class="conv-value" style="color:${c}">${tasa}</div><div class="conv-sub">Visitas → admisión</div></div>
+    </div>`;
 
   document.getElementById("tabla-ga4-"+cfg.codigo).innerHTML=`
     <tr><th>Página</th><th>Visitas</th></tr>
@@ -450,53 +436,36 @@ function renderColegio(cfg){
     <tr><td style="font-size:12px;color:#7a90b5">${d["Top Página 3"]||"-"}</td><td>${fmt(d["Visitas P3"])}</td></tr>
   `;
 
-  // Meta KPIs con mismo tamaño
   document.getElementById("kpis-meta-"+cfg.codigo).innerHTML=`
     <div class="kpi-card"><div class="kpi-label">Campaña</div><div class="kpi-value" style="font-size:16px;color:${c}">${d["Meta Nombre Campaña"]||"-"}</div></div>
-    <div class="kpi-card"><div class="kpi-label">Alcance</div><div class="kpi-value" style="color:${c};font-size:54px">${fmt(d["Meta Alcance"])}</div></div>
-    <div class="kpi-card"><div class="kpi-label">Presupuesto</div><div class="kpi-value" style="color:${c};font-size:54px">${fmtCLP(d["Meta Presupuesto"])}</div></div>
-    <div class="kpi-card"><div class="kpi-label">CPR</div><div class="kpi-value" style="color:${c};font-size:54px">${Math.round(d["Meta CPR"]||0)}</div></div>
-    <div class="kpi-card"><div class="kpi-label">Usuarios únicos</div><div class="kpi-value" style="color:${c};font-size:54px">${fmt(d["Meta Usuarios"])}</div></div>
+    <div class="kpi-card"><div class="kpi-label">Alcance</div><div class="kpi-value" style="color:${c}">${fmt(d["Meta Alcance"])}</div></div>
+    <div class="kpi-card"><div class="kpi-label">Presupuesto</div><div class="kpi-value" style="color:${c}">${fmtCLP(d["Meta Presupuesto"])}</div></div>
+    <div class="kpi-card"><div class="kpi-label">CPR</div><div class="kpi-value" style="color:${c}">$${Math.round(d["Meta CPR"]||0)}</div></div>
+    <div class="kpi-card"><div class="kpi-label">Usuarios únicos</div><div class="kpi-value" style="color:${c}">${fmt(d["Meta Usuarios"])}</div></div>
   `;
 
-  // Google Ads KPIs
   document.getElementById("kpis-gads-"+cfg.codigo).innerHTML=`
-    <div class="kpi-card"><div class="kpi-label">Impresiones</div><div class="kpi-value" style="color:${c};font-size:54px">${fmt(d["GAds Impresiones"])}</div></div>
-    <div class="kpi-card"><div class="kpi-label">Clics</div><div class="kpi-value" style="color:${c};font-size:54px">${fmt(d["GAds Clics"])}</div></div>
-    <div class="kpi-card"><div class="kpi-label">Llamadas</div><div class="kpi-value" style="color:${c};font-size:54px">${fmt(d["GAds Llamadas"])}</div></div>
+    <div class="kpi-card"><div class="kpi-label">Impresiones</div><div class="kpi-value" style="color:${c}">${fmt(d["GAds Impresiones"])}</div></div>
+    <div class="kpi-card"><div class="kpi-label">Clics</div><div class="kpi-value" style="color:${c}">${fmt(d["GAds Clics"])}</div></div>
+    <div class="kpi-card"><div class="kpi-label">Llamadas</div><div class="kpi-value" style="color:${c}">${fmt(d["GAds Llamadas"])}</div></div>
   `;
 
-  // HubSpot torta con total centrado
   dc("hub-"+cfg.codigo);
-  const hubData = [d["HS Matriculados"]||0,d["HS Aceptados"]||0,d["HS Desiste"]||0,d["HS Rechazados"]||0,d["HS Lista Espera"]||0];
-  const hubTotal = hubData.reduce((s,v)=>s+v,0);
+  const hubData=[d["HS Matriculados"]||0,d["HS Aceptados"]||0,d["HS Desiste"]||0,d["HS Rechazados"]||0,d["HS Lista Espera"]||0];
+  const hubTotal=hubData.reduce((s,v)=>s+v,0);
   charts["hub-"+cfg.codigo]=new Chart(document.getElementById("chart-hub-"+cfg.codigo),{
     type:"doughnut",
-    data:{
-      labels:["Matriculados","Aceptados","Desiste","Rechazados","Lista espera"],
-      datasets:[{data:hubData,backgroundColor:[c,c+"cc",c+"66",c+"44",c+"22"],borderWidth:2,borderColor:"#fff"}]
-    },
-    options:{
-      cutout:"62%",
-      plugins:{legend:{display:true,position:"right",labels:{color:"#0d2a5e",font:{size:11},boxWidth:8,borderRadius:50,
-        generateLabels(ch){const ds=ch.data.datasets[0];return ch.data.labels.map((l,i)=>({text:l+" · "+fmt(ds.data[i]),fillStyle:ds.backgroundColor[i],strokeStyle:"#fff",lineWidth:2,index:i}));}
-      }}},
-      responsive:true
-    },
-    plugins:[{
-      id:"centerText-hub-"+cfg.codigo,
-      afterDraw(chart){
-        const {ctx,chartArea:{top,bottom,left,right}}=chart;
-        const cx=(left+right)/2, cy=(top+bottom)/2;
-        ctx.save();
-        ctx.font="800 22px system-ui";
-        ctx.fillStyle="#1b2a4a";
-        ctx.textAlign="center";
-        ctx.textBaseline="middle";
-        ctx.fillText(fmt(hubTotal),cx,cy);
-        ctx.restore();
-      }
-    }]
+    data:{labels:["Matriculados","Aceptados","Desiste","Rechazados","Lista espera"],
+      datasets:[{data:hubData,backgroundColor:[c,c+"cc",c+"66",c+"44",c+"22"],borderWidth:2,borderColor:"#fff"}]},
+    options:{cutout:"62%",plugins:{legend:{display:true,position:"right",labels:{color:"#0d2a5e",font:{size:11},boxWidth:8,borderRadius:50,
+      generateLabels(ch){const ds=ch.data.datasets[0];return ch.data.labels.map((l,i)=>({text:l+" · "+fmt(ds.data[i]),fillStyle:ds.backgroundColor[i],strokeStyle:"#fff",lineWidth:2,index:i}));}
+    }}},responsive:true},
+    plugins:[{id:"ct-"+cfg.codigo,afterDraw(chart){
+      const {ctx,chartArea:{top,bottom,left,right}}=chart;
+      const cx=(left+right)/2,cy=(top+bottom)/2;
+      ctx.save();ctx.font="800 22px system-ui";ctx.fillStyle="#1b2a4a";
+      ctx.textAlign="center";ctx.textBaseline="middle";ctx.fillText(fmt(hubTotal),cx,cy);ctx.restore();
+    }}]
   });
 
   document.getElementById("tabla-hub-"+cfg.codigo).innerHTML=`
