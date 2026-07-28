@@ -313,6 +313,17 @@ function drawMotivoChart(id, items, color){
   });
 }
 
+// Hash simple y determinístico de un string -> número positivo.
+// Sirve para asignar SIEMPRE el mismo color a la misma campaña, sin importar
+// el orden en que aparezcan los datos en cada carga (a diferencia de usar el
+// índice de aparición, que cambia si se agregan/eliminan campañas).
+function hashStr(s){
+  s=String(s);
+  let h=0;
+  for(let i=0;i<s.length;i++){ h=(h*31+s.charCodeAt(i))|0; }
+  return Math.abs(h);
+}
+
 function drawCampanasChart(cfg){
   const id="chart-campanas-"+cfg.codigo;
   const el=document.getElementById(id);
@@ -327,19 +338,26 @@ function drawCampanasChart(cfg){
 
   if(!rows.length) return;
 
-  // Un color distinto por campaña (ciclando la paleta), para que las quincenas de una
-  // misma campaña se vean agrupadas visualmente aunque estén una al lado de la otra.
-  const PALETA=["#1a6bbf","#4eade1","#f3bc52","#c13642","#5a7ab5","#2e8b57","#8e44ad"];
-  const idsUnicos=[...new Set(rows.map(r=>r["Campaign ID"]))];
-  const colorPorCampana=id=>PALETA[idsUnicos.indexOf(id)%PALETA.length];
+  // Variaciones de opacidad del MISMO color del colegio (no se introducen colores nuevos):
+  // cada campaña queda con un tono fijo y estable (por hash de su ID), y todas sus quincenas
+  // comparten ese tono, agrupándose visualmente.
+  const ALPHAS=["FF","C2","8C","5C"];
+  const colorPorCampana=campId=>cfg.color+ALPHAS[hashStr(campId)%ALPHAS.length];
 
-  const labels=rows.map(r=>fmtFechaCorta(r._fecha));
+  // Etiqueta del eje: la fecha siempre, y el NOMBRE de la campaña solo en la primera
+  // quincena de cada campaña (para que se lea agrupada, sin repetirlo en cada barra).
+  const labels=rows.map((r,i)=>{
+    const fecha=fmtFechaCorta(r._fecha);
+    const esNuevaCampana = i===0 || r["Campaign ID"]!==rows[i-1]["Campaign ID"];
+    return esNuevaCampana ? [truncar(r["Nombre Campaña"]||"Campaña sin nombre",16), fecha] : fecha;
+  });
+
   charts[id]=new Chart(el,{
     data:{
       labels,
       datasets:[
-        {type:"bar",  label:"Alcance",       data:rows.map(r=>+(r["Alcance"]||0)),      backgroundColor:rows.map(r=>colorPorCampana(r["Campaign ID"])),      borderRadius:4, yAxisID:"y"},
-        {type:"bar",  label:"Clics enlace",  data:rows.map(r=>+(r["Clics Enlace"]||0)), backgroundColor:rows.map(r=>colorPorCampana(r["Campaign ID"])+"77"), borderRadius:4, yAxisID:"y"},
+        {type:"bar",  label:"Alcance",       data:rows.map(r=>+(r["Alcance"]||0)),      backgroundColor:rows.map(r=>colorPorCampana(r["Campaign ID"])), borderRadius:4, yAxisID:"y"},
+        {type:"bar",  label:"Clics enlace",  data:rows.map(r=>+(r["Clics Enlace"]||0)), backgroundColor:cfg.color+"55",                                 borderRadius:4, yAxisID:"y"},
         {type:"line", label:"CPR ($)",       data:rows.map(r=>+(r["CPR"]||0)),          borderColor:"#f3bc52", backgroundColor:"#f3bc52", yAxisID:"y1", tension:0.3, pointRadius:3}
       ]
     },
@@ -519,6 +537,7 @@ function buildColegioSections(){
         <div id="conv-${c.codigo}" style="margin-bottom:2rem"></div>
         <div class="block-label" id="titulo-ga4-${c.codigo}">Top 10 páginas</div>
         <table class="simple" id="tabla-ga4-${c.codigo}"></table>
+        <div id="nota-ga4-${c.codigo}" style="font-size:11px;color:#7a90b5;margin-top:8px;font-style:italic"></div>
       </div>
       <div class="platform-block">
         <div class="platform-header">📱 Meta</div>
@@ -593,14 +612,21 @@ function renderColegio(cfg){
 
   document.getElementById("titulo-ga4-"+cfg.codigo).textContent = "Top 10 páginas — semana " + (d["Semana"]||"-");
 
+  const top10Paginas = Array.from({length:10},(_,i)=>i+1)
+    .map(n=>({pag:d["Top Página "+n], vis:d["Visitas P"+n]}));
+  const conDatos = top10Paginas.filter(r=>r.pag).length;
+
   document.getElementById("tabla-ga4-"+cfg.codigo).innerHTML=`
     <tr><th>Página</th><th>Visitas</th></tr>
-    ${Array.from({length:10},(_,i)=>i+1)
-      .map(n=>({pag:d["Top Página "+n], vis:d["Visitas P"+n]}))
-      .filter(r=>r.pag)
-      .map(r=>`<tr><td style="font-size:12px;color:#7a90b5">${r.pag}</td><td>${fmt(r.vis)}</td></tr>`)
-      .join("")}
+    ${top10Paginas.map(r=>`<tr><td style="font-size:12px;color:${r.pag?"#7a90b5":"#c7d0e0"}">${r.pag||"— sin datos —"}</td><td>${r.pag?fmt(r.vis):"—"}</td></tr>`).join("")}
   `;
+
+  const notaPaginas = document.getElementById("nota-ga4-"+cfg.codigo);
+  if (notaPaginas) {
+    notaPaginas.textContent = conDatos < 10
+      ? `Esa semana solo ${conDatos} de 10 páginas tuvieron tráfico registrado.`
+      : "";
+  }
 
   document.getElementById("kpis-meta-"+cfg.codigo).innerHTML=`
     <div class="kpi-card"><div class="kpi-label">Campaña actual</div><div class="kpi-value" style="font-size:16px;color:${c}">${d["Meta Nombre Campaña"]||"-"}</div><div class="kpi-sub">Desde ${fmtFechaLarga(parseFechaSheet(d["Meta Fecha Anuncio"]))}</div></div>
