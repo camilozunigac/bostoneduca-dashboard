@@ -143,7 +143,7 @@ const COLEGIOS_CFG = [
   { nombre:"Colegio San Marcos de Macul",              codigo:"CSM",  color:"#e6b800", initials:"SM" },
 ];
 
-let DATA=[], charts={}, SEMANA_ACTUAL=null;
+let DATA=[], CAMPANAS=[], charts={}, SEMANA_ACTUAL=null;
 function getCfg(n){ return COLEGIOS_CFG.find(c=>c.nombre===n)||{color:"#555",initials:"??",codigo:"??"}; }
 function fmt(n){ return Math.round(n||0).toLocaleString("es-CL").replace(/,/g,"."); }
 function fmtCLP(n){ return "$"+Math.round(n||0).toLocaleString("es-CL").replace(/,/g,"."); }
@@ -232,6 +232,47 @@ function drawBarChart(containerId,rows,colegiosData){
   });
 }
 
+function fmtFechaCorta(s){
+  if(!s) return "";
+  const d=new Date(s);
+  if(isNaN(d)) return String(s);
+  return String(d.getDate()).padStart(2,"0")+"/"+String(d.getMonth()+1).padStart(2,"0");
+}
+
+// Historial de campañas de Meta por colegio: alcance y clics (barras) + CPR (línea, eje secundario)
+function drawCampanasChart(cfg){
+  const id="chart-campanas-"+cfg.codigo;
+  const el=document.getElementById(id);
+  if(!el) return;
+  dc(id);
+
+  const rows=CAMPANAS.filter(r=>r["Colegio"]===cfg.nombre && r["Fecha Inicio"])
+    .sort((a,b)=>new Date(a["Fecha Inicio"])-new Date(b["Fecha Inicio"]));
+
+  if(!rows.length) return;
+
+  const labels=rows.map(r=>fmtFechaCorta(r["Fecha Inicio"]));
+  charts[id]=new Chart(el,{
+    data:{
+      labels,
+      datasets:[
+        {type:"bar",  label:"Alcance",       data:rows.map(r=>+(r["Alcance"]||0)),      backgroundColor:cfg.color,      borderRadius:4, yAxisID:"y"},
+        {type:"bar",  label:"Clics enlace",  data:rows.map(r=>+(r["Clics Enlace"]||0)), backgroundColor:cfg.color+"77", borderRadius:4, yAxisID:"y"},
+        {type:"line", label:"CPR ($)",       data:rows.map(r=>+(r["CPR"]||0)),          borderColor:"#f3bc52", backgroundColor:"#f3bc52", yAxisID:"y1", tension:0.3, pointRadius:3}
+      ]
+    },
+    options:{
+      plugins:{legend:{display:true,position:"top",labels:{color:"#0d2a5e",font:{size:11},boxWidth:10,padding:16}}},
+      scales:{
+        x:  SC.x,
+        y:  {...SC.y, position:"left"},
+        y1: {position:"right", grid:{display:false}, ticks:{color:"#7a90b5",font:{size:11},callback:v=>"$"+v}}
+      },
+      responsive:true
+    }
+  });
+}
+
 function generateSummary(d){
   const totV=d.reduce((s,r)=>s+(r["Visitas Totales"]||0),0);
   const totA=d.reduce((s,r)=>s+(r["Meta Alcance"]||0),0);
@@ -245,14 +286,21 @@ function generateSummary(d){
   return `La semana registró <strong>${fmt(totV)} visitas totales</strong>, lideradas por <strong style="color:${topV.color}">${topV.codigo}</strong>. El alcance en Meta fue de <strong>${fmt(totA)} personas</strong>, destacando <strong style="color:${topA.color}">${topA.codigo}</strong>. En admisiones, hay <strong>${fmt(totP)} postulaciones</strong> con una conversión del <strong>${conv}%</strong> a matrícula — <strong style="color:${topM.color}">${topM.codigo}</strong> lidera con ${fmt(topMrow?.["HS Matriculados"]||0)} matriculados. Se recomienda reforzar la inversión en los colegios con menor tráfico a /admision2027.`;
 }
 
+async function fetchSheet(nombreHoja){
+  const url=`https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(nombreHoja)}`;
+  const resp=await fetch(url);
+  const text=await resp.text();
+  const json=JSON.parse(text.match(/google\.visualization\.Query\.setResponse\(([\s\S]*?)\);?\s*$/)[1]);
+  const cols=json.table.cols.map(c=>c.label);
+  return json.table.rows.map(r=>{const obj={};cols.forEach((col,i)=>{obj[col]=r.c[i]?.v??0;});return obj;});
+}
+
 async function loadData(){
-  const url=`https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=CONSOLIDADO`;
   try{
-    const resp=await fetch(url);
-    const text=await resp.text();
-    const json=JSON.parse(text.match(/google\.visualization\.Query\.setResponse\(([\s\S]*?)\);?\s*$/)[1]);
-    const cols=json.table.cols.map(c=>c.label);
-    DATA=json.table.rows.map(r=>{const obj={};cols.forEach((col,i)=>{obj[col]=r.c[i]?.v??0;});return obj;}).filter(r=>r["Colegio"]&&r["Colegio"]!=="Colegio");
+    DATA=(await fetchSheet("CONSOLIDADO")).filter(r=>r["Colegio"]&&r["Colegio"]!=="Colegio");
+    try{
+      CAMPANAS=(await fetchSheet("META_CAMPANAS")).filter(r=>r["Colegio"]&&r["Colegio"]!=="Colegio");
+    }catch(e){ CAMPANAS=[]; console.warn("No se pudo cargar META_CAMPANAS", e); }
     document.getElementById("loading").style.display="none";
     const semanas=[...new Set(DATA.map(r=>r["Semana"]))].filter(Boolean).sort().reverse();
     SEMANA_ACTUAL=semanas[0];
@@ -378,6 +426,8 @@ function buildColegioSections(){
       <div class="platform-block">
         <div class="platform-header">📱 Meta</div>
         <div class="kpi-grid" id="kpis-meta-${c.codigo}"></div>
+        <div class="block-label" style="margin-top:1.5rem">Historial de campañas — alcance, clics al enlace y CPR</div>
+        <canvas id="chart-campanas-${c.codigo}" style="max-height:280px"></canvas>
       </div>
       <div class="platform-block">
         <div class="platform-header">🔍 Google Ads</div>
@@ -435,12 +485,14 @@ function renderColegio(cfg){
   `;
 
   document.getElementById("kpis-meta-"+cfg.codigo).innerHTML=`
-    <div class="kpi-card"><div class="kpi-label">Campaña</div><div class="kpi-value" style="font-size:16px;color:${c}">${d["Meta Nombre Campaña"]||"-"}</div></div>
+    <div class="kpi-card"><div class="kpi-label">Campaña actual</div><div class="kpi-value" style="font-size:16px;color:${c}">${d["Meta Nombre Campaña"]||"-"}</div><div class="kpi-sub">Desde ${d["Meta Fecha Anuncio"]||"-"}</div></div>
     <div class="kpi-card"><div class="kpi-label">Alcance</div><div class="kpi-value" style="color:${c}">${fmt(d["Meta Alcance"])}</div></div>
     <div class="kpi-card"><div class="kpi-label">Presupuesto</div><div class="kpi-value" style="color:${c}">${fmtCLP(d["Meta Presupuesto"])}</div></div>
     <div class="kpi-card"><div class="kpi-label">CPR</div><div class="kpi-value" style="color:${c}">$${Math.round(d["Meta CPR"]||0)}</div></div>
     <div class="kpi-card"><div class="kpi-label">Usuarios únicos</div><div class="kpi-value" style="color:${c}">${fmt(d["Meta Usuarios"])}</div></div>
   `;
+
+  drawCampanasChart(cfg);
 
   document.getElementById("kpis-gads-"+cfg.codigo).innerHTML=`
     <div class="kpi-card"><div class="kpi-label">Impresiones</div><div class="kpi-value" style="color:${c}">${fmt(d["GAds Impresiones"])}</div></div>
