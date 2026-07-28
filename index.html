@@ -486,6 +486,7 @@ function buildColegioSections(){
         <div class="block-label">Tasa de conversión a admisión 2027</div>
         <div id="conv-${c.codigo}" style="margin-bottom:2rem"></div>
         <div class="block-label" id="titulo-ga4-${c.codigo}">Top 10 páginas</div>
+        <div id="debug-ga4-${c.codigo}" style="font-size:10px;color:#c13642;margin-bottom:8px;word-break:break-all"></div>
         <table class="simple" id="tabla-ga4-${c.codigo}"></table>
       </div>
       <div class="platform-block">
@@ -560,6 +561,14 @@ function renderColegio(cfg){
     </div>`;
 
   document.getElementById("titulo-ga4-"+cfg.codigo).textContent = "Top 10 páginas — semana " + (d["Semana"]||"-");
+
+  document.getElementById("debug-ga4-"+cfg.codigo).textContent = "DEBUG (temporal) → " + JSON.stringify({
+    p6:d["Top Página 6"], v6:d["Visitas P6"],
+    p7:d["Top Página 7"], v7:d["Visitas P7"],
+    p8:d["Top Página 8"], v8:d["Visitas P8"],
+    p9:d["Top Página 9"], v9:d["Visitas P9"],
+    p10:d["Top Página 10"], v10:d["Visitas P10"],
+  });
 
   document.getElementById("tabla-ga4-"+cfg.codigo).innerHTML=`
     <tr><th>Página</th><th>Visitas</th></tr>
