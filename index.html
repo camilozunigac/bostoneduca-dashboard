@@ -261,6 +261,11 @@ function fmtFechaCorta(d){
   return String(d.getDate()).padStart(2,"0")+"/"+String(d.getMonth()+1).padStart(2,"0");
 }
 
+function fmtFechaLarga(d){
+  if(!d) return "-";
+  return String(d.getDate()).padStart(2,"0")+"/"+String(d.getMonth()+1).padStart(2,"0")+"/"+d.getFullYear();
+}
+
 const MESES_CORTOS=["Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dic"];
 function fmtMesCorto(d){
   if(!d) return "";
@@ -322,13 +327,19 @@ function drawCampanasChart(cfg){
 
   if(!rows.length) return;
 
-  const labels=rows.map(r=>fmtMesCorto(r._fecha));
+  // Un color distinto por campaña (ciclando la paleta), para que las quincenas de una
+  // misma campaña se vean agrupadas visualmente aunque estén una al lado de la otra.
+  const PALETA=["#1a6bbf","#4eade1","#f3bc52","#c13642","#5a7ab5","#2e8b57","#8e44ad"];
+  const idsUnicos=[...new Set(rows.map(r=>r["Campaign ID"]))];
+  const colorPorCampana=id=>PALETA[idsUnicos.indexOf(id)%PALETA.length];
+
+  const labels=rows.map(r=>fmtFechaCorta(r._fecha));
   charts[id]=new Chart(el,{
     data:{
       labels,
       datasets:[
-        {type:"bar",  label:"Alcance",       data:rows.map(r=>+(r["Alcance"]||0)),      backgroundColor:cfg.color,      borderRadius:4, yAxisID:"y"},
-        {type:"bar",  label:"Clics enlace",  data:rows.map(r=>+(r["Clics Enlace"]||0)), backgroundColor:cfg.color+"77", borderRadius:4, yAxisID:"y"},
+        {type:"bar",  label:"Alcance",       data:rows.map(r=>+(r["Alcance"]||0)),      backgroundColor:rows.map(r=>colorPorCampana(r["Campaign ID"])),      borderRadius:4, yAxisID:"y"},
+        {type:"bar",  label:"Clics enlace",  data:rows.map(r=>+(r["Clics Enlace"]||0)), backgroundColor:rows.map(r=>colorPorCampana(r["Campaign ID"])+"77"), borderRadius:4, yAxisID:"y"},
         {type:"line", label:"CPR ($)",       data:rows.map(r=>+(r["CPR"]||0)),          borderColor:"#f3bc52", backgroundColor:"#f3bc52", yAxisID:"y1", tension:0.3, pointRadius:3}
       ]
     },
@@ -340,7 +351,7 @@ function drawCampanasChart(cfg){
             title:(items)=>{
               const r=rows[items[0].dataIndex];
               const nombre=r["Nombre Campaña"]||"Campaña sin nombre";
-              return nombre+" — "+fmtMesCorto(r._fecha);
+              return nombre+" — quincena del "+fmtFechaLarga(r._fecha);
             }
           }
         }
@@ -592,7 +603,7 @@ function renderColegio(cfg){
   `;
 
   document.getElementById("kpis-meta-"+cfg.codigo).innerHTML=`
-    <div class="kpi-card"><div class="kpi-label">Campaña actual</div><div class="kpi-value" style="font-size:16px;color:${c}">${d["Meta Nombre Campaña"]||"-"}</div><div class="kpi-sub">Desde ${d["Meta Fecha Anuncio"]||"-"}</div></div>
+    <div class="kpi-card"><div class="kpi-label">Campaña actual</div><div class="kpi-value" style="font-size:16px;color:${c}">${d["Meta Nombre Campaña"]||"-"}</div><div class="kpi-sub">Desde ${fmtFechaLarga(parseFechaSheet(d["Meta Fecha Anuncio"]))}</div></div>
     <div class="kpi-card"><div class="kpi-label">Alcance</div><div class="kpi-value" style="color:${c}">${fmt(d["Meta Alcance"])}</div></div>
     <div class="kpi-card"><div class="kpi-label">Presupuesto</div><div class="kpi-value" style="color:${c}">${fmtCLP(d["Meta Presupuesto"])}</div></div>
     <div class="kpi-card"><div class="kpi-label">CPR</div><div class="kpi-value" style="color:${c}">$${Math.round(d["Meta CPR"]||0)}</div></div>
