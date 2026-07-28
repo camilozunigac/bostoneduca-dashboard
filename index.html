@@ -251,6 +251,11 @@ function fmtFechaCorta(d){
 
 // Historial de campañas de Meta por colegio: alcance y clics (barras) + CPR (línea, eje secundario)
 // Solo se muestran campañas del año 2026 en adelante (ciclo con nombres ya estandarizados).
+function truncar(s,n){
+  s=String(s||"");
+  return s.length>n ? s.slice(0,n-1)+"…" : s;
+}
+
 function drawCampanasChart(cfg){
   const id="chart-campanas-"+cfg.codigo;
   const el=document.getElementById(id);
@@ -265,7 +270,7 @@ function drawCampanasChart(cfg){
 
   if(!rows.length) return;
 
-  const labels=rows.map(r=>fmtFechaCorta(r._fecha));
+  const labels=rows.map(r=>truncar(r["Nombre Campaña"],18) || fmtFechaCorta(r._fecha));
   charts[id]=new Chart(el,{
     data:{
       labels,
@@ -276,9 +281,20 @@ function drawCampanasChart(cfg){
       ]
     },
     options:{
-      plugins:{legend:{display:true,position:"top",labels:{color:"#0d2a5e",font:{size:11},boxWidth:10,padding:16}}},
+      plugins:{
+        legend:{display:true,position:"top",labels:{color:"#0d2a5e",font:{size:11},boxWidth:10,padding:16}},
+        tooltip:{
+          callbacks:{
+            title:(items)=>{
+              const r=rows[items[0].dataIndex];
+              const nombre=r["Nombre Campaña"]||"Campaña sin nombre";
+              return nombre+" ("+fmtFechaCorta(r._fecha)+")";
+            }
+          }
+        }
+      },
       scales:{
-        x:  SC.x,
+        x:  {...SC.x, ticks:{...SC.x.ticks, maxRotation:55, minRotation:35, autoSkip:false}},
         y:  {...SC.y, position:"left"},
         y1: {position:"right", grid:{display:false}, ticks:{color:"#7a90b5",font:{size:11},callback:v=>"$"+v}}
       },
