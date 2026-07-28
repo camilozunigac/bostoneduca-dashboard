@@ -232,26 +232,40 @@ function drawBarChart(containerId,rows,colegiosData){
   });
 }
 
-function fmtFechaCorta(s){
-  if(!s) return "";
-  const d=new Date(s);
-  if(isNaN(d)) return String(s);
+// Google Sheets (gviz) devuelve fechas como texto "Date(2026,6,1)" (mes 0-indexado) o como Date real
+function parseFechaSheet(v){
+  if(v instanceof Date) return v;
+  if(typeof v==="string"){
+    const m=v.match(/^Date\((\d+),(\d+),(\d+)\)/);
+    if(m) return new Date(+m[1], +m[2], +m[3]);
+    const d=new Date(v);
+    if(!isNaN(d)) return d;
+  }
+  return null;
+}
+
+function fmtFechaCorta(d){
+  if(!d) return "";
   return String(d.getDate()).padStart(2,"0")+"/"+String(d.getMonth()+1).padStart(2,"0");
 }
 
 // Historial de campañas de Meta por colegio: alcance y clics (barras) + CPR (línea, eje secundario)
+// Solo se muestran campañas del año 2026 en adelante (ciclo con nombres ya estandarizados).
 function drawCampanasChart(cfg){
   const id="chart-campanas-"+cfg.codigo;
   const el=document.getElementById(id);
   if(!el) return;
   dc(id);
 
-  const rows=CAMPANAS.filter(r=>r["Colegio"]===cfg.nombre && r["Fecha Inicio"])
-    .sort((a,b)=>new Date(a["Fecha Inicio"])-new Date(b["Fecha Inicio"]));
+  const rows=CAMPANAS
+    .filter(r=>r["Colegio"]===cfg.nombre)
+    .map(r=>({...r, _fecha:parseFechaSheet(r["Fecha Inicio"])}))
+    .filter(r=>r._fecha && r._fecha.getFullYear()>=2026)
+    .sort((a,b)=>a._fecha-b._fecha);
 
   if(!rows.length) return;
 
-  const labels=rows.map(r=>fmtFechaCorta(r["Fecha Inicio"]));
+  const labels=rows.map(r=>fmtFechaCorta(r._fecha));
   charts[id]=new Chart(el,{
     data:{
       labels,
@@ -272,6 +286,7 @@ function drawCampanasChart(cfg){
     }
   });
 }
+
 
 function generateSummary(d){
   const totV=d.reduce((s,r)=>s+(r["Visitas Totales"]||0),0);
