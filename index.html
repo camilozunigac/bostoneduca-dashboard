@@ -313,17 +313,6 @@ function drawMotivoChart(id, items, color){
   });
 }
 
-// Hash simple y determinístico de un string -> número positivo.
-// Sirve para asignar SIEMPRE el mismo color a la misma campaña, sin importar
-// el orden en que aparezcan los datos en cada carga (a diferencia de usar el
-// índice de aparición, que cambia si se agregan/eliminan campañas).
-function hashStr(s){
-  s=String(s);
-  let h=0;
-  for(let i=0;i<s.length;i++){ h=(h*31+s.charCodeAt(i))|0; }
-  return Math.abs(h);
-}
-
 function drawCampanasChart(cfg){
   const id="chart-campanas-"+cfg.codigo;
   const el=document.getElementById(id);
@@ -338,26 +327,14 @@ function drawCampanasChart(cfg){
 
   if(!rows.length) return;
 
-  // Variaciones de opacidad del MISMO color del colegio (no se introducen colores nuevos):
-  // cada campaña queda con un tono fijo y estable (por hash de su ID), y todas sus quincenas
-  // comparten ese tono, agrupándose visualmente.
-  const ALPHAS=["FF","C2","8C","5C"];
-  const colorPorCampana=campId=>cfg.color+ALPHAS[hashStr(campId)%ALPHAS.length];
-
-  // Etiqueta del eje: la fecha siempre, y el NOMBRE de la campaña solo en la primera
-  // quincena de cada campaña (para que se lea agrupada, sin repetirlo en cada barra).
-  const labels=rows.map((r,i)=>{
-    const fecha=fmtFechaCorta(r._fecha);
-    const esNuevaCampana = i===0 || r["Campaign ID"]!==rows[i-1]["Campaign ID"];
-    return esNuevaCampana ? [truncar(r["Nombre Campaña"]||"Campaña sin nombre",16), fecha] : fecha;
-  });
+  const labels=rows.map(r=>truncar(r["Nombre Campaña"]||"Campaña sin nombre",18));
 
   charts[id]=new Chart(el,{
     data:{
       labels,
       datasets:[
-        {type:"bar",  label:"Alcance",       data:rows.map(r=>+(r["Alcance"]||0)),      backgroundColor:rows.map(r=>colorPorCampana(r["Campaign ID"])), borderRadius:4, yAxisID:"y"},
-        {type:"bar",  label:"Clics enlace",  data:rows.map(r=>+(r["Clics Enlace"]||0)), backgroundColor:cfg.color+"55",                                 borderRadius:4, yAxisID:"y"},
+        {type:"bar",  label:"Alcance",       data:rows.map(r=>+(r["Alcance"]||0)),      backgroundColor:cfg.color,      borderRadius:4, yAxisID:"y"},
+        {type:"bar",  label:"Clics enlace",  data:rows.map(r=>+(r["Clics Enlace"]||0)), backgroundColor:cfg.color+"77", borderRadius:4, yAxisID:"y"},
         {type:"line", label:"CPR ($)",       data:rows.map(r=>+(r["CPR"]||0)),          borderColor:"#f3bc52", backgroundColor:"#f3bc52", yAxisID:"y1", tension:0.3, pointRadius:3}
       ]
     },
@@ -369,7 +346,7 @@ function drawCampanasChart(cfg){
             title:(items)=>{
               const r=rows[items[0].dataIndex];
               const nombre=r["Nombre Campaña"]||"Campaña sin nombre";
-              return nombre+" — quincena del "+fmtFechaLarga(r._fecha);
+              return nombre+" — desde "+fmtFechaLarga(r._fecha);
             }
           }
         }
