@@ -451,7 +451,7 @@ function buildColegioSections(){
         </div>
         <div class="block-label">Tasa de conversión a admisión 2027</div>
         <div id="conv-${c.codigo}" style="margin-bottom:2rem"></div>
-        <div class="block-label">Top 5 páginas</div>
+        <div class="block-label">Top 10 páginas</div>
         <table class="simple" id="tabla-ga4-${c.codigo}"></table>
       </div>
       <div class="platform-block">
@@ -508,11 +508,11 @@ function renderColegio(cfg){
 
   document.getElementById("tabla-ga4-"+cfg.codigo).innerHTML=`
     <tr><th>Página</th><th>Visitas</th></tr>
-    <tr><td style="font-size:12px;color:#7a90b5">${d["Top Página 1"]||"-"}</td><td>${fmt(d["Visitas P1"])}</td></tr>
-    <tr><td style="font-size:12px;color:#7a90b5">${d["Top Página 2"]||"-"}</td><td>${fmt(d["Visitas P2"])}</td></tr>
-    <tr><td style="font-size:12px;color:#7a90b5">${d["Top Página 3"]||"-"}</td><td>${fmt(d["Visitas P3"])}</td></tr>
-    <tr><td style="font-size:12px;color:#7a90b5">${d["Top Página 4"]||"-"}</td><td>${fmt(d["Visitas P4"])}</td></tr>
-    <tr><td style="font-size:12px;color:#7a90b5">${d["Top Página 5"]||"-"}</td><td>${fmt(d["Visitas P5"])}</td></tr>
+    ${Array.from({length:10},(_,i)=>i+1)
+      .map(n=>({pag:d["Top Página "+n], vis:d["Visitas P"+n]}))
+      .filter(r=>r.pag)
+      .map(r=>`<tr><td style="font-size:12px;color:#7a90b5">${r.pag}</td><td>${fmt(r.vis)}</td></tr>`)
+      .join("")}
   `;
 
   document.getElementById("kpis-meta-"+cfg.codigo).innerHTML=`
