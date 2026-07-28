@@ -136,11 +136,11 @@ table.simple tr:last-child td { border-bottom:none; }
 <script>
 const SHEET_ID = "1ZU7L4IWlgJg-ff5Xovy5cwr4HVMuTT3ScUNXIZZsdDY";
 const COLEGIOS_CFG = [
-  { nombre:"Boston Academy Laguna del Sol",            codigo:"BALS", color:"#1a6bbf", initials:"BA" },
-  { nombre:"Boston College Alto Macul",                codigo:"BCAM", color:"#214e97", initials:"BC" },
-  { nombre:"Colegio Inmaculada Concepción de Vitacura",codigo:"CICV", color:"#4eade1", initials:"CI" },
-  { nombre:"Colegio San Francisco de Paine",           codigo:"CSFP", color:"#c13642", initials:"SF" },
-  { nombre:"Colegio San Marcos de Macul",              codigo:"CSM",  color:"#e6b800", initials:"SM" },
+  { nombre:"Boston Academy Laguna del Sol",            codigo:"BALS", color:"#1a6bbf", initials:"BA", logo:"https://bostonacademy.cl/wp-content/uploads/2026/07/Favicon.png" },
+  { nombre:"Boston College Alto Macul",                codigo:"BCAM", color:"#214e97", initials:"BC", logo:"https://bostoncollegealtomacul.cl/wp-content/uploads/2026/07/Favicon.png" },
+  { nombre:"Colegio Inmaculada Concepción de Vitacura",codigo:"CICV", color:"#4eade1", initials:"CI", logo:"https://cicv.cl/wp-content/uploads/2026/07/Favicon.png" },
+  { nombre:"Colegio San Francisco de Paine",           codigo:"CSFP", color:"#c13642", initials:"SF", logo:"https://csfp.cl/wp-content/uploads/2026/07/Favicon.png" },
+  { nombre:"Colegio San Marcos de Macul",              codigo:"CSM",  color:"#e6b800", initials:"SM", logo:"https://colegiosanmarcos.cl/wp-content/uploads/2026/07/Favicon.png" },
 ];
 
 let DATA=[], CAMPANAS=[], charts={}, SEMANA_ACTUAL=null;
@@ -261,6 +261,12 @@ function fmtFechaCorta(d){
   return String(d.getDate()).padStart(2,"0")+"/"+String(d.getMonth()+1).padStart(2,"0");
 }
 
+const MESES_CORTOS=["Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dic"];
+function fmtMesCorto(d){
+  if(!d) return "";
+  return MESES_CORTOS[d.getMonth()]+" "+d.getFullYear();
+}
+
 // Historial de campañas de Meta por colegio: alcance y clics (barras) + CPR (línea, eje secundario)
 // Solo se muestran campañas del año 2026 en adelante (ciclo con nombres ya estandarizados).
 function truncar(s,n){
@@ -316,7 +322,7 @@ function drawCampanasChart(cfg){
 
   if(!rows.length) return;
 
-  const labels=rows.map(r=>truncar(r["Nombre Campaña"],18) || fmtFechaCorta(r._fecha));
+  const labels=rows.map(r=>fmtMesCorto(r._fecha));
   charts[id]=new Chart(el,{
     data:{
       labels,
@@ -334,7 +340,7 @@ function drawCampanasChart(cfg){
             title:(items)=>{
               const r=rows[items[0].dataIndex];
               const nombre=r["Nombre Campaña"]||"Campaña sin nombre";
-              return nombre+" ("+fmtFechaCorta(r._fecha)+")";
+              return nombre+" — "+fmtMesCorto(r._fecha);
             }
           }
         }
@@ -467,7 +473,7 @@ function buildNavTabs(){
   COLEGIOS_CFG.forEach(c=>{
     const t=document.createElement("div");
     t.className="nav-tab";
-    t.innerHTML=`<span class="nav-dot" style="background:${c.color}"></span>${c.codigo}`;
+    t.innerHTML=`<img src="${c.logo}" alt="" style="width:16px;height:16px;border-radius:3px;object-fit:cover" onerror="this.style.display='none'"><span class="nav-dot" style="background:${c.color}"></span>${c.codigo}`;
     t.onclick=function(){showTab("col-"+c.codigo,this);};
     nav.appendChild(t);
   });
@@ -481,7 +487,10 @@ function buildColegioSections(){
     sec.className="section";
     sec.innerHTML=`
       <div style="display:flex;align-items:center;gap:14px;margin-bottom:2.5rem">
-        <div class="colegio-avatar" style="background:${c.color};color:#fff">${c.initials}</div>
+        <div class="colegio-avatar" style="background:${c.color};color:#fff;position:relative;overflow:hidden">
+          <span>${c.initials}</span>
+          <img src="${c.logo}" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover" onerror="this.style.display='none'">
+        </div>
         <div class="section-title">${c.nombre}</div>
       </div>
       <div class="kpi-grid" id="kpis-${c.codigo}"></div>
