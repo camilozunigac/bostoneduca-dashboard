@@ -470,6 +470,8 @@ function buildColegioSections(){
           <div><div class="block-label">Distribución por etapa</div><canvas id="chart-hub-${c.codigo}" style="max-height:220px"></canvas></div>
           <div><div class="block-label">Detalle por etapa</div><table class="simple" id="tabla-hub-${c.codigo}"></table></div>
         </div>
+        <div class="block-label" style="margin-top:1.5rem">Motivos (top 5, según cantidad de postulantes)</div>
+        <div id="motivos-hub-${c.codigo}"></div>
       </div>
     `;
     container.appendChild(sec);
@@ -558,6 +560,21 @@ function renderColegio(cfg){
     <tr><td>Rechazados</td><td>${fmt(d["HS Rechazados"])}</td><td>-</td></tr>
     <tr><td>Lista espera</td><td>${fmt(d["HS Lista Espera"])}</td><td>-</td></tr>
   `;
+
+  const motivos=[
+    {label:"Cómo se enteró del colegio", val:d["HS Como Se Enteró"]},
+    {label:"Por qué eligió el colegio",  val:d["HS Por Qué Eligió"]},
+    {label:"Motivo de desistimiento",    val:d["HS Motivo Desiste"]},
+    {label:"Motivo de rechazo",          val:d["HS Motivo Rechaza"]},
+  ].filter(m=>m.val);
+
+  document.getElementById("motivos-hub-"+cfg.codigo).innerHTML = motivos.length
+    ? motivos.map(m=>`
+        <div style="margin-bottom:12px">
+          <div style="font-size:11px;color:#7a90b5;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px">${m.label}</div>
+          <div style="font-size:13px;color:#0d2a5e;line-height:1.5">${m.val}</div>
+        </div>`).join("")
+    : `<div style="font-size:13px;color:#7a90b5">Sin datos de motivos para esta semana.</div>`;
 }
 
 function showTab(id,el){
