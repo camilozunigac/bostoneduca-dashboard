@@ -158,6 +158,7 @@ const datalabelsBar = {
   id:"datalabelsBar",
   afterDatasetsDraw(chart){
     if(chart.config.type!=="bar") return;
+    const horizontal = chart.options.indexAxis==="y";
     const ctx=chart.ctx;
     chart.data.datasets.forEach((ds,di)=>{
       const meta=chart.getDatasetMeta(di);
@@ -168,9 +169,15 @@ const datalabelsBar = {
         ctx.save();
         ctx.font="400 13px system-ui";
         ctx.fillStyle="#7a90b5";
-        ctx.textAlign="center";
-        ctx.textBaseline="bottom";
-        ctx.fillText(fmt(val),bar.x,bar.y-4);
+        if(horizontal){
+          ctx.textAlign="left";
+          ctx.textBaseline="middle";
+          ctx.fillText(fmt(val),bar.x+6,bar.y);
+        }else{
+          ctx.textAlign="center";
+          ctx.textBaseline="bottom";
+          ctx.fillText(fmt(val),bar.x,bar.y-4);
+        }
         ctx.restore();
       });
     });
@@ -240,7 +247,7 @@ function drawBarChart(containerId,rows,colegiosData){
       borderRadius:4,
       barPercentage:0.7,
     }))},
-    options:{plugins:{legend:{display:true,position:"top",labels:{color:"#0d2a5e",font:{size:11},boxWidth:10,padding:16}}},scales:SC,responsive:true}
+    options:{layout:{padding:{top:24}},plugins:{legend:{display:true,position:"top",labels:{color:"#0d2a5e",font:{size:11},boxWidth:10,padding:16}}},scales:SC,responsive:true}
   });
 }
 
@@ -303,6 +310,7 @@ function drawMotivoChart(id, items, color){
     },
     options:{
       indexAxis:"y",
+      layout:{padding:{right:36}},
       plugins:{legend:{display:false}},
       scales:{
         x:{ grid:{color:"rgba(0,0,0,0.04)"}, ticks:{color:"#7a90b5",font:{size:11},precision:0} },
@@ -417,7 +425,7 @@ function renderConsolidado(){
       {label:"Visitas nuevas", data:d.map(r=>r["Visitas Nuevas"]||0), backgroundColor:colors.map(c=>c+"77"),borderRadius:4},
       {label:"Admisión 2027",  data:d.map(r=>r["Visitas /admision2027"]||0),backgroundColor:"#f3bc52",borderRadius:4}
     ]},
-    options:{plugins:{legend:{display:true,labels:{color:"#0d2a5e",font:{size:11},boxWidth:10}}},scales:SC,responsive:true}
+    options:{layout:{padding:{top:24}},plugins:{legend:{display:true,labels:{color:"#0d2a5e",font:{size:11},boxWidth:10}}},scales:SC,responsive:true}
   });
 
   const totV=d.reduce((s,r)=>s+(r["Visitas Totales"]||0),0);
@@ -440,12 +448,12 @@ function renderConsolidado(){
   dc("meta-alcance");
   charts["meta-alcance"]=new Chart(document.getElementById("chart-meta-alcance"),{
     type:"bar",data:{labels,datasets:[{label:"Alcance",data:d.map(r=>r["Meta Alcance"]||0),backgroundColor:colors,borderRadius:4}]},
-    options:{plugins:{legend:{display:false}},scales:SC,responsive:true}
+    options:{layout:{padding:{top:24}},plugins:{legend:{display:false}},scales:SC,responsive:true}
   });
   dc("meta-presupuesto");
   charts["meta-presupuesto"]=new Chart(document.getElementById("chart-meta-presupuesto"),{
     type:"bar",data:{labels,datasets:[{label:"Presupuesto",data:d.map(r=>r["Meta Presupuesto"]||0),backgroundColor:colors,borderRadius:4}]},
-    options:{plugins:{legend:{display:false}},scales:SC,responsive:true}
+    options:{layout:{padding:{top:24}},plugins:{legend:{display:false}},scales:SC,responsive:true}
   });
 
   drawBarChart("tabla-meta-compare",[
@@ -479,7 +487,7 @@ function buildNavTabs(){
   COLEGIOS_CFG.forEach(c=>{
     const t=document.createElement("div");
     t.className="nav-tab";
-    t.innerHTML=`<img src="${c.logo}" alt="" style="width:16px;height:16px;border-radius:3px;object-fit:cover" onerror="this.style.display='none'"><span class="nav-dot" style="background:${c.color}"></span>${c.codigo}`;
+    t.innerHTML=`<img src="${c.logo}" alt="" style="width:16px;height:16px;border-radius:3px;object-fit:cover" onerror="this.style.display='none'">${c.codigo}`;
     t.onclick=function(){showTab("col-"+c.codigo,this);};
     nav.appendChild(t);
   });
@@ -493,10 +501,7 @@ function buildColegioSections(){
     sec.className="section";
     sec.innerHTML=`
       <div style="display:flex;align-items:center;gap:14px;margin-bottom:2.5rem">
-        <div class="colegio-avatar" style="background:${c.color};color:#fff;position:relative;overflow:hidden">
-          <span>${c.initials}</span>
-          <img src="${c.logo}" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover" onerror="this.style.display='none'">
-        </div>
+        <img src="${c.logo}" alt="${c.codigo}" style="width:40px;height:40px;border-radius:9px;object-fit:cover" onerror="this.style.display='none'">
         <div class="section-title">${c.nombre}</div>
       </div>
       <div class="kpi-grid" id="kpis-${c.codigo}"></div>
@@ -578,7 +583,7 @@ function renderColegio(cfg){
   charts["ga4-"+cfg.codigo]=new Chart(document.getElementById("chart-ga4-"+cfg.codigo),{
     type:"bar",
     data:{labels:["Visitas totales","Visitas nuevas","Admisión 2027"],datasets:[{data:[d["Visitas Totales"]||0,d["Visitas Nuevas"]||0,d["Visitas /admision2027"]||0],backgroundColor:[c,c+"99","#f3bc52"],borderRadius:4}]},
-    options:{plugins:{legend:{display:false}},scales:SC,responsive:true}
+    options:{layout:{padding:{top:24}},plugins:{legend:{display:false}},scales:SC,responsive:true}
   });
 
   const tasa=d["Visitas Totales"]?((d["Visitas /admision2027"]/d["Visitas Totales"])*100).toFixed(1)+"%":"0%";
