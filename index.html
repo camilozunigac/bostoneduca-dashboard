@@ -18,6 +18,7 @@ header { background:#fff; border-bottom:1px solid rgba(0,0,0,0.08); padding:1.2r
 .logo-text span { font-size:13px; color:#7a90b5; }
 #semana-select { background:#f5f7fa; border:1px solid rgba(0,0,0,0.08); border-radius:6px; padding:6px 14px; font-size:13px; color:#0d2a5e; cursor:pointer; }
 #loading { font-size:13px; color:#f3bc52; }
+#ultima-actualizacion { font-size:12px; color:#7a90b5; }
 
 nav { background:#fff; border-bottom:1px solid rgba(0,0,0,0.08); padding:0 2.5rem; display:flex; overflow-x:auto; }
 .nav-tab { padding:14px 22px; font-size:13px; font-weight:500; color:#7a90b5; border-bottom:2px solid transparent; cursor:pointer; white-space:nowrap; display:flex; align-items:center; gap:6px; }
@@ -74,6 +75,7 @@ table.simple tr:last-child td { border-bottom:none; }
   </div>
   <div style="display:flex;align-items:center;gap:12px">
     <select id="semana-select" onchange="cambiarSemana(this.value)"></select>
+    <span id="ultima-actualizacion"></span>
     <span id="loading">Conectando...</span>
   </div>
 </header>
@@ -107,7 +109,7 @@ table.simple tr:last-child td { border-bottom:none; }
       <div class="platform-header">📱 Meta</div>
       <div class="grid-2" style="margin-bottom:2rem">
         <div><div class="block-label">Alcance por colegio</div><canvas id="chart-meta-alcance" style="max-height:220px"></canvas></div>
-        <div><div class="block-label">Presupuesto invertido (CLP)</div><canvas id="chart-meta-presupuesto" style="max-height:220px"></canvas></div>
+        <div><div class="block-label">Resultados obtenidos</div><canvas id="chart-meta-resultados" style="max-height:220px"></canvas></div>
       </div>
       <div class="block-label">Métricas por colegio</div>
       <div id="tabla-meta-compare"></div>
@@ -251,12 +253,13 @@ function drawBarChart(containerId,rows,colegiosData){
   });
 }
 
-// Google Sheets (gviz) devuelve fechas como texto "Date(2026,6,1)" (mes 0-indexado) o como Date real
+// Google Sheets (gviz) devuelve fechas como texto "Date(2026,6,1)" (mes 0-indexado,
+// a veces con hora/minuto/segundo incluidos) o como Date real.
 function parseFechaSheet(v){
   if(v instanceof Date) return v;
   if(typeof v==="string"){
-    const m=v.match(/^Date\((\d+),(\d+),(\d+)\)/);
-    if(m) return new Date(+m[1], +m[2], +m[3]);
+    const m=v.match(/^Date\((\d+),(\d+),(\d+)(?:,(\d+),(\d+),(\d+))?\)/);
+    if(m) return new Date(+m[1], +m[2], +m[3], +(m[4]||0), +(m[5]||0), +(m[6]||0));
     const d=new Date(v);
     if(!isNaN(d)) return d;
   }
@@ -401,6 +404,18 @@ async function loadData(){
     document.getElementById("loading").style.display="none";
     const semanas=[...new Set(DATA.map(r=>r["Semana"]))].filter(Boolean).sort((a,b)=>semanaSortKey(b)-semanaSortKey(a));
     SEMANA_ACTUAL=semanas[0];
+
+    const actualizaciones=DATA.map(r=>parseFechaSheet(r["Meta Actualizado"])).filter(Boolean);
+    const elUltima=document.getElementById("ultima-actualizacion");
+    if(elUltima){
+      if(actualizaciones.length){
+        const ultima=new Date(Math.max(...actualizaciones.map(d=>d.getTime())));
+        elUltima.textContent="Actualizado "+ultima.toLocaleString("es-CL",{day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"});
+      }else{
+        elUltima.textContent="";
+      }
+    }
+
     const select=document.getElementById("semana-select");
     select.innerHTML=semanas.map(s=>`<option value="${s}">${s}</option>`).join("");
     buildNavTabs();
@@ -450,15 +465,15 @@ function renderConsolidado(){
     type:"bar",data:{labels,datasets:[{label:"Alcance",data:d.map(r=>r["Meta Alcance"]||0),backgroundColor:colors,borderRadius:4}]},
     options:{layout:{padding:{top:24}},plugins:{legend:{display:false}},scales:SC,responsive:true}
   });
-  dc("meta-presupuesto");
-  charts["meta-presupuesto"]=new Chart(document.getElementById("chart-meta-presupuesto"),{
-    type:"bar",data:{labels,datasets:[{label:"Presupuesto",data:d.map(r=>r["Meta Presupuesto"]||0),backgroundColor:colors,borderRadius:4}]},
+  dc("meta-resultados");
+  charts["meta-resultados"]=new Chart(document.getElementById("chart-meta-resultados"),{
+    type:"bar",data:{labels,datasets:[{label:"Resultados",data:d.map(r=>r["Meta Resultados"]||0),backgroundColor:colors,borderRadius:4}]},
     options:{layout:{padding:{top:24}},plugins:{legend:{display:false}},scales:SC,responsive:true}
   });
 
   drawBarChart("tabla-meta-compare",[
     {label:"Alcance",key:"Meta Alcance"},
-    {label:"Presupuesto",key:"Meta Presupuesto"},
+    {label:"Resultados",key:"Meta Resultados"},
     {label:"CPR",key:"Meta CPR"},
     {label:"Usuarios únicos",key:"Meta Usuarios"},
   ],d);
@@ -613,7 +628,7 @@ function renderColegio(cfg){
   document.getElementById("kpis-meta-"+cfg.codigo).innerHTML=`
     <div class="kpi-card"><div class="kpi-label">Campaña actual</div><div class="kpi-value" style="font-size:16px;color:${c}">${d["Meta Nombre Campaña"]||"-"}</div><div class="kpi-sub">Desde ${fmtFechaLarga(parseFechaSheet(d["Meta Fecha Anuncio"]))}</div></div>
     <div class="kpi-card"><div class="kpi-label">Alcance</div><div class="kpi-value" style="color:${c}">${fmt(d["Meta Alcance"])}</div></div>
-    <div class="kpi-card"><div class="kpi-label">Presupuesto</div><div class="kpi-value" style="color:${c}">${fmtCLP(d["Meta Presupuesto"])}</div></div>
+    <div class="kpi-card"><div class="kpi-label">Resultados</div><div class="kpi-value" style="color:${c}">${fmt(d["Meta Resultados"])}</div></div>
     <div class="kpi-card"><div class="kpi-label">CPR</div><div class="kpi-value" style="color:${c}">$${Math.round(d["Meta CPR"]||0)}</div></div>
     <div class="kpi-card"><div class="kpi-label">Usuarios únicos</div><div class="kpi-value" style="color:${c}">${fmt(d["Meta Usuarios"])}</div></div>
   `;
