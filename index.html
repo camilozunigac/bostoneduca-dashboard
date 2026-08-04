@@ -101,8 +101,6 @@ table.simple tr:last-child td { border-bottom:none; }
       </div>
       <div class="block-label">Tasa de conversión a admisión 2027</div>
       <div class="conv-row" id="tasa-conversion-ga4"></div>
-      <div class="block-label">Métricas por colegio</div>
-      <div id="tabla-ga4-compare"></div>
     </div>
 
     <div class="platform-block">
@@ -453,12 +451,6 @@ function renderConsolidado(){
     const t=r["Visitas Totales"]?((r["Visitas /admision2027"]/r["Visitas Totales"])*100).toFixed(1)+"%":"0%";
     return `<div><div class="conv-codigo">${cfg.codigo}</div><div class="conv-value" style="color:${cfg.color}">${t}</div><div class="conv-sub">Visitas → admisión</div></div>`;
   }).join("");
-
-  drawBarChart("tabla-ga4-compare",[
-    {label:"Visitas totales",key:"Visitas Totales"},
-    {label:"Visitas nuevas",key:"Visitas Nuevas"},
-    {label:"Visitas /admision2027",key:"Visitas /admision2027"},
-  ],d);
 
   dc("meta-alcance");
   charts["meta-alcance"]=new Chart(document.getElementById("chart-meta-alcance"),{
