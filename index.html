@@ -519,7 +519,10 @@ function renderAnalyticsSitios(){
     const sems=[...new Set(filas.map(r=>r["Semana"]))].filter(Boolean).sort((a,b)=>semanaSortKey(a)-semanaSortKey(b));
     const fila=filas.find(r=>r["Semana"]===sems[sems.length-1] && r["Fecha Inicio"]);
     if(!fila) return "";
-    return fila["Fecha Inicio"]+" – "+fila["Fecha Fin"];
+    const ini=parseFechaSheet(fila["Fecha Inicio"]);
+    const fin=parseFechaSheet(fila["Fecha Fin"]);
+    if(!ini||!fin) return "";
+    return fmtFechaLarga(ini)+" – "+fmtFechaLarga(fin);
   }
 
   if(tabsEl){
