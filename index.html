@@ -135,6 +135,7 @@ table.simple tr:last-child td { border-bottom:none; }
 
   <div id="sec-analytics-sitios" class="section">
     <div class="section-title">Top 10 páginas por sitio</div>
+    <div id="analytics-sitios-periodos" style="display:flex;gap:8px;margin-bottom:12px"></div>
     <div class="ai-summary" id="analytics-sitios-nota" style="margin-bottom:1.5rem"></div>
     <div id="analytics-sitios-lista"></div>
   </div>
@@ -478,51 +479,77 @@ function generateSummary(d){
   return `La semana registró <strong>${fmt(totV)} visitas totales</strong>, lideradas por <strong style="color:${topV.color}">${topV.codigo}</strong>. El alcance en Meta fue de <strong>${fmt(totA)} personas</strong>, destacando <strong style="color:${topA.color}">${topA.codigo}</strong>. En admisiones, hay <strong>${fmt(totP)} postulaciones</strong> con una conversión del <strong>${conv}%</strong> a matrícula — <strong style="color:${topM.color}">${topM.codigo}</strong> lidera con ${fmt(topMrow?.["HS Matriculados"]||0)} matriculados. Se recomienda reforzar la inversión en los colegios con menor tráfico a /admision2027.`;
 }
 
-// Pestaña "🌐 Sitios": lista simple (sin gráficos) con el top 10 de páginas
-// más visitadas de la última semana disponible, para cada sitio en
-// ANALYTICS_SITIOS. Si un sitio quedó marcado con Ranking="ERROR" (falló su
-// property ID o el acceso en el script de Apps Script), se muestra el detalle
-// del error en vez de la tabla.
+// Pestaña "🌐 Sitios": lista simple (sin gráficos), un sitio debajo del otro,
+// con el top 10 de páginas más visitadas para cada uno. Soporta 4 períodos
+// (Semanal/Mensual/Anual/Histórico) que vienen precalculados desde el script
+// de Apps Script en la columna "Periodo" de ANALYTICS_SITIOS. Si un sitio
+// quedó marcado con Ranking="ERROR" (falló su property ID o el acceso), se
+// muestra el detalle del error en vez de la tabla.
+let ANALYTICS_PERIODO="Semanal";
+const ORDEN_PERIODOS=["Semanal","Mensual","Anual","Histórico"];
+
+function cambiarPeriodoSitios(p){
+  ANALYTICS_PERIODO=p;
+  renderAnalyticsSitios();
+}
+
 function renderAnalyticsSitios(){
   const cont=document.getElementById("analytics-sitios-lista");
   const nota=document.getElementById("analytics-sitios-nota");
+  const tabsEl=document.getElementById("analytics-sitios-periodos");
   if(!cont) return;
 
   if(!ANALYTICS_SITIOS.length){
     cont.innerHTML="";
+    if(tabsEl) tabsEl.innerHTML="";
     if(nota) nota.textContent="Aún no hay datos en la pestaña ANALYTICS_SITIOS de la planilla.";
     return;
   }
 
-  const semanas=[...new Set(ANALYTICS_SITIOS.map(r=>r["Semana"]))].filter(Boolean).sort((a,b)=>semanaSortKey(a)-semanaSortKey(b));
+  const disponibles=[...new Set(ANALYTICS_SITIOS.map(r=>r["Periodo"]).filter(Boolean))];
+  const periodos=ORDEN_PERIODOS.filter(p=>disponibles.includes(p));
+  if(!periodos.length) periodos.push("Semanal"); // planilla vieja, sin columna Periodo
+  if(!periodos.includes(ANALYTICS_PERIODO)) ANALYTICS_PERIODO=periodos[0];
+
+  if(tabsEl){
+    tabsEl.innerHTML=periodos.map(p=>{
+      const activo=p===ANALYTICS_PERIODO;
+      return `<div onclick="cambiarPeriodoSitios('${p}')" style="padding:8px 16px;border-radius:6px;font-size:13px;font-weight:500;cursor:pointer;background:${activo?"#1b2a4a":"#f5f7fa"};color:${activo?"#fff":"#7a90b5"}">${p}</div>`;
+    }).join("");
+  }
+
+  const datosPeriodo=disponibles.length
+    ? ANALYTICS_SITIOS.filter(r=>r["Periodo"]===ANALYTICS_PERIODO)
+    : ANALYTICS_SITIOS; // compatibilidad con datos de antes de agregar la columna Periodo
+
+  const semanas=[...new Set(datosPeriodo.map(r=>r["Semana"]))].filter(Boolean).sort((a,b)=>semanaSortKey(a)-semanaSortKey(b));
   const semana=semanas[semanas.length-1];
-  if(nota) nota.textContent="Semana "+semana;
+  if(nota) nota.textContent=semana?(ANALYTICS_PERIODO+" · datos al corte de la semana "+semana):"";
 
   const porSitio={};
   const orden=[];
-  ANALYTICS_SITIOS.filter(r=>r["Semana"]===semana).forEach(r=>{
+  datosPeriodo.filter(r=>r["Semana"]===semana).forEach(r=>{
     const s=r["Sitio"];
     if(!porSitio[s]){ porSitio[s]=[]; orden.push(s); }
     porSitio[s].push(r);
   });
 
-  cont.innerHTML=`<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:2rem">` +
-    orden.map(s=>{
-      const filas=porSitio[s].slice().sort((a,b)=>(+a["Ranking"]||99)-(+b["Ranking"]||99));
-      const codigo=filas[0]?.["Código"]||"";
-      const esError=String(filas[0]?.["Ranking"])==="ERROR";
-      const filasHtml=esError
-        ? `<tr><td colspan="3" style="color:#c13642;font-size:12px">${filas[0]["Página"]}</td></tr>`
-        : filas.map(r=>`<tr><td style="color:#7a90b5;width:28px">${r["Ranking"]}</td><td style="font-size:12px">${r["Página"]}</td><td style="text-align:right">${fmt(r["Visitas"])}</td></tr>`).join("");
-      return `
-        <div>
-          <div style="font-weight:700;color:#1b2a4a;margin-bottom:10px">${s} <span style="color:#7a90b5;font-weight:400;font-size:12px">(${codigo})</span></div>
-          <table class="simple">
-            <tr><th>#</th><th>Página</th><th style="text-align:right">Visitas</th></tr>
-            ${filasHtml}
-          </table>
-        </div>`;
-    }).join("") + `</div>`;
+  cont.innerHTML=orden.map(s=>{
+    const filas=porSitio[s].slice().sort((a,b)=>(+a["Ranking"]||99)-(+b["Ranking"]||99));
+    const codigo=filas[0]?.["Código"]||"";
+    const esError=String(filas[0]?.["Ranking"])==="ERROR";
+    const filasHtml=esError
+      ? `<tr><td colspan="4" style="color:#c13642;font-size:12px">${filas[0]["Página"]}</td></tr>`
+      : filas.map(r=>`<tr><td style="color:#7a90b5;width:28px">${r["Ranking"]}</td><td style="font-size:12px">${r["Página"]}</td><td style="text-align:right">${fmt(r["Visitas"])}</td><td style="text-align:right">${fmt(r["Usuarios"])}</td></tr>`).join("");
+    return `
+      <div style="padding:1.5rem 0;border-bottom:1px solid rgba(0,0,0,0.08)">
+        <div style="font-weight:700;color:#1b2a4a;margin-bottom:10px">${s} <span style="color:#7a90b5;font-weight:400;font-size:12px">(${codigo})</span></div>
+        <table class="simple">
+          <tr><th>#</th><th>Página</th><th style="text-align:right">Visitas</th><th style="text-align:right">Usuarios</th></tr>
+          ${filasHtml}
+        </table>
+      </div>`;
+  }).join("");
 }
 
 async function fetchSheet(nombreHoja){
