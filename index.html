@@ -511,10 +511,25 @@ function renderAnalyticsSitios(){
   if(!periodos.length) periodos.push("Semanal"); // planilla vieja, sin columna Periodo
   if(!periodos.includes(ANALYTICS_PERIODO)) ANALYTICS_PERIODO=periodos[0];
 
+  // Rango de fechas real (Fecha Inicio – Fecha Fin) de la corrida más reciente
+  // de un período dado, para mostrarlo como leyenda bajo cada botón.
+  function rangoPeriodo(p){
+    const filas=ANALYTICS_SITIOS.filter(r=>r["Periodo"]===p);
+    if(!filas.length) return "";
+    const sems=[...new Set(filas.map(r=>r["Semana"]))].filter(Boolean).sort((a,b)=>semanaSortKey(a)-semanaSortKey(b));
+    const fila=filas.find(r=>r["Semana"]===sems[sems.length-1] && r["Fecha Inicio"]);
+    if(!fila) return "";
+    return fila["Fecha Inicio"]+" – "+fila["Fecha Fin"];
+  }
+
   if(tabsEl){
     tabsEl.innerHTML=periodos.map(p=>{
       const activo=p===ANALYTICS_PERIODO;
-      return `<div onclick="cambiarPeriodoSitios('${p}')" style="padding:8px 16px;border-radius:6px;font-size:13px;font-weight:500;cursor:pointer;background:${activo?"#1b2a4a":"#f5f7fa"};color:${activo?"#fff":"#7a90b5"}">${p}</div>`;
+      const rango=rangoPeriodo(p);
+      return `<div onclick="cambiarPeriodoSitios('${p}')" style="padding:8px 14px;border-radius:6px;cursor:pointer;text-align:center;background:${activo?"#1b2a4a":"#f5f7fa"}">
+        <div style="font-size:13px;font-weight:500;color:${activo?"#fff":"#7a90b5"}">${p}</div>
+        ${rango?`<div style="font-size:10px;margin-top:2px;color:${activo?"#c7d2e8":"#a9b8d4"}">${rango}</div>`:""}
+      </div>`;
     }).join("");
   }
 
@@ -524,7 +539,8 @@ function renderAnalyticsSitios(){
 
   const semanas=[...new Set(datosPeriodo.map(r=>r["Semana"]))].filter(Boolean).sort((a,b)=>semanaSortKey(a)-semanaSortKey(b));
   const semana=semanas[semanas.length-1];
-  if(nota) nota.textContent=semana?(ANALYTICS_PERIODO+" · datos al corte de la semana "+semana):"";
+  const rangoActivo=rangoPeriodo(ANALYTICS_PERIODO);
+  if(nota) nota.textContent=semana?(ANALYTICS_PERIODO+(rangoActivo?" · "+rangoActivo:"")):"";
 
   const porSitio={};
   const orden=[];
