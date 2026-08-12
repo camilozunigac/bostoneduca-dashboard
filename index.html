@@ -559,7 +559,13 @@ function renderAnalyticsSitios(){
     const esError=String(filas[0]?.["Ranking"])==="ERROR";
     const filasHtml=esError
       ? `<tr><td colspan="4" style="color:#c13642;font-size:12px">${filas[0]["Página"]}</td></tr>`
-      : filas.map(r=>`<tr><td style="color:#7a90b5;text-align:center">${r["Ranking"]}</td><td style="font-size:12px;text-align:center">${r["Página"]}</td><td style="text-align:right">${fmt(r["Visitas"])}</td><td style="text-align:right">${fmt(r["Usuarios"])}</td></tr>`).join("");
+      : filas.map(r=>{
+          const pagina=r["Página"]||"";
+          const celdaPagina=r["URL"]
+            ? `<a href="${r["URL"]}" target="_blank" rel="noopener" style="color:#1a6bbf;text-decoration:none">${pagina}</a>`
+            : pagina;
+          return `<tr><td style="color:#7a90b5;text-align:center">${r["Ranking"]}</td><td style="font-size:12px;text-align:center">${celdaPagina}</td><td style="text-align:right">${fmt(r["Visitas"])}</td><td style="text-align:right">${fmt(r["Usuarios"])}</td></tr>`;
+        }).join("");
     return `
       <div style="padding:1.5rem 0;border-bottom:3px solid rgba(0,0,0,0.12)">
         <div style="font-weight:700;color:#1b2a4a;margin-bottom:10px">${s} <span style="color:#7a90b5;font-weight:400;font-size:12px">(${codigo})</span></div>
