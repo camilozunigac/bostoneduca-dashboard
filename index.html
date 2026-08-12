@@ -18,7 +18,6 @@ header { background:#fff; border-bottom:1px solid rgba(0,0,0,0.08); padding:1.2r
 .logo-text span { font-size:13px; color:#7a90b5; }
 #semana-select { background:#f5f7fa; border:1px solid rgba(0,0,0,0.08); border-radius:6px; padding:6px 14px; font-size:13px; color:#0d2a5e; cursor:pointer; }
 #loading { font-size:13px; color:#f3bc52; }
-#ultima-actualizacion { font-size:12px; color:#7a90b5; }
 
 nav { background:#fff; border-bottom:1px solid rgba(0,0,0,0.08); padding:0 2.5rem; display:flex; overflow-x:auto; }
 .nav-tab { padding:14px 22px; font-size:13px; font-weight:500; color:#7a90b5; border-bottom:2px solid transparent; cursor:pointer; white-space:nowrap; display:flex; align-items:center; gap:6px; }
@@ -75,13 +74,13 @@ table.simple tr:last-child td { border-bottom:none; }
   </div>
   <div style="display:flex;align-items:center;gap:12px">
     <select id="semana-select" onchange="cambiarSemana(this.value)"></select>
-    <span id="ultima-actualizacion"></span>
     <span id="loading">Conectando...</span>
   </div>
 </header>
 
 <nav id="main-nav">
   <div class="nav-tab active" onclick="showTab('consolidado',this)">Consolidado</div>
+  <div class="nav-tab" onclick="showTab('analytics-sitios',this)">🌐 Sitios</div>
 </nav>
 
 <main>
@@ -101,13 +100,15 @@ table.simple tr:last-child td { border-bottom:none; }
       </div>
       <div class="block-label">Tasa de conversión a admisión 2027</div>
       <div class="conv-row" id="tasa-conversion-ga4"></div>
+      <div class="block-label">Métricas por colegio</div>
+      <div id="tabla-ga4-compare"></div>
     </div>
 
     <div class="platform-block">
       <div class="platform-header">📱 Meta</div>
       <div class="grid-2" style="margin-bottom:2rem">
         <div><div class="block-label">Alcance por colegio</div><canvas id="chart-meta-alcance" style="max-height:220px"></canvas></div>
-        <div><div class="block-label">Resultados obtenidos</div><canvas id="chart-meta-resultados" style="max-height:220px"></canvas></div>
+        <div><div class="block-label">Presupuesto invertido (CLP)</div><canvas id="chart-meta-presupuesto" style="max-height:220px"></canvas></div>
       </div>
       <div class="block-label">Métricas por colegio</div>
       <div id="tabla-meta-compare"></div>
@@ -127,7 +128,15 @@ table.simple tr:last-child td { border-bottom:none; }
       </div>
       <div class="block-label">Métricas por colegio</div>
       <div id="tabla-hub-compare"></div>
+      <div class="block-label" style="margin-top:2rem">Postulantes por mes</div>
+      <canvas id="chart-hub-postulantes-mes" style="max-height:260px"></canvas>
     </div>
+  </div>
+
+  <div id="sec-analytics-sitios" class="section">
+    <div class="section-title">Top 10 páginas por sitio</div>
+    <div class="ai-summary" id="analytics-sitios-nota" style="margin-bottom:1.5rem"></div>
+    <div id="analytics-sitios-lista"></div>
   </div>
 
   <div id="sections-colegios"></div>
@@ -143,7 +152,7 @@ const COLEGIOS_CFG = [
   { nombre:"Colegio San Marcos de Macul",              codigo:"CSM",  color:"#e6b800", initials:"SM", logo:"https://colegiosanmarcos.cl/wp-content/uploads/2026/07/Favicon.png" },
 ];
 
-let DATA=[], CAMPANAS=[], charts={}, SEMANA_ACTUAL=null;
+let DATA=[], CAMPANAS=[], ANALYTICS_SITIOS=[], charts={}, SEMANA_ACTUAL=null;
 function getCfg(n){ return COLEGIOS_CFG.find(c=>c.nombre===n)||{color:"#555",initials:"??",codigo:"??"}; }
 function fmt(n){ return Math.round(n||0).toLocaleString("es-CL").replace(/,/g,"."); }
 function fmtCLP(n){ return "$"+Math.round(n||0).toLocaleString("es-CL").replace(/,/g,"."); }
@@ -195,6 +204,20 @@ function semanaSortKey(s){
   const [d,m,y]=primera.split("/").map(Number);
   if(!d||!m||!y) return 0;
   return y*10000+m*100+d;
+}
+
+// Clave y etiqueta de MES a partir del texto de "Semana" (se usa para agrupar
+// "postulantes" por mes en vez de solo ver el acumulado semanal).
+function mesKey(s){
+  if(!s) return null;
+  const primera=String(s).split("–")[0].trim();
+  const [d,m,y]=primera.split("/").map(Number);
+  if(!d||!m||!y) return null;
+  return y*100+m;
+}
+function mesLabel(key){
+  const y=Math.floor(key/100), m=key%100;
+  return MESES_CORTOS[m-1]+" "+y;
 }
 
 function getLatest(){
@@ -251,13 +274,12 @@ function drawBarChart(containerId,rows,colegiosData){
   });
 }
 
-// Google Sheets (gviz) devuelve fechas como texto "Date(2026,6,1)" (mes 0-indexado,
-// a veces con hora/minuto/segundo incluidos) o como Date real.
+// Google Sheets (gviz) devuelve fechas como texto "Date(2026,6,1)" (mes 0-indexado) o como Date real
 function parseFechaSheet(v){
   if(v instanceof Date) return v;
   if(typeof v==="string"){
-    const m=v.match(/^Date\((\d+),(\d+),(\d+)(?:,(\d+),(\d+),(\d+))?\)/);
-    if(m) return new Date(+m[1], +m[2], +m[3], +(m[4]||0), +(m[5]||0), +(m[6]||0));
+    const m=v.match(/^Date\((\d+),(\d+),(\d+)\)/);
+    if(m) return new Date(+m[1], +m[2], +m[3]);
     const d=new Date(v);
     if(!isNaN(d)) return d;
   }
@@ -322,6 +344,72 @@ function drawMotivoChart(id, items, color){
   });
 }
 
+// Suma "HS Postulantes" agrupado por mes, para un colegio puntual o para todos.
+// Usa TODO el historial cargado (no solo la semana seleccionada), porque la idea
+// es ver la evolución mes a mes, no un corte semanal.
+function getPostulantesPorMes(colegioNombre){
+  const map={};
+  DATA.forEach(r=>{
+    if(colegioNombre && r["Colegio"]!==colegioNombre) return;
+    const k=mesKey(r["Semana"]);
+    if(k==null) return;
+    map[k]=(map[k]||0)+(+r["HS Postulantes"]||0);
+  });
+  return Object.keys(map).map(Number).sort((a,b)=>a-b).map(k=>({key:k,label:mesLabel(k),value:map[k]}));
+}
+
+function drawPostulantesMesConsolidado(){
+  const id="chart-hub-postulantes-mes";
+  const el=document.getElementById(id);
+  if(!el) return;
+
+  const mesesSet=new Set();
+  const porColegio={};
+  DATA.forEach(r=>{
+    const k=mesKey(r["Semana"]);
+    if(k==null) return;
+    mesesSet.add(k);
+    const col=r["Colegio"];
+    porColegio[col]=porColegio[col]||{};
+    porColegio[col][k]=(porColegio[col][k]||0)+(+r["HS Postulantes"]||0);
+  });
+  const meses=[...mesesSet].sort((a,b)=>a-b);
+  const labels=meses.map(mesLabel);
+
+  dc(id);
+  charts[id]=new Chart(el,{
+    type:"bar",
+    data:{
+      labels,
+      datasets:COLEGIOS_CFG.map(c=>({
+        label:c.codigo,
+        data:meses.map(k=>(porColegio[c.nombre]&&porColegio[c.nombre][k])||0),
+        backgroundColor:c.color,
+        borderRadius:4,
+        barPercentage:0.7,
+      }))
+    },
+    options:{layout:{padding:{top:24}},plugins:{legend:{display:true,position:"top",labels:{color:"#0d2a5e",font:{size:11},boxWidth:10,padding:16}}},scales:SC,responsive:true}
+  });
+}
+
+function drawPostulantesMesColegio(cfg){
+  const id="chart-hub-mes-"+cfg.codigo;
+  const el=document.getElementById(id);
+  if(!el) return;
+
+  const datos=getPostulantesPorMes(cfg.nombre);
+  dc(id);
+  charts[id]=new Chart(el,{
+    type:"bar",
+    data:{
+      labels:datos.map(d=>d.label),
+      datasets:[{ label:"Postulantes", data:datos.map(d=>d.value), backgroundColor:cfg.color, borderRadius:4, barPercentage:0.6 }]
+    },
+    options:{layout:{padding:{top:24}},plugins:{legend:{display:false}},scales:SC,responsive:true}
+  });
+}
+
 function drawCampanasChart(cfg){
   const id="chart-campanas-"+cfg.codigo;
   const el=document.getElementById(id);
@@ -336,7 +424,13 @@ function drawCampanasChart(cfg){
 
   if(!rows.length) return;
 
-  const labels=rows.map(r=>truncar(r["Nombre Campaña"]||"Campaña sin nombre",18));
+  // Etiqueta de dos líneas: nombre de la campaña + fecha de inicio y estado
+  // (activa/pausada). Con esto queda visible sin tener que pasar el mouse.
+  const labels=rows.map(r=>{
+    const estadoRaw=String(r["Estado"]||"").toUpperCase();
+    const estadoTxt = estadoRaw==="ACTIVE" ? "vigente desde" : estadoRaw==="PAUSED" ? "pausada desde" : "desde";
+    return [truncar(r["Nombre Campaña"]||"Campaña sin nombre",18), estadoTxt+" "+fmtFechaLarga(r._fecha)];
+  });
 
   charts[id]=new Chart(el,{
     data:{
@@ -384,6 +478,53 @@ function generateSummary(d){
   return `La semana registró <strong>${fmt(totV)} visitas totales</strong>, lideradas por <strong style="color:${topV.color}">${topV.codigo}</strong>. El alcance en Meta fue de <strong>${fmt(totA)} personas</strong>, destacando <strong style="color:${topA.color}">${topA.codigo}</strong>. En admisiones, hay <strong>${fmt(totP)} postulaciones</strong> con una conversión del <strong>${conv}%</strong> a matrícula — <strong style="color:${topM.color}">${topM.codigo}</strong> lidera con ${fmt(topMrow?.["HS Matriculados"]||0)} matriculados. Se recomienda reforzar la inversión en los colegios con menor tráfico a /admision2027.`;
 }
 
+// Pestaña "🌐 Sitios": lista simple (sin gráficos) con el top 10 de páginas
+// más visitadas de la última semana disponible, para cada sitio en
+// ANALYTICS_SITIOS. Si un sitio quedó marcado con Ranking="ERROR" (falló su
+// property ID o el acceso en el script de Apps Script), se muestra el detalle
+// del error en vez de la tabla.
+function renderAnalyticsSitios(){
+  const cont=document.getElementById("analytics-sitios-lista");
+  const nota=document.getElementById("analytics-sitios-nota");
+  if(!cont) return;
+
+  if(!ANALYTICS_SITIOS.length){
+    cont.innerHTML="";
+    if(nota) nota.textContent="Aún no hay datos en la pestaña ANALYTICS_SITIOS de la planilla.";
+    return;
+  }
+
+  const semanas=[...new Set(ANALYTICS_SITIOS.map(r=>r["Semana"]))].filter(Boolean).sort((a,b)=>semanaSortKey(a)-semanaSortKey(b));
+  const semana=semanas[semanas.length-1];
+  if(nota) nota.textContent="Semana "+semana;
+
+  const porSitio={};
+  const orden=[];
+  ANALYTICS_SITIOS.filter(r=>r["Semana"]===semana).forEach(r=>{
+    const s=r["Sitio"];
+    if(!porSitio[s]){ porSitio[s]=[]; orden.push(s); }
+    porSitio[s].push(r);
+  });
+
+  cont.innerHTML=`<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:2rem">` +
+    orden.map(s=>{
+      const filas=porSitio[s].slice().sort((a,b)=>(+a["Ranking"]||99)-(+b["Ranking"]||99));
+      const codigo=filas[0]?.["Código"]||"";
+      const esError=String(filas[0]?.["Ranking"])==="ERROR";
+      const filasHtml=esError
+        ? `<tr><td colspan="3" style="color:#c13642;font-size:12px">${filas[0]["Página"]}</td></tr>`
+        : filas.map(r=>`<tr><td style="color:#7a90b5;width:28px">${r["Ranking"]}</td><td style="font-size:12px">${r["Página"]}</td><td style="text-align:right">${fmt(r["Visitas"])}</td></tr>`).join("");
+      return `
+        <div>
+          <div style="font-weight:700;color:#1b2a4a;margin-bottom:10px">${s} <span style="color:#7a90b5;font-weight:400;font-size:12px">(${codigo})</span></div>
+          <table class="simple">
+            <tr><th>#</th><th>Página</th><th style="text-align:right">Visitas</th></tr>
+            ${filasHtml}
+          </table>
+        </div>`;
+    }).join("") + `</div>`;
+}
+
 async function fetchSheet(nombreHoja){
   const url=`https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(nombreHoja)}&_ts=${Date.now()}`;
   const resp=await fetch(url,{cache:"no-store"});
@@ -399,27 +540,19 @@ async function loadData(){
     try{
       CAMPANAS=(await fetchSheet("META_CAMPANAS")).filter(r=>r["Colegio"]&&r["Colegio"]!=="Colegio");
     }catch(e){ CAMPANAS=[]; console.warn("No se pudo cargar META_CAMPANAS", e); }
+    try{
+      ANALYTICS_SITIOS=(await fetchSheet("ANALYTICS_SITIOS")).filter(r=>r["Sitio"]&&r["Sitio"]!=="Sitio");
+    }catch(e){ ANALYTICS_SITIOS=[]; console.warn("No se pudo cargar ANALYTICS_SITIOS", e); }
     document.getElementById("loading").style.display="none";
     const semanas=[...new Set(DATA.map(r=>r["Semana"]))].filter(Boolean).sort((a,b)=>semanaSortKey(b)-semanaSortKey(a));
     SEMANA_ACTUAL=semanas[0];
-
-    const actualizaciones=DATA.map(r=>parseFechaSheet(r["Meta Actualizado"])).filter(Boolean);
-    const elUltima=document.getElementById("ultima-actualizacion");
-    if(elUltima){
-      if(actualizaciones.length){
-        const ultima=new Date(Math.max(...actualizaciones.map(d=>d.getTime())));
-        elUltima.textContent="Actualizado "+ultima.toLocaleString("es-CL",{day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"});
-      }else{
-        elUltima.textContent="";
-      }
-    }
-
     const select=document.getElementById("semana-select");
     select.innerHTML=semanas.map(s=>`<option value="${s}">${s}</option>`).join("");
     buildNavTabs();
     buildColegioSections();
     renderConsolidado();
     COLEGIOS_CFG.forEach(c=>renderColegio(c));
+    renderAnalyticsSitios();
   }catch(e){document.getElementById("loading").textContent="Error al cargar";console.error(e);}
 }
 
@@ -452,22 +585,27 @@ function renderConsolidado(){
     return `<div><div class="conv-codigo">${cfg.codigo}</div><div class="conv-value" style="color:${cfg.color}">${t}</div><div class="conv-sub">Visitas → admisión</div></div>`;
   }).join("");
 
+  drawBarChart("tabla-ga4-compare",[
+    {label:"Visitas totales",key:"Visitas Totales"},
+    {label:"Visitas nuevas",key:"Visitas Nuevas"},
+    {label:"Visitas /admision2027",key:"Visitas /admision2027"},
+  ],d);
+
   dc("meta-alcance");
   charts["meta-alcance"]=new Chart(document.getElementById("chart-meta-alcance"),{
     type:"bar",data:{labels,datasets:[{label:"Alcance",data:d.map(r=>r["Meta Alcance"]||0),backgroundColor:colors,borderRadius:4}]},
     options:{layout:{padding:{top:24}},plugins:{legend:{display:false}},scales:SC,responsive:true}
   });
-  dc("meta-resultados");
-  charts["meta-resultados"]=new Chart(document.getElementById("chart-meta-resultados"),{
-    type:"bar",data:{labels,datasets:[{label:"Resultados",data:d.map(r=>r["Meta Resultados"]||0),backgroundColor:colors,borderRadius:4}]},
+  dc("meta-presupuesto");
+  charts["meta-presupuesto"]=new Chart(document.getElementById("chart-meta-presupuesto"),{
+    type:"bar",data:{labels,datasets:[{label:"Presupuesto",data:d.map(r=>r["Meta Presupuesto"]||0),backgroundColor:colors,borderRadius:4}]},
     options:{layout:{padding:{top:24}},plugins:{legend:{display:false}},scales:SC,responsive:true}
   });
 
   drawBarChart("tabla-meta-compare",[
     {label:"Alcance",key:"Meta Alcance"},
-    {label:"Resultados",key:"Meta Resultados"},
+    {label:"Presupuesto",key:"Meta Presupuesto"},
     {label:"CPR",key:"Meta CPR"},
-    {label:"Usuarios únicos",key:"Meta Usuarios"},
   ],d);
 
   drawBarChart("tabla-gads-compare",[
@@ -487,6 +625,8 @@ function renderConsolidado(){
     {label:"Rechazados",key:"HS Rechazados"},
     {label:"Lista espera",key:"HS Lista Espera"},
   ],d);
+
+  drawPostulantesMesConsolidado();
 }
 
 function buildNavTabs(){
@@ -544,6 +684,8 @@ function buildColegioSections(){
           <div><div class="block-label">Distribución por etapa</div><canvas id="chart-hub-${c.codigo}" style="max-height:220px"></canvas></div>
           <div><div class="block-label">Detalle por etapa</div><table class="simple" id="tabla-hub-${c.codigo}"></table></div>
         </div>
+        <div class="block-label" style="margin-top:1.5rem">Postulantes por mes</div>
+        <canvas id="chart-hub-mes-${c.codigo}" style="max-height:220px"></canvas>
         <div class="block-label" style="margin-top:1.5rem">Motivos (top 5, según cantidad de postulantes)</div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;margin-top:.5rem">
           <div>
@@ -620,9 +762,8 @@ function renderColegio(cfg){
   document.getElementById("kpis-meta-"+cfg.codigo).innerHTML=`
     <div class="kpi-card"><div class="kpi-label">Campaña actual</div><div class="kpi-value" style="font-size:16px;color:${c}">${d["Meta Nombre Campaña"]||"-"}</div><div class="kpi-sub">Desde ${fmtFechaLarga(parseFechaSheet(d["Meta Fecha Anuncio"]))}</div></div>
     <div class="kpi-card"><div class="kpi-label">Alcance</div><div class="kpi-value" style="color:${c}">${fmt(d["Meta Alcance"])}</div></div>
-    <div class="kpi-card"><div class="kpi-label">Resultados</div><div class="kpi-value" style="color:${c}">${fmt(d["Meta Resultados"])}</div></div>
+    <div class="kpi-card"><div class="kpi-label">Presupuesto</div><div class="kpi-value" style="color:${c}">${fmtCLP(d["Meta Presupuesto"])}</div></div>
     <div class="kpi-card"><div class="kpi-label">CPR</div><div class="kpi-value" style="color:${c}">$${Math.round(d["Meta CPR"]||0)}</div></div>
-    <div class="kpi-card"><div class="kpi-label">Usuarios únicos</div><div class="kpi-value" style="color:${c}">${fmt(d["Meta Usuarios"])}</div></div>
   `;
 
   drawCampanasChart(cfg);
@@ -665,6 +806,8 @@ function renderColegio(cfg){
   drawMotivoChart("chart-motivo-eligio-"+cfg.codigo,  parseMotivos(d["HS Por Qué Eligió"]),  cfg.color);
   drawMotivoChart("chart-motivo-desiste-"+cfg.codigo, parseMotivos(d["HS Motivo Desiste"]),  cfg.color);
   drawMotivoChart("chart-motivo-rechaza-"+cfg.codigo, parseMotivos(d["HS Motivo Rechaza"]),  cfg.color);
+
+  drawPostulantesMesColegio(cfg);
 }
 
 function showTab(id,el){
