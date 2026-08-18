@@ -153,7 +153,7 @@ const COLEGIOS_CFG = [
   { nombre:"Colegio San Marcos de Macul",              codigo:"CSM",  color:"#e6b800", initials:"SM", logo:"https://colegiosanmarcos.cl/wp-content/uploads/2026/07/Favicon.png" },
 ];
 
-let DATA=[], CAMPANAS=[], ANALYTICS_SITIOS=[], GADS_KEYWORDS=[], charts={}, SEMANA_ACTUAL=null;
+let DATA=[], CAMPANAS=[], ANALYTICS_SITIOS=[], GADS_KEYWORDS=[], META_FECHAS=[], charts={}, SEMANA_ACTUAL=null;
 function getCfg(n){ return COLEGIOS_CFG.find(c=>c.nombre===n)||{color:"#555",initials:"??",codigo:"??"}; }
 function fmt(n){ return Math.round(n||0).toLocaleString("es-CL").replace(/,/g,"."); }
 function fmtCLP(n){ return "$"+Math.round(n||0).toLocaleString("es-CL").replace(/,/g,"."); }
@@ -597,6 +597,18 @@ async function loadData(){
     try{
       CAMPANAS=(await fetchSheet("META_CAMPANAS")).filter(r=>r["Colegio"]&&r["Colegio"]!=="Colegio");
     }catch(e){ CAMPANAS=[]; console.warn("No se pudo cargar META_CAMPANAS", e); }
+    try{
+      META_FECHAS=(await fetchSheet("META_FECHAS")).filter(r=>r["Colegio"]&&r["Colegio"]!=="Colegio");
+      // Cruza por Campaign ID para agregarle a CAMPANAS la fecha real de
+      // pausa/término (viene directo de la API de Meta, vía META_FECHAS).
+      // Así no dependemos de que la otra automatización que llena
+      // META_CAMPANAS conozca este campo — solo lo inyectamos acá en memoria.
+      META_FECHAS.forEach(mf=>{
+        if(!mf["Fecha Pausa/Término"]) return;
+        const match=CAMPANAS.find(c=>String(c["Campaign ID"])===String(mf["Campaign ID"]));
+        if(match) match["Fecha Fin"]=mf["Fecha Pausa/Término"];
+      });
+    }catch(e){ META_FECHAS=[]; console.warn("No se pudo cargar META_FECHAS", e); }
     try{
       ANALYTICS_SITIOS=(await fetchSheet("ANALYTICS_SITIOS")).filter(r=>r["Sitio"]&&r["Sitio"]!=="Sitio");
     }catch(e){ ANALYTICS_SITIOS=[]; console.warn("No se pudo cargar ANALYTICS_SITIOS", e); }
