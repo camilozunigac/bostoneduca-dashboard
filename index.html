@@ -411,6 +411,19 @@ function drawPostulantesMesColegio(cfg){
   });
 }
 
+// Ancho fijo por campaña (en vez de dejar que el gráfico se achique cuando
+// hay más datos): el contenedor crece hacia el lado y se puede desplazar
+// horizontalmente, manteniendo el tamaño de cada barra/imagen constante.
+function anchoCampanas(n){
+  return Math.max(700, n*70);
+}
+
+// Guarda el área real donde Chart.js dibujó las barras (izquierda/derecha
+// en píxeles), para que la galería de imágenes de abajo pueda alinearse
+// exactamente con cada barra, en vez de asumir que el gráfico ocupa todo
+// el ancho del contenedor (no es así: el eje Y le come espacio a la izq).
+let chartAreaCampanas={};
+
 function drawCampanasChart(cfg){
   const id="chart-campanas-"+cfg.codigo;
   const el=document.getElementById(id);
@@ -424,6 +437,9 @@ function drawCampanasChart(cfg){
     .sort((a,b)=>a._fecha-b._fecha);
 
   if(!rows.length) return;
+
+  const inner=document.getElementById("inner-campanas-"+cfg.codigo);
+  if(inner) inner.style.width=anchoCampanas(rows.length)+"px";
 
   // Etiqueta de dos líneas: nombre de la campaña + fecha(s). Si la planilla
   // ya trae "Fecha Fin" (fecha real en que se pausó/terminó, vía Meta API),
@@ -467,6 +483,9 @@ function drawCampanasChart(cfg){
       responsive:true
     }
   });
+
+  const ca=charts[id].chartArea;
+  chartAreaCampanas[cfg.codigo]={left:ca.left, right:ca.right, n:rows.length};
 }
 
 
@@ -485,20 +504,30 @@ function renderGaleriaMeta(cfg){
     .filter(r=>r._fecha && r._fecha.getFullYear()>=2026)
     .sort((a,b)=>a._fecha-b._fecha);
 
-  const conImagen=rows.filter(r=>r["Imagen"]);
-
-  if(!conImagen.length){
+  if(!rows.length){
     el.innerHTML=`<div style="font-size:12px;color:#7a90b5;font-style:italic">Aún no hay creatividades cargadas para este período.</div>`;
     return;
   }
 
-  el.innerHTML=conImagen.map(r=>`
-    <div style="flex:0 0 auto;width:90px;text-align:center">
-      <img src="${r["Imagen"]}" alt="${r["Nombre Campaña"]||"Campaña"}" style="width:90px;height:90px;object-fit:cover;border-radius:8px;border:1px solid #e2e8f5;display:block">
-      <div style="font-size:10px;color:#7a90b5;margin-top:4px;line-height:1.2">${truncar(r["Nombre Campaña"]||"-",22)}</div>
-      <div style="font-size:9px;color:#c7d0e0">${fmtFechaCorta(r._fecha)}</div>
-    </div>
-  `).join("");
+  // Se usa el área real donde Chart.js dibujó las barras (calculada en
+  // drawCampanasChart, que corre justo antes) para que cada miniatura quede
+  // exactamente bajo su barra — un ítem por campaña, mismo orden, mismo
+  // ancho por ítem que el que ocupa cada barra en el eje X.
+  const ca=chartAreaCampanas[cfg.codigo] || {left:0, right:anchoCampanas(rows.length), n:rows.length};
+  const anchoItem=(ca.right-ca.left)/rows.length;
+  const tam=Math.max(28, Math.min(anchoItem-8, 90));
+
+  el.style.paddingLeft=Math.max(0,ca.left)+"px";
+  el.innerHTML=rows.map(r=>{
+    const nombre=r["Nombre Campaña"]||"Campaña sin nombre";
+    const fechaTxt=fmtFechaCorta(r._fecha);
+    return `
+    <div style="flex:0 0 ${anchoItem}px;width:${anchoItem}px;text-align:center" title="${nombre} — ${fechaTxt}">
+      ${r["Imagen"]
+        ? `<img src="${r["Imagen"]}" alt="${nombre}" style="width:${tam}px;height:${tam}px;object-fit:cover;border-radius:8px;border:1px solid #e2e8f5">`
+        : `<div style="width:${tam}px;height:${tam}px;margin:0 auto;border-radius:8px;border:1px dashed #e2e8f5"></div>`}
+    </div>`;
+  }).join("");
 }
 
 function generateSummary(d){
@@ -776,9 +805,13 @@ function buildColegioSections(){
         <div class="platform-header">📱 Meta</div>
         <div class="kpi-grid" id="kpis-meta-${c.codigo}"></div>
         <div class="block-label" style="margin-top:1.5rem">Historial de campañas — alcance, clics al enlace y CPR</div>
-        <canvas id="chart-campanas-${c.codigo}" style="max-height:280px"></canvas>
-        <div class="block-label" style="margin-top:1.5rem">Creatividades por campaña</div>
-        <div id="galeria-meta-${c.codigo}" style="display:flex;gap:10px;overflow-x:auto;padding-bottom:6px"></div>
+        <div id="scroll-campanas-${c.codigo}" style="overflow-x:auto">
+          <div id="inner-campanas-${c.codigo}">
+            <canvas id="chart-campanas-${c.codigo}" style="max-height:280px"></canvas>
+            <div class="block-label" style="margin-top:1.5rem">Creatividades por campaña</div>
+            <div id="galeria-meta-${c.codigo}" style="display:flex;gap:0;padding-bottom:6px"></div>
+          </div>
+        </div>
       </div>
       <div class="platform-block">
         <div class="platform-header">🔍 Google Ads</div>
