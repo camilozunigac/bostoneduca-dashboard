@@ -153,7 +153,7 @@ const COLEGIOS_CFG = [
   { nombre:"Colegio San Marcos de Macul",              codigo:"CSM",  color:"#e6b800", initials:"SM", logo:"https://colegiosanmarcos.cl/wp-content/uploads/2026/07/Favicon.png" },
 ];
 
-let DATA=[], CAMPANAS=[], ANALYTICS_SITIOS=[], charts={}, SEMANA_ACTUAL=null;
+let DATA=[], CAMPANAS=[], ANALYTICS_SITIOS=[], GADS_KEYWORDS=[], charts={}, SEMANA_ACTUAL=null;
 function getCfg(n){ return COLEGIOS_CFG.find(c=>c.nombre===n)||{color:"#555",initials:"??",codigo:"??"}; }
 function fmt(n){ return Math.round(n||0).toLocaleString("es-CL").replace(/,/g,"."); }
 function fmtCLP(n){ return "$"+Math.round(n||0).toLocaleString("es-CL").replace(/,/g,"."); }
@@ -425,12 +425,14 @@ function drawCampanasChart(cfg){
 
   if(!rows.length) return;
 
-  // Etiqueta de dos líneas: nombre de la campaña + fecha de inicio y estado
-  // (activa/pausada). Con esto queda visible sin tener que pasar el mouse.
+  // Etiqueta de dos líneas: nombre de la campaña + fecha(s). Si la planilla
+  // ya trae "Fecha Fin" (fecha real en que se pausó/terminó, vía Meta API),
+  // se muestra el rango completo; si no, solo la fecha de publicación.
   const labels=rows.map(r=>{
-    const estadoRaw=String(r["Estado"]||"").toUpperCase();
-    const estadoTxt = estadoRaw==="ACTIVE" ? "vigente desde" : estadoRaw==="PAUSED" ? "pausada desde" : "desde";
-    return [truncar(r["Nombre Campaña"]||"Campaña sin nombre",18), estadoTxt+" "+fmtFechaLarga(r._fecha)];
+    const nombre=truncar(r["Nombre Campaña"]||"Campaña sin nombre",18);
+    const fechaFin=parseFechaSheet(r["Fecha Fin"]);
+    const fechaTxt=fechaFin ? (fmtFechaLarga(r._fecha)+" – "+fmtFechaLarga(fechaFin)) : fmtFechaLarga(r._fecha);
+    return [nombre, fechaTxt];
   });
 
   charts[id]=new Chart(el,{
@@ -450,7 +452,9 @@ function drawCampanasChart(cfg){
             title:(items)=>{
               const r=rows[items[0].dataIndex];
               const nombre=r["Nombre Campaña"]||"Campaña sin nombre";
-              return nombre+" — desde "+fmtFechaLarga(r._fecha);
+              const fechaFin=parseFechaSheet(r["Fecha Fin"]);
+              const fechaTxt=fechaFin ? (fmtFechaLarga(r._fecha)+" – "+fmtFechaLarga(fechaFin)) : fmtFechaLarga(r._fecha);
+              return nombre+" — "+fechaTxt;
             }
           }
         }
@@ -596,6 +600,9 @@ async function loadData(){
     try{
       ANALYTICS_SITIOS=(await fetchSheet("ANALYTICS_SITIOS")).filter(r=>r["Sitio"]&&r["Sitio"]!=="Sitio");
     }catch(e){ ANALYTICS_SITIOS=[]; console.warn("No se pudo cargar ANALYTICS_SITIOS", e); }
+    try{
+      GADS_KEYWORDS=(await fetchSheet("GADS_KEYWORDS")).filter(r=>r["Colegio"]&&r["Colegio"]!=="Colegio");
+    }catch(e){ GADS_KEYWORDS=[]; console.warn("No se pudo cargar GADS_KEYWORDS", e); }
     document.getElementById("loading").style.display="none";
     const semanas=[...new Set(DATA.map(r=>r["Semana"]))].filter(Boolean).sort((a,b)=>semanaSortKey(b)-semanaSortKey(a));
     SEMANA_ACTUAL=semanas[0];
@@ -730,6 +737,9 @@ function buildColegioSections(){
       <div class="platform-block">
         <div class="platform-header">🔍 Google Ads</div>
         <div class="kpi-grid" id="kpis-gads-${c.codigo}"></div>
+        <div class="block-label" style="margin-top:1.5rem">Palabras clave más buscadas (carga manual)</div>
+        <div id="nota-gads-keywords-${c.codigo}" style="font-size:11px;color:#7a90b5;margin-bottom:8px;font-style:italic"></div>
+        <table class="simple" id="tabla-gads-keywords-${c.codigo}"></table>
       </div>
       <div class="platform-block">
         <div class="platform-header">🎯 HubSpot Admisiones</div>
@@ -762,6 +772,37 @@ function buildColegioSections(){
     `;
     container.appendChild(sec);
   });
+}
+
+// Palabras clave de Google Ads (carga manual, ver GADS_KEYWORDS). La columna
+// "Colegio" en esta pestaña trae directamente el código (BALS, BCAM, etc.),
+// a diferencia del resto de la planilla que trae el nombre completo — por
+// eso se filtra por cfg.codigo y no por cfg.nombre.
+function renderGadsKeywords(cfg){
+  const el=document.getElementById("tabla-gads-keywords-"+cfg.codigo);
+  const nota=document.getElementById("nota-gads-keywords-"+cfg.codigo);
+  if(!el) return;
+
+  const filas=GADS_KEYWORDS.filter(r=>r["Colegio"]===cfg.codigo);
+  if(!filas.length){
+    el.innerHTML="";
+    if(nota) nota.textContent="Aún no hay datos cargados para este colegio.";
+    return;
+  }
+
+  // Se toma la última fecha cargada (según el orden en que aparecen las filas
+  // en la planilla, ya que "Fecha" es texto libre tipo "1-15 agosto 2026" y
+  // no se puede ordenar cronológicamente de forma confiable).
+  const fechas=[...new Set(filas.map(r=>r["Fecha"]))].filter(Boolean);
+  const ultimaFecha=fechas[fechas.length-1];
+  if(nota) nota.textContent="Período: "+ultimaFecha;
+
+  const datos=filas.filter(r=>r["Fecha"]===ultimaFecha).sort((a,b)=>(+b["Clics"]||0)-(+a["Clics"]||0));
+
+  el.innerHTML=`
+    <tr><th>Término de búsqueda</th><th style="text-align:right">Clics</th><th style="text-align:right">Inversión</th></tr>
+    ${datos.map(r=>`<tr><td style="font-size:12px">${r["Término de búsqueda"]||"-"}</td><td style="text-align:right">${fmt(r["Clics"])}</td><td style="text-align:right">${fmtCLP(r["Inversión"])}</td></tr>`).join("")}
+  `;
 }
 
 function renderColegio(cfg){
@@ -826,6 +867,8 @@ function renderColegio(cfg){
     <div class="kpi-card"><div class="kpi-label">Clics</div><div class="kpi-value" style="color:${c}">${fmt(d["GAds Clics"])}</div></div>
     <div class="kpi-card"><div class="kpi-label">Llamadas</div><div class="kpi-value" style="color:${c}">${fmt(d["GAds Llamadas"])}</div></div>
   `;
+
+  renderGadsKeywords(cfg);
 
   dc("hub-"+cfg.codigo);
   const hubData=[d["HS Matriculados"]||0,d["HS Aceptados"]||0,d["HS Desiste"]||0,d["HS Rechazados"]||0,d["HS Lista Espera"]||0];
