@@ -490,16 +490,24 @@ function renderGaleriaMeta(cfg){
     return;
   }
 
+  // Alineación con las barras del gráfico de arriba: en vez de medir el
+  // canvas por JS (frágil — depende del momento exacto en que el navegador
+  // aplica los estilos), se deja un margen fijo a la izquierda y derecha
+  // del mismo ancho que ocupan los ejes de números ("600,000" a la izq,
+  // "$180" a la der.), y se reparte el resto en partes iguales — igual que
+  // Chart.js reparte las categorías del eje X.
+  const tam=Math.max(36, Math.min(90, Math.floor(560/rows.length)-10));
+  el.style.paddingLeft="58px";
+  el.style.paddingRight="46px";
   el.innerHTML=rows.map(r=>{
     const nombre=r["Nombre Campaña"]||"Campaña sin nombre";
     const fechaTxt=fmtFechaCorta(r._fecha);
     return `
-    <div style="flex:0 0 auto;width:90px;text-align:center">
+    <div style="flex:1 1 0;min-width:0;text-align:center">
       ${r["Imagen"]
-        ? `<img src="${r["Imagen"]}" alt="${nombre}" style="width:90px;height:90px;object-fit:cover;border-radius:8px;border:1px solid #e2e8f5;display:block">`
-        : `<div style="width:90px;height:90px;border-radius:8px;border:1px dashed #e2e8f5"></div>`}
-      <div style="font-size:10px;color:#7a90b5;margin-top:4px;line-height:1.2">${truncar(nombre,22)}</div>
-      <div style="font-size:9px;color:#c7d0e0">${fechaTxt}</div>
+        ? `<img src="${r["Imagen"]}" alt="${nombre}" style="width:${tam}px;height:${tam}px;object-fit:cover;border-radius:8px;border:1px solid #e2e8f5;display:block;margin:0 auto">`
+        : `<div style="width:${tam}px;height:${tam}px;margin:0 auto;border-radius:8px;border:1px dashed #e2e8f5"></div>`}
+      <div style="font-size:9px;color:#7a90b5;margin-top:4px;line-height:1.2;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${truncar(nombre,14)}</div>
     </div>`;
   }).join("");
 }
@@ -781,7 +789,7 @@ function buildColegioSections(){
         <div class="block-label" style="margin-top:1.5rem">Historial de campañas — alcance, clics al enlace y CPR</div>
         <canvas id="chart-campanas-${c.codigo}" style="max-height:280px"></canvas>
         <div class="block-label" style="margin-top:1.5rem">Creatividades por campaña</div>
-        <div id="galeria-meta-${c.codigo}" style="display:flex;gap:10px;overflow-x:auto;padding-bottom:6px"></div>
+        <div id="galeria-meta-${c.codigo}" style="display:flex;gap:6px;padding-bottom:6px"></div>
       </div>
       <div class="platform-block">
         <div class="platform-header">🔍 Google Ads</div>
