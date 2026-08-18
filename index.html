@@ -439,7 +439,10 @@ function drawCampanasChart(cfg){
   if(!rows.length) return;
 
   const inner=document.getElementById("inner-campanas-"+cfg.codigo);
-  if(inner) inner.style.width=anchoCampanas(rows.length)+"px";
+  if(inner){
+    inner.style.width=anchoCampanas(rows.length)+"px";
+    void inner.offsetWidth; // fuerza al navegador a aplicar el ancho YA, antes de crear el gráfico (si no, Chart.js mide el tamaño viejo/incorrecto)
+  }
 
   // Etiqueta de dos líneas: nombre de la campaña + fecha(s). Si la planilla
   // ya trae "Fecha Fin" (fecha real en que se pausó/terminó, vía Meta API),
@@ -513,8 +516,10 @@ function renderGaleriaMeta(cfg){
   // drawCampanasChart, que corre justo antes) para que cada miniatura quede
   // exactamente bajo su barra — un ítem por campaña, mismo orden, mismo
   // ancho por ítem que el que ocupa cada barra en el eje X.
-  const ca=chartAreaCampanas[cfg.codigo] || {left:0, right:anchoCampanas(rows.length), n:rows.length};
-  const anchoItem=(ca.right-ca.left)/rows.length;
+  let ca=chartAreaCampanas[cfg.codigo];
+  if(!ca || !(ca.right>ca.left)){ ca={left:0, right:anchoCampanas(rows.length), n:rows.length}; }
+  let anchoItem=(ca.right-ca.left)/rows.length;
+  if(!(anchoItem>0)) anchoItem=70; // resguardo: nunca dejar un ancho inválido (NaN/negativo)
   const tam=Math.max(28, Math.min(anchoItem-8, 90));
 
   el.style.paddingLeft=Math.max(0,ca.left)+"px";
