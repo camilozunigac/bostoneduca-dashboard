@@ -742,7 +742,10 @@ function buildColegioSections(){
       </div>
       <div class="platform-block">
         <div class="platform-header">📱 Meta</div>
-        <div class="kpi-grid" id="kpis-meta-${c.codigo}"></div>
+        <div style="display:flex;gap:1.5rem;align-items:flex-start;flex-wrap:wrap">
+          <div class="kpi-grid" id="kpis-meta-${c.codigo}" style="flex:1;min-width:260px"></div>
+          <div id="imagen-meta-${c.codigo}"></div>
+        </div>
         <div class="block-label" style="margin-top:1.5rem">Historial de campañas — alcance, clics al enlace y CPR</div>
         <canvas id="chart-campanas-${c.codigo}" style="max-height:280px"></canvas>
       </div>
@@ -871,6 +874,16 @@ function renderColegio(cfg){
     <div class="kpi-card"><div class="kpi-label">Presupuesto</div><div class="kpi-value" style="color:${c}">${fmtCLP(d["Meta Presupuesto"])}</div></div>
     <div class="kpi-card"><div class="kpi-label">CPR</div><div class="kpi-value" style="color:${c}">$${Math.round(d["Meta CPR"]||0)}</div></div>
   `;
+
+  // Imagen del anuncio vigente: se busca en META_FECHAS por Código de
+  // colegio + nombre de campaña (viene directo de la API de Meta).
+  const imgEl=document.getElementById("imagen-meta-"+cfg.codigo);
+  if(imgEl){
+    const filaImagen=META_FECHAS.find(mf=>mf["Código"]===cfg.codigo && mf["Nombre Campaña"]===d["Meta Nombre Campaña"] && mf["Imagen"]);
+    imgEl.innerHTML = filaImagen
+      ? `<img src="${filaImagen["Imagen"]}" alt="Anuncio vigente" style="width:160px;height:160px;object-fit:cover;border-radius:10px;border:1px solid #e2e8f5">`
+      : "";
+  }
 
   drawCampanasChart(cfg);
 
