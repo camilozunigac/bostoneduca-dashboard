@@ -678,6 +678,7 @@ function renderConsolidado(){
     {label:"Alcance",key:"Meta Alcance"},
     {label:"Presupuesto",key:"Meta Presupuesto"},
     {label:"CPR",key:"Meta CPR"},
+    {label:"Clics",key:"Meta Clics"},
   ],d);
 
   drawBarChart("tabla-gads-compare",[
@@ -868,6 +869,7 @@ function renderColegio(cfg){
   document.getElementById("kpis-meta-"+cfg.codigo).innerHTML=`
     <div class="kpi-card"><div class="kpi-label">Campaña actual</div><div class="kpi-value" style="font-size:16px;color:${c}">${d["Meta Nombre Campaña"]||"-"}</div><div class="kpi-sub">Desde ${fmtFechaLarga(parseFechaSheet(d["Meta Fecha Anuncio"]))}</div></div>
     <div class="kpi-card"><div class="kpi-label">Alcance</div><div class="kpi-value" style="color:${c}">${fmt(d["Meta Alcance"])}</div></div>
+    <div class="kpi-card"><div class="kpi-label">Clics</div><div class="kpi-value" style="color:${c}">${fmt(d["Meta Clics"])}</div></div>
     <div class="kpi-card"><div class="kpi-label">Presupuesto</div><div class="kpi-value" style="color:${c}">${fmtCLP(d["Meta Presupuesto"])}</div></div>
     <div class="kpi-card"><div class="kpi-label">CPR</div><div class="kpi-value" style="color:${c}">$${Math.round(d["Meta CPR"]||0)}</div></div>
   `;
