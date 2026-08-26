@@ -505,7 +505,7 @@ function renderGaleriaMeta(cfg){
     return `
     <div style="flex:1 1 0;min-width:0;text-align:center">
       ${r["Imagen"]
-        ? `<img src="${r["Imagen"]}" alt="${nombre}" style="width:${tam}px;height:${tam}px;object-fit:cover;border-radius:8px;border:1px solid #e2e8f5;display:block;margin:0 auto">`
+        ? `<a href="${r["Imagen"]}" target="_blank" rel="noopener" title="Ver imagen del anuncio — ${nombre}" style="width:${tam}px;height:${tam}px;margin:0 auto;border-radius:8px;border:1px solid #e2e8f5;background:#f5f7fa;display:flex;align-items:center;justify-content:center;text-decoration:none;font-size:${Math.max(14,Math.floor(tam*0.4))}px">🔗</a>`
         : `<div style="width:${tam}px;height:${tam}px;margin:0 auto;border-radius:8px;border:1px dashed #e2e8f5"></div>`}
       <div style="font-size:9px;color:#7a90b5;margin-top:4px;line-height:1.2;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${truncar(nombre,14)}</div>
     </div>`;
