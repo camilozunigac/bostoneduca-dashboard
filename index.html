@@ -470,48 +470,6 @@ function drawCampanasChart(cfg){
 }
 
 
-// Galería chica de creatividades: una miniatura por campaña (2026 en
-// adelante, mismo filtro que el gráfico de historial), en el mismo orden
-// cronológico, para poder comparar de un vistazo qué imagen usó cada
-// campaña. Las campañas sin imagen (aún no se buscó, o el anuncio no tiene
-// creativo con foto) simplemente no muestran miniatura.
-function renderGaleriaMeta(cfg){
-  const el=document.getElementById("galeria-meta-"+cfg.codigo);
-  if(!el) return;
-
-  const rows=CAMPANAS
-    .filter(r=>r["Colegio"]===cfg.nombre)
-    .map(r=>({...r, _fecha:parseFechaSheet(r["Fecha Inicio"])}))
-    .filter(r=>r._fecha && r._fecha.getFullYear()>=2026)
-    .sort((a,b)=>a._fecha-b._fecha);
-
-  if(!rows.length){
-    el.innerHTML=`<div style="font-size:12px;color:#7a90b5;font-style:italic">Aún no hay creatividades cargadas para este período.</div>`;
-    return;
-  }
-
-  // Alineación con las barras del gráfico de arriba: en vez de medir el
-  // canvas por JS (frágil — depende del momento exacto en que el navegador
-  // aplica los estilos), se deja un margen fijo a la izquierda y derecha
-  // del mismo ancho que ocupan los ejes de números ("600,000" a la izq,
-  // "$180" a la der.), y se reparte el resto en partes iguales — igual que
-  // Chart.js reparte las categorías del eje X.
-  const tam=Math.max(36, Math.min(90, Math.floor(560/rows.length)-10));
-  el.style.paddingLeft="58px";
-  el.style.paddingRight="46px";
-  el.innerHTML=rows.map(r=>{
-    const nombre=r["Nombre Campaña"]||"Campaña sin nombre";
-    const fechaTxt=fmtFechaCorta(r._fecha);
-    return `
-    <div style="flex:1 1 0;min-width:0;text-align:center">
-      ${r["Imagen"]
-        ? `<a href="${r["Imagen"]}" target="_blank" rel="noopener" title="Ver imagen del anuncio — ${nombre}" style="width:${tam}px;height:${tam}px;margin:0 auto;border-radius:8px;border:1px solid #e2e8f5;background:#f5f7fa;display:flex;align-items:center;justify-content:center;text-decoration:none;font-size:${Math.max(14,Math.floor(tam*0.4))}px">🔗</a>`
-        : `<div style="width:${tam}px;height:${tam}px;margin:0 auto;border-radius:8px;border:1px dashed #e2e8f5"></div>`}
-      <div style="font-size:9px;color:#7a90b5;margin-top:4px;line-height:1.2;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${truncar(nombre,14)}</div>
-    </div>`;
-  }).join("");
-}
-
 function generateSummary(d){
   const totV=d.reduce((s,r)=>s+(r["Visitas Totales"]||0),0);
   const totA=d.reduce((s,r)=>s+(r["Meta Alcance"]||0),0);
@@ -649,7 +607,6 @@ async function loadData(){
         const match=CAMPANAS.find(c=>String(c["Campaign ID"])===String(mf["Campaign ID"]));
         if(!match) return;
         if(mf["Fecha Pausa/Término"]) match["Fecha Fin"]=mf["Fecha Pausa/Término"];
-        if(mf["Imagen"]) match["Imagen"]=mf["Imagen"];
       });
     }catch(e){ META_FECHAS=[]; console.warn("No se pudo cargar META_FECHAS", e); }
     try{
@@ -788,8 +745,6 @@ function buildColegioSections(){
         <div class="kpi-grid" id="kpis-meta-${c.codigo}"></div>
         <div class="block-label" style="margin-top:1.5rem">Historial de campañas — alcance, clics al enlace y CPR</div>
         <canvas id="chart-campanas-${c.codigo}" style="max-height:280px"></canvas>
-        <div class="block-label" style="margin-top:1.5rem">Creatividades por campaña</div>
-        <div id="galeria-meta-${c.codigo}" style="display:flex;gap:6px;padding-bottom:6px"></div>
       </div>
       <div class="platform-block">
         <div class="platform-header">🔍 Google Ads</div>
@@ -918,7 +873,6 @@ function renderColegio(cfg){
   `;
 
   drawCampanasChart(cfg);
-  renderGaleriaMeta(cfg);
 
   document.getElementById("kpis-gads-"+cfg.codigo).innerHTML=`
     <div class="kpi-card"><div class="kpi-label">Impresiones</div><div class="kpi-value" style="color:${c}">${fmt(d["GAds Impresiones"])}</div></div>
