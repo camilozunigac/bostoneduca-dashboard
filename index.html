@@ -145,6 +145,10 @@ table.simple tr:last-child td { border-bottom:none; }
 
 <script>
 const SHEET_ID = "1ZU7L4IWlgJg-ff5Xovy5cwr4HVMuTT3ScUNXIZZsdDY";
+// API key de Google Cloud, restringida a "Google Sheets API" y al
+// referrer https://camilozunigac.github.io/* (ver instrucciones aparte).
+// Reemplaza el texto de abajo por tu key real antes de publicar.
+const SHEETS_API_KEY = "AIzaSyD84cjLqb_JGY3dPxfzzTE85DyozfQfEdM";
 const COLEGIOS_CFG = [
   { nombre:"Boston Academy Laguna del Sol",            codigo:"BALS", color:"#1a6bbf", initials:"BA", logo:"https://bostonacademy.cl/wp-content/uploads/2026/07/Favicon.png" },
   { nombre:"Boston College Alto Macul",                codigo:"BCAM", color:"#214e97", initials:"BC", logo:"https://bostoncollegealtomacul.cl/wp-content/uploads/2026/07/Favicon.png" },
@@ -275,9 +279,21 @@ function drawBarChart(containerId,rows,colegiosData){
   });
 }
 
-// Google Sheets (gviz) devuelve fechas como texto "Date(2026,6,1)" (mes 0-indexado) o como Date real
+// FIX 31/08: al pasar de gviz a la API de Sheets v4 (con
+// valueRenderOption=UNFORMATTED_VALUE, necesario para que los números
+// vengan como números y no como texto con separador de miles), las
+// fechas ya no llegan como Date real ni como texto "Date(y,m,d)" —
+// llegan como NÚMERO DE SERIE (días desde 1899-12-30, el mismo sistema
+// que usa Excel/Sheets internamente). Se agrega ese caso sin sacar los
+// anteriores, por si alguna columna todavía llega en el formato viejo.
 function parseFechaSheet(v){
   if(v instanceof Date) return v;
+  if(typeof v==="number" && v>0){
+    // Épocas de Sheets/Excel: día 0 = 1899-12-30 (UTC)
+    const ms=Date.UTC(1899,11,30)+Math.round(v*86400000);
+    const d=new Date(ms);
+    if(!isNaN(d)) return d;
+  }
   if(typeof v==="string"){
     const m=v.match(/^Date\((\d+),(\d+),(\d+)\)/);
     if(m) return new Date(+m[1], +m[2], +m[3]);
@@ -583,13 +599,27 @@ function renderAnalyticsSitios(){
   }).join("");
 }
 
+// FIX 31/08: antes esto leía por "gviz/tq" (la API de visualización de
+// Google Sheets, pensada para embeber gráficos). Confirmamos que ese
+// endpoint cachea columnas específicas del lado de Google por tiempo
+// indefinido — el dato en la hoja real estaba correcto (verificado
+// copiando la celda directo desde la UI de Sheets) pero gviz seguía
+// devolviendo esa columna vacía días después, con cache-busting y todo.
+// La API oficial de Sheets (v4) lee el valor en vivo, sin ese caché
+// intermedio — requiere una API key (gratis, restringida a este sitio
+// y a "Google Sheets API" nada más, ver instrucciones aparte).
 async function fetchSheet(nombreHoja){
-  const url=`https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(nombreHoja)}&_ts=${Date.now()}`;
+  const url=`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${encodeURIComponent(nombreHoja)}?key=${SHEETS_API_KEY}&valueRenderOption=UNFORMATTED_VALUE`;
   const resp=await fetch(url,{cache:"no-store"});
-  const text=await resp.text();
-  const json=JSON.parse(text.match(/google\.visualization\.Query\.setResponse\(([\s\S]*?)\);?\s*$/)[1]);
-  const cols=json.table.cols.map(c=>c.label);
-  return json.table.rows.map(r=>{const obj={};cols.forEach((col,i)=>{obj[col]=r.c[i]?.v??0;});return obj;});
+  if(!resp.ok){
+    const errText=await resp.text().catch(()=>"");
+    throw new Error(`Sheets API error ${resp.status} en "${nombreHoja}": ${errText.slice(0,200)}`);
+  }
+  const json=await resp.json();
+  const filas=json.values||[];
+  if(!filas.length) return [];
+  const cols=filas[0];
+  return filas.slice(1).map(r=>{const obj={};cols.forEach((col,i)=>{obj[col]=r[i]??0;});return obj;});
 }
 
 async function loadData(){
