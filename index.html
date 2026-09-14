@@ -41,6 +41,14 @@ main { padding:3rem 2.5rem; max-width:1440px; margin:0 auto; }
 .ai-summary strong { color:#1b2a4a; }
 
 .ga4-row { display:grid; grid-template-columns:80fr 20fr; gap:2rem; align-items:center; margin-bottom:3rem; }
+/* Los hijos directos de un grid usan min-width:auto por defecto, lo que los
+   deja crecer hasta el ancho mínimo de su contenido (ej. un gráfico con
+   scroll horizontal interno) y termina ensanchando toda la página. Con
+   min-width:0 respetan el ancho de su columna y el scroll queda contenido
+   dentro de .chart-scroll, donde corresponde. */
+.ga4-row > div, .grid-2 > div { min-width:0; }
+
+.motivos-grid { display:grid; grid-template-columns:1fr 1fr; gap:1.5rem; margin-top:.5rem; }
 .ga4-total-label { font-size:12px; color:#7a90b5; text-transform:uppercase; letter-spacing:.5px; margin-bottom:8px; }
 .ga4-total-num { font-size:54px; font-weight:900; color:#1b2a4a; line-height:1; }
 .ga4-total-sub { font-size:13px; color:#7a90b5; margin-top:10px; }
@@ -66,6 +74,52 @@ table.simple { width:100%; border-collapse:collapse; font-size:13px; }
 table.simple th { padding:8px 0; color:#7a90b5; font-size:11px; text-transform:uppercase; border-bottom:1px solid rgba(0,0,0,0.08); }
 table.simple td { padding:10px 0; border-bottom:1px solid rgba(0,0,0,0.08); }
 table.simple tr:last-child td { border-bottom:none; }
+
+/* Gráficos con muchas barras (varios colegios x varias métricas, historial de
+   campañas, postulantes por mes) pueden quedar demasiado angostos y
+   ilegibles en mobile. .chart-scroll permite hacer scroll horizontal en vez
+   de aplastar las barras; .chart-scroll-inner recibe un min-width calculado
+   en JS según la cantidad de barras — en pantallas anchas ese min-width es
+   menor al ancho disponible y no genera scroll (se ve igual que antes). */
+.chart-scroll { width:100%; overflow-x:auto; -webkit-overflow-scrolling:touch; }
+.chart-scroll-inner { min-width:100%; }
+
+/* ===== Mobile ===== */
+@media (max-width:640px) {
+  header { padding:.9rem 1rem; flex-wrap:wrap; gap:10px; }
+  .logo { gap:10px; }
+  .logo-img { width:42px; height:42px; font-size:14px; border-radius:8px; }
+  .logo-text h1 { font-size:18px; }
+  .logo-text span { font-size:10px; }
+  #semana-select { font-size:12px; padding:5px 10px; }
+  #loading { font-size:11px; }
+
+  nav { padding:0 1rem; }
+  .nav-tab { padding:11px 14px; font-size:12px; gap:4px; }
+
+  main { padding:1.5rem 1rem; }
+  .platform-block { margin-bottom:3rem; padding-top:1.5rem; }
+  .platform-header { font-size:17px; margin-bottom:1.25rem; }
+  .section-title { font-size:18px; }
+  .ai-summary { font-size:13px; margin-bottom:1.75rem; }
+
+  .block-label-row { gap:4px; }
+  .block-label-extra { font-size:11px; }
+
+  .ga4-total-num { font-size:34px; }
+  .ga4-row { gap:1.25rem; margin-bottom:2rem; }
+
+  .conv-row { gap:1.5rem 2rem; margin-bottom:2rem; }
+  .conv-value { font-size:32px; }
+
+  .kpi-grid { grid-template-columns:repeat(auto-fit,minmax(128px,1fr)); gap:10px; margin-bottom:1.5rem; }
+  .kpi-card { padding:1rem; }
+  .kpi-value { font-size:28px; }
+  .kpi-label { font-size:10px; }
+
+  main canvas { max-height:200px !important; }
+  .motivos-grid { grid-template-columns:1fr; gap:1.25rem; }
+}
 </style>
 </head>
 <body>
@@ -94,7 +148,7 @@ table.simple tr:last-child td { border-bottom:none; }
     <div class="platform-block">
       <div class="platform-header">📊 Google Analytics</div>
       <div class="ga4-row">
-        <div><div class="block-label">Visitas por colegio y tipo</div><canvas id="chart-ga4-barras" style="max-height:260px"></canvas></div>
+        <div><div class="block-label">Visitas por colegio y tipo</div><div class="chart-scroll"><div class="chart-scroll-inner"><canvas id="chart-ga4-barras" style="max-height:260px"></canvas></div></div></div>
         <div>
           <div class="ga4-total-label">Total visitas</div>
           <div class="ga4-total-num" id="ga4-total-num">—</div>
@@ -136,7 +190,7 @@ table.simple tr:last-child td { border-bottom:none; }
       </div>
       <div id="tabla-hub-compare"></div>
       <div class="block-label" style="margin-top:2rem">Postulantes por mes</div>
-      <canvas id="chart-hub-postulantes-mes" style="max-height:260px"></canvas>
+      <div class="chart-scroll"><div class="chart-scroll-inner"><canvas id="chart-hub-postulantes-mes" style="max-height:260px"></canvas></div></div>
     </div>
   </div>
 
@@ -271,7 +325,18 @@ function drawBarChart(containerId,rows,colegiosData){
   canvas.id=containerId+"-chart";
   canvas.style.maxHeight="280px";
   el.innerHTML="";
-  el.appendChild(canvas);
+  // Con muchas métricas (ej. 6 x 5 colegios = 30 barras) el gráfico queda
+  // ilegible si se aplasta al ancho del celular — se envuelve en un
+  // contenedor con scroll horizontal, con un ancho mínimo proporcional a
+  // la cantidad de barras (ver comentario de .chart-scroll en el CSS).
+  const scrollOuter=document.createElement("div");
+  scrollOuter.className="chart-scroll";
+  const scrollInner=document.createElement("div");
+  scrollInner.className="chart-scroll-inner";
+  scrollInner.style.minWidth=Math.max(340, labels.length*rows.length*40)+"px";
+  scrollInner.appendChild(canvas);
+  scrollOuter.appendChild(scrollInner);
+  el.appendChild(scrollOuter);
 
   const usaEjeSecundario=rows.some(r=>r.yAxisID==="y1");
   const scales={ x:SC.x, y:{...SC.y, position:"left"} };
@@ -395,6 +460,8 @@ function drawPostulantesMesConsolidado(){
   const meses=[...mesesSet].sort((a,b)=>a-b);
   const labels=meses.map(mesLabel);
 
+  if(el.parentElement) el.parentElement.style.minWidth=Math.max(340,labels.length*COLEGIOS_CFG.length*38)+"px";
+
   dc(id);
   charts[id]=new Chart(el,{
     type:"bar",
@@ -418,6 +485,7 @@ function drawPostulantesMesColegio(cfg){
   if(!el) return;
 
   const datos=getPostulantesPorMes(cfg.nombre);
+  if(el.parentElement) el.parentElement.style.minWidth=Math.max(280,datos.length*70)+"px";
   dc(id);
   charts[id]=new Chart(el,{
     type:"bar",
@@ -455,6 +523,8 @@ function drawCampanasChart(cfg){
   const rows=rowsColegio.filter(r=>r._fecha>=fechaCorte);
 
   if(!rows.length) return;
+
+  if(el.parentElement) el.parentElement.style.minWidth=Math.max(480,rows.length*130)+"px";
 
   // Etiqueta de dos líneas: nombre de la campaña + fecha(s). Si la planilla
   // ya trae "Fecha Fin" (fecha real en que se pausó/terminó, vía Meta API),
@@ -672,7 +742,9 @@ function renderConsolidado(){
   // colegio, lo que hacía que las tres barras de una misma categoría no se
   // pudieran identificar de un vistazo).
   dc("ga4-barras");
-  charts["ga4-barras"]=new Chart(document.getElementById("chart-ga4-barras"),{
+  const ga4BarrasCanvas=document.getElementById("chart-ga4-barras");
+  if(ga4BarrasCanvas.parentElement) ga4BarrasCanvas.parentElement.style.minWidth=Math.max(340,labels.length*3*40)+"px";
+  charts["ga4-barras"]=new Chart(ga4BarrasCanvas,{
     type:"bar",
     data:{labels,datasets:[
       {label:"Visitas totales",data:d.map(r=>r["Visitas Totales"]||0),backgroundColor:"#214e97",borderRadius:4},
@@ -760,7 +832,7 @@ function buildColegioSections(){
       <div class="kpi-grid" id="kpis-${c.codigo}"></div>
       <div class="platform-block">
         <div class="platform-header">📊 Google Analytics</div>
-        <div style="display:grid;grid-template-columns:80fr 20fr;gap:2rem;align-items:center;margin-bottom:2rem">
+        <div class="ga4-row" style="margin-bottom:2rem">
           <div><div class="block-label">Visitas por tipo</div><canvas id="chart-ga4-${c.codigo}" style="max-height:260px"></canvas></div>
           <div>
             <div class="ga4-total-label">Total visitas</div>
@@ -778,7 +850,7 @@ function buildColegioSections(){
         <div class="platform-header">📱 Meta</div>
         <div class="kpi-grid" id="kpis-meta-${c.codigo}"></div>
         <div class="block-label" style="margin-top:1.5rem">Historial de campañas — alcance, clics al enlace y CPR</div>
-        <canvas id="chart-campanas-${c.codigo}" style="max-height:280px"></canvas>
+        <div class="chart-scroll"><div class="chart-scroll-inner"><canvas id="chart-campanas-${c.codigo}" style="max-height:280px"></canvas></div></div>
       </div>
       <div class="platform-block">
         <div class="platform-header">🔍 Google Ads</div>
@@ -794,9 +866,9 @@ function buildColegioSections(){
           <div><div class="block-label">Detalle por etapa</div><table class="simple" id="tabla-hub-${c.codigo}"></table></div>
         </div>
         <div class="block-label" style="margin-top:1.5rem">Postulantes por mes</div>
-        <canvas id="chart-hub-mes-${c.codigo}" style="max-height:220px"></canvas>
+        <div class="chart-scroll"><div class="chart-scroll-inner"><canvas id="chart-hub-mes-${c.codigo}" style="max-height:220px"></canvas></div></div>
         <div class="block-label" style="margin-top:1.5rem">Motivos (top 5, según cantidad de postulantes)</div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;margin-top:.5rem">
+        <div class="motivos-grid">
           <div>
             <div style="font-size:11px;color:#7a90b5;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">Cómo se enteró del colegio</div>
             <canvas id="chart-motivo-entero-${c.codigo}" style="max-height:180px"></canvas>
