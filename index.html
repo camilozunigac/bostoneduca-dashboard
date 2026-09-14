@@ -82,7 +82,7 @@ table.simple tr:last-child td { border-bottom:none; }
    en JS según la cantidad de barras — en pantallas anchas ese min-width es
    menor al ancho disponible y no genera scroll (se ve igual que antes). */
 .chart-scroll { width:100%; overflow-x:auto; -webkit-overflow-scrolling:touch; }
-.chart-scroll-inner { min-width:100%; }
+.chart-scroll-inner { width:100%; min-width:100%; }
 
 /* ===== Mobile ===== */
 @media (max-width:640px) {
@@ -1030,6 +1030,22 @@ function showTab(id,el){
   document.getElementById("sec-"+id).classList.add("active");
   el.classList.add("active");
 }
+
+// Chart.js redimensiona sus gráficos solo o mediante un ResizeObserver sobre
+// el contenedor del canvas. Con los wrappers de scroll horizontal que se
+// agregaron para mobile (.chart-scroll / .chart-scroll-inner), achicar la
+// ventana del navegador y volver a agrandarla podía dejar algunos gráficos
+// "pegados" en un ancho chico en vez de recuperar su tamaño real. Para que
+// siempre queden bien, ante cualquier resize de la ventana se fuerza un
+// chart.resize() en todos los gráficos activos (con un pequeño debounce para
+// no recalcular en cada pixel mientras se arrastra el borde de la ventana).
+let resizeTimer=null;
+window.addEventListener("resize", ()=>{
+  clearTimeout(resizeTimer);
+  resizeTimer=setTimeout(()=>{
+    Object.values(charts).forEach(ch=>{ try{ ch.resize(); }catch(e){} });
+  }, 150);
+});
 
 loadData();
 </script>
