@@ -32,6 +32,9 @@ main { padding:3rem 2.5rem; max-width:1440px; margin:0 auto; }
 .platform-block { margin-bottom:4.5rem; border-top:2px solid #1b2a4a; padding-top:2rem; }
 .platform-header { font-size:22px; font-weight:700; color:#1b2a4a; margin-bottom:2rem; }
 .block-label { font-size:11px; color:#7a90b5; text-transform:uppercase; letter-spacing:.5px; margin-bottom:14px; }
+.block-label-row { display:flex; align-items:baseline; justify-content:space-between; flex-wrap:wrap; gap:8px; margin-bottom:14px; }
+.block-label-row .block-label { margin-bottom:0; }
+.block-label-extra { font-size:12px; color:#7a90b5; text-transform:none; letter-spacing:normal; font-style:italic; }
 
 .section-title { font-size:22px; font-weight:700; color:#1b2a4a; margin-bottom:12px; }
 .ai-summary { font-size:14px; color:#7a90b5; line-height:1.7; margin-bottom:2.5rem; max-width:860px; }
@@ -100,8 +103,6 @@ table.simple tr:last-child td { border-bottom:none; }
       </div>
       <div class="block-label">Tasa de conversión a admisión 2027</div>
       <div class="conv-row" id="tasa-conversion-ga4"></div>
-      <div class="block-label">Métricas por colegio</div>
-      <div id="tabla-ga4-compare"></div>
     </div>
 
     <div class="platform-block">
@@ -116,7 +117,10 @@ table.simple tr:last-child td { border-bottom:none; }
 
     <div class="platform-block">
       <div class="platform-header">🔍 Google Ads</div>
-      <div class="block-label">Métricas por colegio</div>
+      <div class="block-label-row">
+        <div class="block-label">Métricas por colegio</div>
+        <div class="block-label-extra">Presupuesto general por colegio al mes de $50.000</div>
+      </div>
       <div id="tabla-gads-compare"></div>
     </div>
 
@@ -126,7 +130,10 @@ table.simple tr:last-child td { border-bottom:none; }
         <div><div class="block-label">Matriculados por colegio</div><canvas id="chart-hub-torta" style="max-height:220px"></canvas></div>
         <div><div class="block-label">Postulaciones por colegio</div><canvas id="chart-hub-postulaciones" style="max-height:220px"></canvas></div>
       </div>
-      <div class="block-label">Métricas por colegio</div>
+      <div class="block-label-row">
+        <div class="block-label">Métricas por colegio</div>
+        <div class="block-label-extra">Acumulados Admisión 2027</div>
+      </div>
       <div id="tabla-hub-compare"></div>
       <div class="block-label" style="margin-top:2rem">Postulantes por mes</div>
       <canvas id="chart-hub-postulantes-mes" style="max-height:260px"></canvas>
@@ -251,6 +258,9 @@ function makePie(id,labels,data,colors){
   });
 }
 
+// rows puede traer un yAxisID opcional por fila (ej. {label:"CPR",key:"Meta CPR",yAxisID:"y1"})
+// para darle un eje propio a un dato cuya magnitud es muy distinta al resto y
+// quedaría invisible compartiendo la misma escala (ver eje "y1" más abajo).
 function drawBarChart(containerId,rows,colegiosData){
   const el=document.getElementById(containerId);
   if(!el) return;
@@ -262,6 +272,13 @@ function drawBarChart(containerId,rows,colegiosData){
   canvas.style.maxHeight="280px";
   el.innerHTML="";
   el.appendChild(canvas);
+
+  const usaEjeSecundario=rows.some(r=>r.yAxisID==="y1");
+  const scales={ x:SC.x, y:{...SC.y, position:"left"} };
+  if(usaEjeSecundario){
+    scales.y1={ position:"right", grid:{display:false}, ticks:{color:"#7a90b5",font:{size:11}}, beginAtZero:true };
+  }
+
   charts[containerId+"-chart"]=new Chart(canvas,{
     type:"bar",
     data:{labels,datasets:rows.map((row,ri)=>({
@@ -270,8 +287,9 @@ function drawBarChart(containerId,rows,colegiosData){
       backgroundColor:rowColors[ri%rowColors.length],
       borderRadius:4,
       barPercentage:0.7,
+      yAxisID:row.yAxisID||"y",
     }))},
-    options:{layout:{padding:{top:24}},plugins:{legend:{display:true,position:"top",labels:{color:"#0d2a5e",font:{size:11},boxWidth:10,padding:16}}},scales:SC,responsive:true}
+    options:{layout:{padding:{top:24}},plugins:{legend:{display:true,position:"top",labels:{color:"#0d2a5e",font:{size:11},boxWidth:10,padding:16}}},scales,responsive:true}
   });
 }
 
@@ -648,12 +666,17 @@ function renderConsolidado(){
 
   document.getElementById("ai-summary").innerHTML=generateSummary(d);
 
+  // Mismos colores que el resto de los gráficos "Métricas por colegio":
+  // Visitas totales en navy, Visitas nuevas en celeste y Admisión 2027 en dorado,
+  // consistentes para todos los colegios (antes usaban el color propio de cada
+  // colegio, lo que hacía que las tres barras de una misma categoría no se
+  // pudieran identificar de un vistazo).
   dc("ga4-barras");
   charts["ga4-barras"]=new Chart(document.getElementById("chart-ga4-barras"),{
     type:"bar",
     data:{labels,datasets:[
-      {label:"Visitas totales",data:d.map(r=>r["Visitas Totales"]||0),backgroundColor:colors,borderRadius:4},
-      {label:"Visitas nuevas", data:d.map(r=>r["Visitas Nuevas"]||0), backgroundColor:colors.map(c=>c+"77"),borderRadius:4},
+      {label:"Visitas totales",data:d.map(r=>r["Visitas Totales"]||0),backgroundColor:"#214e97",borderRadius:4},
+      {label:"Visitas nuevas", data:d.map(r=>r["Visitas Nuevas"]||0), backgroundColor:"#4eade1",borderRadius:4},
       {label:"Admisión 2027",  data:d.map(r=>r["Visitas /admision2027"]||0),backgroundColor:"#f3bc52",borderRadius:4}
     ]},
     options:{layout:{padding:{top:24}},plugins:{legend:{display:true,labels:{color:"#0d2a5e",font:{size:11},boxWidth:10}}},scales:SC,responsive:true}
@@ -670,12 +693,6 @@ function renderConsolidado(){
     return `<div><div class="conv-codigo">${cfg.codigo}</div><div class="conv-value" style="color:${cfg.color}">${t}</div><div class="conv-sub">Visitas → admisión</div></div>`;
   }).join("");
 
-  drawBarChart("tabla-ga4-compare",[
-    {label:"Visitas totales",key:"Visitas Totales"},
-    {label:"Visitas nuevas",key:"Visitas Nuevas"},
-    {label:"Visitas /admision2027",key:"Visitas /admision2027"},
-  ],d);
-
   dc("meta-alcance");
   charts["meta-alcance"]=new Chart(document.getElementById("chart-meta-alcance"),{
     type:"bar",data:{labels,datasets:[{label:"Alcance",data:d.map(r=>r["Meta Alcance"]||0),backgroundColor:colors,borderRadius:4}]},
@@ -687,10 +704,14 @@ function renderConsolidado(){
     options:{layout:{padding:{top:24}},plugins:{legend:{display:false}},scales:SC,responsive:true}
   });
 
+  // CPR va en su propio eje derecho (y1): comparado con Alcance/Presupuesto
+  // es un número mucho más chico y quedaba aplastado contra el 0 al compartir
+  // la misma escala. Con eje propio, sus barras usan todo el alto disponible
+  // y sí se puede ver y comparar entre colegios.
   drawBarChart("tabla-meta-compare",[
     {label:"Alcance",key:"Meta Alcance"},
     {label:"Presupuesto",key:"Meta Presupuesto"},
-    {label:"CPR",key:"Meta CPR"},
+    {label:"CPR",key:"Meta CPR", yAxisID:"y1"},
   ],d);
 
   drawBarChart("tabla-gads-compare",[
