@@ -206,6 +206,10 @@ table.simple tr:last-child td { border-bottom:none; }
 
 <script>
 const SHEET_ID = "1ZU7L4IWlgJg-ff5Xovy5cwr4HVMuTT3ScUNXIZZsdDY";
+// Clave de la API de Google Sheets (v4), restringida por referrer a camilozunigac.github.io/*.
+// Mientras esta constante siga con el valor de ejemplo, el dashboard usa automáticamente
+// el método anterior (gviz) como respaldo — ver fetchSheet() más abajo.
+const SHEETS_API_KEY = "AIzaSyD84cjLqb_JGY3dPxfzzTE85DyozfQfEdM";
 const COLEGIOS_CFG = [
   { nombre:"Boston Academy Laguna del Sol",            codigo:"BALS", color:"#1a6bbf", initials:"BA", logo:"https://bostonacademy.cl/wp-content/uploads/2026/07/Favicon.png" },
   { nombre:"Boston College Alto Macul",                codigo:"BCAM", color:"#214e97", initials:"BC", logo:"https://bostoncollegealtomacul.cl/wp-content/uploads/2026/07/Favicon.png" },
@@ -358,9 +362,15 @@ function drawBarChart(containerId,rows,colegiosData){
   });
 }
 
-// Google Sheets (gviz) devuelve fechas como texto "Date(2026,6,1)" (mes 0-indexado) o como Date real
+// Fechas de Google Sheets: gviz las devuelve como texto "Date(2026,6,1)" (mes 0-indexado);
+// la API v4 (con valueRenderOption=UNFORMATTED_VALUE) las devuelve como número de serie
+// (días desde 1899-12-30). Esta función soporta ambos formatos, más Date real.
 function parseFechaSheet(v){
   if(v instanceof Date) return v;
+  if(typeof v==="number"){
+    const ms=Math.round((v-25569)*86400*1000);
+    return new Date(ms);
+  }
   if(typeof v==="string"){
     const m=v.match(/^Date\((\d+),(\d+),(\d+)\)/);
     if(m) return new Date(+m[1], +m[2], +m[3]);
@@ -683,13 +693,45 @@ function renderAnalyticsSitios(){
   }).join("");
 }
 
-async function fetchSheet(nombreHoja){
+// Método nuevo: API oficial de Google Sheets v4 (más estable, sin el problema de caché
+// del endpoint gviz). Requiere una API key restringida por referrer (ver SHEETS_API_KEY).
+async function fetchSheetV4(nombreHoja){
+  const rango=encodeURIComponent(nombreHoja);
+  const url=`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${rango}?valueRenderOption=UNFORMATTED_VALUE&key=${SHEETS_API_KEY}`;
+  const resp=await fetch(url,{cache:"no-store"});
+  if(!resp.ok) throw new Error(`Sheets API v4 respondió ${resp.status} para "${nombreHoja}"`);
+  const json=await resp.json();
+  const filas=json.values||[];
+  if(filas.length<1) return [];
+  const cols=filas[0];
+  return filas.slice(1).map(r=>{const obj={};cols.forEach((col,i)=>{obj[col]=r[i]??0;});return obj;});
+}
+
+// Método anterior (respaldo): endpoint gviz, sin autenticación pero con caché interna de Google
+// que a veces demora en reflejar cambios recientes de la planilla.
+async function fetchSheetGviz(nombreHoja){
   const url=`https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(nombreHoja)}&_ts=${Date.now()}`;
   const resp=await fetch(url,{cache:"no-store"});
   const text=await resp.text();
   const json=JSON.parse(text.match(/google\.visualization\.Query\.setResponse\(([\s\S]*?)\);?\s*$/)[1]);
   const cols=json.table.cols.map(c=>c.label);
   return json.table.rows.map(r=>{const obj={};cols.forEach((col,i)=>{obj[col]=r.c[i]?.v??0;});return obj;});
+}
+
+let _avisoSinApiKey=false;
+async function fetchSheet(nombreHoja){
+  const claveConfigurada = SHEETS_API_KEY && SHEETS_API_KEY!=="TU_API_KEY_AQUI";
+  if(claveConfigurada){
+    try{
+      return await fetchSheetV4(nombreHoja);
+    }catch(e){
+      console.warn(`Sheets API v4 falló para "${nombreHoja}", se usa gviz como respaldo:`, e);
+    }
+  }else if(!_avisoSinApiKey){
+    _avisoSinApiKey=true;
+    console.warn("SHEETS_API_KEY no configurada: el dashboard está usando gviz (método anterior) en vez de la API v4 de Google Sheets.");
+  }
+  return await fetchSheetGviz(nombreHoja);
 }
 
 async function loadData(){
