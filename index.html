@@ -65,6 +65,8 @@ main { padding:3rem 2.5rem; max-width:1440px; margin:0 auto; }
 .kpi-card { padding:1.25rem; }
 .kpi-label { font-size:11px; color:#7a90b5; text-transform:uppercase; letter-spacing:.5px; margin-bottom:8px; }
 .kpi-value { font-size:54px; font-weight:800; }
+/* Meta tiene 5 tarjetas (incluye "Gasto total"): cifra más chica para que quepan en una fila */
+.kpi-grid.kpi-meta .kpi-value { font-size:40px; }
 .kpi-sub { font-size:12px; color:#7a90b5; margin-top:6px; }
 
 .colegio-avatar { width:40px; height:40px; border-radius:9px; display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:700; }
@@ -114,7 +116,7 @@ table.simple tr:last-child td { border-bottom:none; }
 
   .kpi-grid { grid-template-columns:repeat(auto-fit,minmax(128px,1fr)); gap:10px; margin-bottom:1.5rem; }
   .kpi-card { padding:1rem; }
-  .kpi-value { font-size:28px; }
+  .kpi-value, .kpi-grid.kpi-meta .kpi-value { font-size:28px; }
   .kpi-label { font-size:10px; }
 
   main canvas { max-height:200px !important; }
@@ -290,6 +292,35 @@ function getLatest(){
   const semanas=[...new Set(DATA.map(r=>r["Semana"]))].filter(Boolean).sort((a,b)=>semanaSortKey(a)-semanaSortKey(b));
   const semana=SEMANA_ACTUAL||semanas[semanas.length-1];
   return DATA.filter(r=>r["Semana"]===semana);
+}
+
+// Postulaciones nuevas de la semana = "HS Postulaciones" (acumulado) de la
+// semana mostrada menos el de la semana anterior para el mismo colegio.
+// Devuelve null si no hay semana anterior o el resultado es negativo
+// (filas antiguas con otra definición del acumulado).
+function postulacionesSemanales(d){
+  if(!d) return null;
+  const semanas=[...new Set(DATA.map(r=>r["Semana"]))].filter(Boolean).sort((a,b)=>semanaSortKey(a)-semanaSortKey(b));
+  const i=semanas.indexOf(d["Semana"]);
+  if(i<1) return null;
+  const prev=DATA.find(r=>r["Semana"]===semanas[i-1]&&r["Colegio"]===d["Colegio"]);
+  if(!prev||!(+prev["HS Postulaciones"])) return null;
+  const delta=(+d["HS Postulaciones"]||0)-(+prev["HS Postulaciones"]||0);
+  return delta>=0?delta:null;
+}
+
+// Gasto total en Meta del ciclo vigente: suma de "Presupuesto Gastado" de
+// META_CAMPANAS desde la campaña "Lanzamiento" (mismo corte que el gráfico
+// de historial de campañas).
+function gastoTotalMeta(cfg){
+  const rowsColegio=CAMPANAS
+    .filter(r=>r["Colegio"]===cfg.nombre)
+    .map(r=>({...r,_fecha:parseFechaSheet(r["Fecha Inicio"])}))
+    .filter(r=>r._fecha);
+  const lanzamiento=rowsColegio.filter(r=>/lanzamiento/i.test(r["Nombre Campaña"]||"")).sort((a,b)=>a._fecha-b._fecha)[0];
+  const fechaCorte=lanzamiento?lanzamiento._fecha:new Date(2026,0,1);
+  const rows=rowsColegio.filter(r=>r._fecha>=fechaCorte);
+  return {total:rows.reduce((s,r)=>s+(+r["Presupuesto Gastado"]||0),0), n:rows.length};
 }
 
 function cambiarSemana(semana){
@@ -890,7 +921,7 @@ function buildColegioSections(){
       </div>
       <div class="platform-block">
         <div class="platform-header">📱 Meta</div>
-        <div class="kpi-grid" id="kpis-meta-${c.codigo}"></div>
+        <div class="kpi-grid kpi-meta" id="kpis-meta-${c.codigo}"></div>
         <div class="block-label" style="margin-top:1.5rem">Historial de campañas — alcance, clics al enlace y CPR</div>
         <div class="chart-scroll"><div class="chart-scroll-inner"><canvas id="chart-campanas-${c.codigo}" style="max-height:280px"></canvas></div></div>
       </div>
@@ -1013,11 +1044,13 @@ function renderColegio(cfg){
       : "";
   }
 
+  const gasto=gastoTotalMeta(cfg);
   document.getElementById("kpis-meta-"+cfg.codigo).innerHTML=`
     <div class="kpi-card"><div class="kpi-label">Campaña actual</div><div class="kpi-value" style="font-size:16px;color:${c}">${d["Meta Nombre Campaña"]||"-"}</div><div class="kpi-sub">Desde ${fmtFechaLarga(parseFechaSheet(d["Meta Fecha Anuncio"]))}</div></div>
     <div class="kpi-card"><div class="kpi-label">Alcance</div><div class="kpi-value" style="color:${c}">${fmt(d["Meta Alcance"])}</div></div>
     <div class="kpi-card"><div class="kpi-label">Presupuesto</div><div class="kpi-value" style="color:${c}">${fmtCLP(d["Meta Presupuesto"])}</div></div>
     <div class="kpi-card"><div class="kpi-label">CPR</div><div class="kpi-value" style="color:${c}">$${Math.round(d["Meta CPR"]||0)}</div></div>
+    <div class="kpi-card"><div class="kpi-label">Gasto total</div><div class="kpi-value" style="color:${c}">${fmtCLP(gasto.total)}</div><div class="kpi-sub">${gasto.n} campañas desde Lanzamiento</div></div>
   `;
 
   drawCampanasChart(cfg);
@@ -1048,9 +1081,11 @@ function renderColegio(cfg){
     }}]
   });
 
+  const postSem=postulacionesSemanales(d);
   document.getElementById("tabla-hub-"+cfg.codigo).innerHTML=`
     <tr><th>Etapa</th><th>Actual</th><th>Año ant.</th></tr>
-    <tr><td>Postulaciones</td><td><strong>${fmt(d["HS Postulaciones"])}</strong></td><td style="color:#7a90b5">${fmt(d["HS Post. Año Ant."])}</td></tr>
+    <tr><td>Postulaciones totales</td><td><strong>${fmt(d["HS Postulaciones"])}</strong></td><td style="color:#7a90b5">${fmt(d["HS Post. Año Ant."])}</td></tr>
+    <tr><td>Postulaciones semanales</td><td><strong>${postSem==null?"-":fmt(postSem)}</strong></td><td>-</td></tr>
     <tr><td>Aceptados</td><td>${fmt(d["HS Aceptados"])}</td><td>-</td></tr>
     <tr><td>Matriculados</td><td><strong style="color:${c}">${fmt(d["HS Matriculados"])}</strong></td><td style="color:#7a90b5">${fmt(d["HS Matric. Año Ant."])}</td></tr>
     <tr><td>Desiste</td><td>${fmt(d["HS Desiste"])}</td><td>-</td></tr>
