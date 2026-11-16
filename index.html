@@ -191,6 +191,10 @@ table.simple tr:last-child td { border-bottom:none; }
         <div class="block-label-extra">Acumulados Admisión 2027</div>
       </div>
       <div id="tabla-hub-compare"></div>
+      <div class="block-label" style="margin-top:2rem">Postulaciones nuevas de la semana</div>
+      <div class="conv-row" id="hub-post-semana"></div>
+      <div class="block-label">Postulaciones nuevas por semana</div>
+      <div class="chart-scroll"><div class="chart-scroll-inner"><canvas id="chart-hub-post-semanal" style="max-height:280px"></canvas></div></div>
       <div class="block-label" style="margin-top:2rem">Postulantes por mes</div>
       <div class="chart-scroll"><div class="chart-scroll-inner"><canvas id="chart-hub-postulantes-mes" style="max-height:260px"></canvas></div></div>
     </div>
@@ -294,20 +298,30 @@ function getLatest(){
   return DATA.filter(r=>r["Semana"]===semana);
 }
 
-// Postulaciones nuevas de la semana = "HS Postulaciones" (acumulado) de la
-// semana mostrada menos el de la semana anterior para el mismo colegio.
-// Devuelve null si no hay semana anterior o el resultado es negativo
-// (filas antiguas con otra definición del acumulado).
+// Postulaciones nuevas de la semana = columna "HS Postulaciones Semana" de
+// CONSOLIDADO (script v15, 16/11/2026): deals 2027 CREADOS en HubSpot entre
+// el lunes y el domingo de esa semana. Devuelve null si la fila no tiene el
+// dato. Ya NO se calcula como diferencia de acumulados: varias semanas
+// antiguas tienen acumulados con otra definición (ej. 01/06 y 10/08) y la
+// resta daba saltos falsos de cientos de postulaciones.
 function postulacionesSemanales(d){
   if(!d) return null;
-  const semanas=[...new Set(DATA.map(r=>r["Semana"]))].filter(Boolean).sort((a,b)=>semanaSortKey(a)-semanaSortKey(b));
-  const i=semanas.indexOf(d["Semana"]);
-  if(i<1) return null;
-  const prev=DATA.find(r=>r["Semana"]===semanas[i-1]&&r["Colegio"]===d["Colegio"]);
-  if(!prev||!(+prev["HS Postulaciones"])) return null;
-  const delta=(+d["HS Postulaciones"]||0)-(+prev["HS Postulaciones"]||0);
-  return delta>=0?delta:null;
+  const v=d["HS Postulaciones Semana"];
+  if(v===undefined || v===null || v==="" || isNaN(+v)) return null;
+  return +v;
 }
+
+// Serie semana a semana de postulaciones nuevas para un colegio (todas las
+// semanas cargadas, en orden cronológico). Semanas sin dato quedan en null.
+function serieSemanalPostulaciones(colegioNombre){
+  const semanas=[...new Set(DATA.map(r=>r["Semana"]))].filter(Boolean).sort((a,b)=>semanaSortKey(a)-semanaSortKey(b));
+  return semanas.map(s=>{
+    const row=DATA.find(r=>r["Semana"]===s&&r["Colegio"]===colegioNombre);
+    return {semana:s, value:row?postulacionesSemanales(row):null};
+  });
+}
+// Etiqueta corta de una semana para el eje X: fecha del lunes "DD/MM".
+function semanaCorta(s){ return String(s||"").split("–")[0].trim().slice(0,5); }
 
 // Gasto total en Meta del ciclo vigente: suma de "Presupuesto Gastado" de
 // META_CAMPANAS desde la campaña "Lanzamiento" (mismo corte que el gráfico
@@ -619,11 +633,13 @@ function generateSummary(d){
   const totM=d.reduce((s,r)=>s+(r["HS Matriculados"]||0),0);
   const totP=d.reduce((s,r)=>s+(r["HS Postulaciones"]||0),0);
   const conv=totP?((totM/totP)*100).toFixed(1):0;
+  const semVals=d.map(postulacionesSemanales).filter(v=>v!=null);
+  const totPS=semVals.reduce((s,v)=>s+v,0);
   const topV=getCfg([...d].sort((a,b)=>(b["Visitas Totales"]||0)-(a["Visitas Totales"]||0))[0]?.["Colegio"]);
   const topA=getCfg([...d].sort((a,b)=>(b["Meta Alcance"]||0)-(a["Meta Alcance"]||0))[0]?.["Colegio"]);
   const topM=getCfg([...d].sort((a,b)=>(b["HS Matriculados"]||0)-(a["HS Matriculados"]||0))[0]?.["Colegio"]);
   const topMrow=d.find(r=>getCfg(r["Colegio"]).codigo===topM.codigo);
-  return `La semana registró <strong>${fmt(totV)} visitas totales</strong>, lideradas por <strong style="color:${topV.color}">${topV.codigo}</strong>. El alcance en Meta fue de <strong>${fmt(totA)} personas</strong>, destacando <strong style="color:${topA.color}">${topA.codigo}</strong>. En admisiones, hay <strong>${fmt(totP)} postulaciones</strong> con una conversión del <strong>${conv}%</strong> a matrícula — <strong style="color:${topM.color}">${topM.codigo}</strong> lidera con ${fmt(topMrow?.["HS Matriculados"]||0)} matriculados. Se recomienda reforzar la inversión en los colegios con menor tráfico a /admision2027.`;
+  return `La semana registró <strong>${fmt(totV)} visitas totales</strong>, lideradas por <strong style="color:${topV.color}">${topV.codigo}</strong>. El alcance en Meta fue de <strong>${fmt(totA)} personas</strong>, destacando <strong style="color:${topA.color}">${topA.codigo}</strong>. En admisiones, hay <strong>${fmt(totP)} postulaciones</strong>${semVals.length?` (<strong>${fmt(totPS)} nuevas esta semana</strong>)`:""} con una conversión del <strong>${conv}%</strong> a matrícula — <strong style="color:${topM.color}">${topM.codigo}</strong> lidera con ${fmt(topMrow?.["HS Matriculados"]||0)} matriculados. Se recomienda reforzar la inversión en los colegios con menor tráfico a /admision2027.`;
 }
 
 // Pestaña "🌐 Sitios": lista simple (sin gráficos), un sitio debajo del otro,
@@ -883,7 +899,79 @@ function renderConsolidado(){
     {label:"Lista espera",key:"HS Lista Espera"},
   ],d);
 
+  document.getElementById("hub-post-semana").innerHTML=d.map(r=>{
+    const cfg=getCfg(r["Colegio"]);
+    const v=postulacionesSemanales(r);
+    return `<div><div class="conv-codigo">${cfg.codigo}</div><div class="conv-value" style="color:${cfg.color}">${v==null?"-":fmt(v)}</div><div class="conv-sub">de ${fmt(r["HS Postulaciones"])} acumuladas</div></div>`;
+  }).join("");
+  drawPostulacionesSemanalesConsolidado();
+
   drawPostulantesMesConsolidado();
+}
+
+// Una línea por colegio con las postulaciones nuevas de cada semana. La
+// semana elegida en el selector se marca con un punto más grande.
+function drawPostulacionesSemanalesConsolidado(){
+  const id="chart-hub-post-semanal";
+  const el=document.getElementById(id);
+  if(!el) return;
+  const series=COLEGIOS_CFG.map(c=>({cfg:c, datos:serieSemanalPostulaciones(c.nombre)}));
+  const semanas=series[0]?series[0].datos.map(x=>x.semana):[];
+  // Desde la primera semana con dato, para no arrastrar semanas vacías al inicio.
+  let inicio=semanas.findIndex((s,i)=>series.some(se=>se.datos[i].value!=null));
+  if(inicio<0) inicio=0;
+  const sem=semanas.slice(inicio);
+  if(el.parentElement) el.parentElement.style.minWidth=Math.max(340,sem.length*42)+"px";
+  dc(id);
+  charts[id]=new Chart(el,{
+    type:"line",
+    data:{
+      labels:sem.map(semanaCorta),
+      datasets:series.map(se=>({
+        label:se.cfg.codigo,
+        data:se.datos.slice(inicio).map(x=>x.value),
+        borderColor:se.cfg.color, backgroundColor:se.cfg.color,
+        cubicInterpolationMode:"monotone", spanGaps:true,
+        pointRadius:sem.map(s=>s===SEMANA_ACTUAL?6:2),
+      }))
+    },
+    options:{
+      plugins:{
+        legend:{display:true,position:"top",labels:{color:"#0d2a5e",font:{size:11},boxWidth:10,padding:16}},
+        tooltip:{callbacks:{title:(items)=>"Semana "+sem[items[0].dataIndex]}}
+      },
+      scales:{x:SC.x, y:{...SC.y, beginAtZero:true, ticks:{...SC.y.ticks, precision:0}}},
+      responsive:true
+    }
+  });
+}
+
+// Barras con las postulaciones nuevas de cada semana de un colegio. La
+// semana elegida en el selector va en color pleno y el resto más claro.
+function drawPostulacionesSemanalesColegio(cfg){
+  const id="chart-hub-semanal-"+cfg.codigo;
+  const el=document.getElementById(id);
+  if(!el) return;
+  let datos=serieSemanalPostulaciones(cfg.nombre);
+  const inicio=datos.findIndex(x=>x.value!=null);
+  datos=inicio<0?[]:datos.slice(inicio);
+  if(el.parentElement) el.parentElement.style.minWidth=Math.max(280,datos.length*42)+"px";
+  dc(id);
+  charts[id]=new Chart(el,{
+    type:"bar",
+    data:{
+      labels:datos.map(x=>semanaCorta(x.semana)),
+      datasets:[{ label:"Postulaciones", data:datos.map(x=>x.value),
+        backgroundColor:datos.map(x=>x.semana===SEMANA_ACTUAL?cfg.color:cfg.color+"66"),
+        borderRadius:4, barPercentage:0.7 }]
+    },
+    options:{
+      layout:{padding:{top:24}},
+      plugins:{legend:{display:false},tooltip:{callbacks:{title:(items)=>"Semana "+datos[items[0].dataIndex].semana}}},
+      scales:{x:SC.x, y:{...SC.y, beginAtZero:true, ticks:{...SC.y.ticks, precision:0}}},
+      responsive:true
+    }
+  });
 }
 
 function buildNavTabs(){
@@ -944,6 +1032,8 @@ function buildColegioSections(){
           <div><div class="block-label">Distribución por etapa</div><canvas id="chart-hub-${c.codigo}" style="max-height:220px"></canvas></div>
           <div><div class="block-label">Detalle por etapa</div><table class="simple" id="tabla-hub-${c.codigo}"></table></div>
         </div>
+        <div class="block-label" style="margin-top:1.5rem">Postulaciones nuevas por semana</div>
+        <div class="chart-scroll"><div class="chart-scroll-inner"><canvas id="chart-hub-semanal-${c.codigo}" style="max-height:220px"></canvas></div></div>
         <div class="block-label" style="margin-top:1.5rem">Postulantes por mes</div>
         <div class="chart-scroll"><div class="chart-scroll-inner"><canvas id="chart-hub-mes-${c.codigo}" style="max-height:220px"></canvas></div></div>
         <div class="block-label" style="margin-top:1.5rem">Motivos (top 5, según cantidad de postulantes)</div>
@@ -1015,7 +1105,7 @@ function renderColegio(cfg){
     <div class="kpi-card"><div class="kpi-label">Admisión 2027</div><div class="kpi-value" style="color:${c}">${fmt(d["Visitas /admision2027"])}</div><div class="kpi-sub">${d["Visitas Totales"]?((d["Visitas /admision2027"]/d["Visitas Totales"])*100).toFixed(1):0}% del total</div></div>
     <div class="kpi-card"><div class="kpi-label">Alcance Meta</div><div class="kpi-value" style="color:${c}">${fmt(d["Meta Alcance"])}</div></div>
     <div class="kpi-card"><div class="kpi-label">Impresiones Ads</div><div class="kpi-value" style="color:${c}">${fmt(d["GAds Impresiones"])}</div></div>
-    <div class="kpi-card"><div class="kpi-label">Postulaciones</div><div class="kpi-value" style="color:${c}">${fmt(d["HS Postulaciones"])}</div></div>
+    <div class="kpi-card"><div class="kpi-label">Postulaciones</div><div class="kpi-value" style="color:${c}">${fmt(d["HS Postulaciones"])}</div><div class="kpi-sub">${(()=>{const v=postulacionesSemanales(d);return v==null?"acumuladas":"+"+fmt(v)+" esta semana";})()}</div></div>
     <div class="kpi-card"><div class="kpi-label">Matriculados</div><div class="kpi-value" style="color:${c}">${fmt(d["HS Matriculados"])}</div></div>
   `;
 
@@ -1107,6 +1197,7 @@ function renderColegio(cfg){
   drawMotivoChart("chart-motivo-desiste-"+cfg.codigo, parseMotivos(d["HS Motivo Desiste"]),  cfg.color);
   drawMotivoChart("chart-motivo-rechaza-"+cfg.codigo, parseMotivos(d["HS Motivo Rechaza"]),  cfg.color);
 
+  drawPostulacionesSemanalesColegio(cfg);
   drawPostulantesMesColegio(cfg);
 }
 
