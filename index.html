@@ -182,19 +182,19 @@ table.simple tr:last-child td { border-bottom:none; }
 
     <div class="platform-block">
       <div class="platform-header">🎯 HubSpot Admisiones</div>
+      <div class="block-label">Postulaciones nuevas de la semana</div>
+      <div class="conv-row" id="hub-post-semana"></div>
+      <div class="block-label">Postulaciones nuevas por semana</div>
+      <div class="chart-scroll" style="margin-bottom:2.5rem"><div class="chart-scroll-inner"><canvas id="chart-hub-post-semanal" style="max-height:280px"></canvas></div></div>
       <div class="grid-2" style="margin-bottom:2rem">
-        <div><div class="block-label">Matriculados por colegio</div><canvas id="chart-hub-torta" style="max-height:220px"></canvas></div>
-        <div><div class="block-label">Postulaciones por colegio</div><canvas id="chart-hub-postulaciones" style="max-height:220px"></canvas></div>
+        <div><div class="block-label">Postulaciones de la semana por colegio</div><canvas id="chart-hub-postulaciones" style="max-height:220px"></canvas></div>
+        <div><div class="block-label">Matriculados por colegio (acumulado)</div><canvas id="chart-hub-torta" style="max-height:220px"></canvas></div>
       </div>
       <div class="block-label-row">
         <div class="block-label">Métricas por colegio</div>
         <div class="block-label-extra">Acumulados Admisión 2027</div>
       </div>
       <div id="tabla-hub-compare"></div>
-      <div class="block-label" style="margin-top:2rem">Postulaciones nuevas de la semana</div>
-      <div class="conv-row" id="hub-post-semana"></div>
-      <div class="block-label">Postulaciones nuevas por semana</div>
-      <div class="chart-scroll"><div class="chart-scroll-inner"><canvas id="chart-hub-post-semanal" style="max-height:280px"></canvas></div></div>
       <div class="block-label" style="margin-top:2rem">Postulantes por mes</div>
       <div class="chart-scroll"><div class="chart-scroll-inner"><canvas id="chart-hub-postulantes-mes" style="max-height:260px"></canvas></div></div>
     </div>
@@ -639,7 +639,7 @@ function generateSummary(d){
   const topA=getCfg([...d].sort((a,b)=>(b["Meta Alcance"]||0)-(a["Meta Alcance"]||0))[0]?.["Colegio"]);
   const topM=getCfg([...d].sort((a,b)=>(b["HS Matriculados"]||0)-(a["HS Matriculados"]||0))[0]?.["Colegio"]);
   const topMrow=d.find(r=>getCfg(r["Colegio"]).codigo===topM.codigo);
-  return `La semana registró <strong>${fmt(totV)} visitas totales</strong>, lideradas por <strong style="color:${topV.color}">${topV.codigo}</strong>. El alcance en Meta fue de <strong>${fmt(totA)} personas</strong>, destacando <strong style="color:${topA.color}">${topA.codigo}</strong>. En admisiones, hay <strong>${fmt(totP)} postulaciones</strong>${semVals.length?` (<strong>${fmt(totPS)} nuevas esta semana</strong>)`:""} con una conversión del <strong>${conv}%</strong> a matrícula — <strong style="color:${topM.color}">${topM.codigo}</strong> lidera con ${fmt(topMrow?.["HS Matriculados"]||0)} matriculados. Se recomienda reforzar la inversión en los colegios con menor tráfico a /admision2027.`;
+  return `La semana registró <strong>${fmt(totV)} visitas totales</strong>, lideradas por <strong style="color:${topV.color}">${topV.codigo}</strong>. El alcance en Meta fue de <strong>${fmt(totA)} personas</strong>, destacando <strong style="color:${topA.color}">${topA.codigo}</strong>. En admisiones, ${semVals.length?`llegaron <strong>${fmt(totPS)} postulaciones nuevas esta semana</strong> (${fmt(totP)} acumuladas),`:`hay <strong>${fmt(totP)} postulaciones</strong> acumuladas,`} con una conversión del <strong>${conv}%</strong> a matrícula — <strong style="color:${topM.color}">${topM.codigo}</strong> lidera con ${fmt(topMrow?.["HS Matriculados"]||0)} matriculados. Se recomienda reforzar la inversión en los colegios con menor tráfico a /admision2027.`;
 }
 
 // Pestaña "🌐 Sitios": lista simple (sin gráficos), un sitio debajo del otro,
@@ -888,10 +888,10 @@ function renderConsolidado(){
   ],d);
 
   makePie("chart-hub-torta",labels,d.map(r=>r["HS Matriculados"]||0),colors);
-  makePie("chart-hub-postulaciones",labels,d.map(r=>r["HS Postulaciones"]||0),colors);
+  makePie("chart-hub-postulaciones",labels,d.map(r=>postulacionesSemanales(r)||0),colors);
 
   drawBarChart("tabla-hub-compare",[
-    {label:"Postulaciones",key:"HS Postulaciones"},
+    {label:"Postulaciones (acum.)",key:"HS Postulaciones"},
     {label:"Aceptados",key:"HS Aceptados"},
     {label:"Matriculados",key:"HS Matriculados"},
     {label:"Desiste",key:"HS Desiste"},
@@ -1105,7 +1105,7 @@ function renderColegio(cfg){
     <div class="kpi-card"><div class="kpi-label">Admisión 2027</div><div class="kpi-value" style="color:${c}">${fmt(d["Visitas /admision2027"])}</div><div class="kpi-sub">${d["Visitas Totales"]?((d["Visitas /admision2027"]/d["Visitas Totales"])*100).toFixed(1):0}% del total</div></div>
     <div class="kpi-card"><div class="kpi-label">Alcance Meta</div><div class="kpi-value" style="color:${c}">${fmt(d["Meta Alcance"])}</div></div>
     <div class="kpi-card"><div class="kpi-label">Impresiones Ads</div><div class="kpi-value" style="color:${c}">${fmt(d["GAds Impresiones"])}</div></div>
-    <div class="kpi-card"><div class="kpi-label">Postulaciones</div><div class="kpi-value" style="color:${c}">${fmt(d["HS Postulaciones"])}</div><div class="kpi-sub">${(()=>{const v=postulacionesSemanales(d);return v==null?"acumuladas":"+"+fmt(v)+" esta semana";})()}</div></div>
+    <div class="kpi-card"><div class="kpi-label">Postulaciones semana</div><div class="kpi-value" style="color:${c}">${(()=>{const v=postulacionesSemanales(d);return v==null?"-":fmt(v);})()}</div><div class="kpi-sub">${fmt(d["HS Postulaciones"])} acumuladas</div></div>
     <div class="kpi-card"><div class="kpi-label">Matriculados</div><div class="kpi-value" style="color:${c}">${fmt(d["HS Matriculados"])}</div></div>
   `;
 
