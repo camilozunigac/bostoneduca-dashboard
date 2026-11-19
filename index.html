@@ -76,6 +76,18 @@ table.simple { width:100%; border-collapse:collapse; font-size:13px; }
 table.simple th { padding:8px 0; color:#7a90b5; font-size:11px; text-transform:uppercase; border-bottom:1px solid rgba(0,0,0,0.08); }
 table.simple td { padding:10px 0; border-bottom:1px solid rgba(0,0,0,0.08); }
 table.simple tr:last-child td { border-bottom:none; }
+/* "Detalle por etapa" (HubSpot): Etapa a la izquierda, cifras centradas
+   bajo su título. */
+table.tabla-etapas { table-layout:fixed; }
+table.tabla-etapas th, table.tabla-etapas td { text-align:center; }
+table.tabla-etapas th:first-child, table.tabla-etapas td:first-child { text-align:left; }
+/* Tabla de gasto por campaña (Meta). */
+.tabla-scroll { width:100%; overflow-x:auto; -webkit-overflow-scrolling:touch; }
+table.tabla-campanas { min-width:560px; }
+table.tabla-campanas th, table.tabla-campanas td { text-align:center; padding-left:6px; padding-right:6px; }
+table.tabla-campanas th:first-child, table.tabla-campanas td:first-child { text-align:left; padding-left:0; }
+table.tabla-campanas th:last-child, table.tabla-campanas td:last-child { text-align:right; padding-right:0; }
+table.tabla-campanas tr.total td { font-weight:700; color:#1b2a4a; border-top:1px solid rgba(0,0,0,0.15); }
 
 /* Gráficos con muchas barras (varios colegios x varias métricas, historial de
    campañas, postulantes por mes) pueden quedar demasiado angostos y
@@ -627,6 +639,78 @@ function drawCampanasChart(cfg){
 }
 
 
+// Tabla bajo el gráfico de historial: lo gastado en cada campaña del ciclo
+// vigente (desde "Lanzamiento", igual que el gráfico) y los días que estuvo
+// activa. "Días activa" = días en que la campaña tuvo gasto en Meta (columnas
+// "Primer Día Gasto", "Último Día Gasto" y "Días Activa" de META_CAMPANAS, que
+// escribe el script v16). Si una campaña todavía no tiene esas columnas, se
+// usa la fecha de término de META_FECHAS (días corridos entre inicio y
+// término); si tampoco hay, se muestra "—".
+function renderTablaCampanas(cfg){
+  const el=document.getElementById("tabla-campanas-"+cfg.codigo);
+  const nota=document.getElementById("nota-campanas-"+cfg.codigo);
+  if(!el) return;
+
+  const rowsColegio=CAMPANAS
+    .filter(r=>r["Colegio"]===cfg.nombre)
+    .map(r=>({...r,_fecha:parseFechaSheet(r["Fecha Inicio"])}))
+    .filter(r=>r._fecha)
+    .sort((a,b)=>a._fecha-b._fecha);
+  const lanzamiento=rowsColegio.find(r=>/lanzamiento/i.test(r["Nombre Campaña"]||""));
+  const fechaCorte=lanzamiento?lanzamiento._fecha:new Date(2026,0,1);
+  const rows=rowsColegio.filter(r=>r._fecha>=fechaCorte);
+
+  if(!rows.length){
+    el.innerHTML="";
+    if(nota) nota.textContent="Aún no hay campañas cargadas para este colegio.";
+    return;
+  }
+
+  const hoy=new Date(); hoy.setHours(0,0,0,0);
+  const DIA=86400000;
+  let total=0, sinDias=0;
+
+  const filas=rows.map(r=>{
+    const gasto=+r["Presupuesto Gastado"]||0;
+    total+=gasto;
+    const primer=parseFechaSheet(r["Primer Día Gasto"]);
+    const ultimo=parseFechaSheet(r["Último Día Gasto"]);
+    const diasCol=r["Días Activa"];
+    let inicioTxt=fmtFechaLarga(primer||r._fecha);
+    let terminoTxt="—", diasTxt="—";
+
+    if(diasCol!==undefined && diasCol!=="" && !isNaN(+diasCol) && (primer||+diasCol===0)){
+      diasTxt=fmt(+diasCol);
+      if(ultimo){
+        // Si gastó ayer o anteayer (Meta reporta con algo de desfase), sigue en curso.
+        terminoTxt=(hoy-ultimo)<=2*DIA ? "En curso" : fmtFechaLarga(ultimo);
+      }else if(+diasCol===0){
+        inicioTxt=fmtFechaLarga(r._fecha); terminoTxt="Sin gasto";
+      }
+    }else{
+      const fin=parseFechaSheet(r["Fecha Fin"]);
+      if(fin){
+        terminoTxt=fmtFechaLarga(fin);
+        diasTxt=fmt(Math.round((fin-r._fecha)/DIA)+1);
+      }else{
+        sinDias++;
+      }
+    }
+    return `<tr><td style="font-size:12px">${r["Nombre Campaña"]||"Campaña sin nombre"}</td><td>${inicioTxt}</td><td>${terminoTxt}</td><td>${diasTxt}</td><td>${fmtCLP(gasto)}</td></tr>`;
+  }).join("");
+
+  el.innerHTML=`
+    <colgroup><col style="width:36%"><col style="width:16%"><col style="width:16%"><col style="width:12%"><col style="width:20%"></colgroup>
+    <tr><th>Campaña</th><th>Inicio</th><th>Término</th><th>Días activa</th><th>Gasto</th></tr>
+    ${filas}
+    <tr class="total"><td>Total (${rows.length} campañas)</td><td></td><td></td><td></td><td>${fmtCLP(total)}</td></tr>
+  `;
+  if(nota){
+    nota.textContent="Días activa = días con gasto en Meta. Gasto = total de la campaña desde su inicio."+
+      (sinDias?` ${sinDias} campaña(s) aún sin fechas de gasto: se completan en la próxima actualización del script.`:"");
+  }
+}
+
 function generateSummary(d){
   const totV=d.reduce((s,r)=>s+(r["Visitas Totales"]||0),0);
   const totA=d.reduce((s,r)=>s+(r["Meta Alcance"]||0),0);
@@ -1018,6 +1102,9 @@ function buildColegioSections(){
         <div class="kpi-grid kpi-meta" id="kpis-meta-${c.codigo}"></div>
         <div class="block-label" style="margin-top:1.5rem">Historial de campañas — alcance, clics al enlace y CPR</div>
         <div class="chart-scroll"><div class="chart-scroll-inner"><canvas id="chart-campanas-${c.codigo}" style="max-height:280px"></canvas></div></div>
+        <div class="block-label" style="margin-top:2rem">Gasto y días activos por campaña</div>
+        <div class="tabla-scroll"><table class="simple tabla-campanas" id="tabla-campanas-${c.codigo}"></table></div>
+        <div id="nota-campanas-${c.codigo}" style="font-size:11px;color:#7a90b5;margin-top:8px;font-style:italic"></div>
       </div>
       <div class="platform-block">
         <div class="platform-header">🔍 Google Ads</div>
@@ -1030,7 +1117,7 @@ function buildColegioSections(){
         <div class="platform-header">🎯 HubSpot Admisiones</div>
         <div class="grid-2">
           <div><div class="block-label">Distribución por etapa</div><canvas id="chart-hub-${c.codigo}" style="max-height:220px"></canvas></div>
-          <div><div class="block-label">Detalle por etapa</div><table class="simple" id="tabla-hub-${c.codigo}"></table></div>
+          <div><div class="block-label">Detalle por etapa</div><table class="simple tabla-etapas" id="tabla-hub-${c.codigo}"></table></div>
         </div>
         <div class="block-label" style="margin-top:1.5rem">Postulaciones nuevas por semana</div>
         <div class="chart-scroll"><div class="chart-scroll-inner"><canvas id="chart-hub-semanal-${c.codigo}" style="max-height:220px"></canvas></div></div>
@@ -1146,13 +1233,14 @@ function renderColegio(cfg){
   const gasto=gastoTotalMeta(cfg);
   document.getElementById("kpis-meta-"+cfg.codigo).innerHTML=`
     <div class="kpi-card"><div class="kpi-label">Campaña actual</div><div class="kpi-value" style="font-size:16px;color:${c}">${d["Meta Nombre Campaña"]||"-"}</div><div class="kpi-sub">Desde ${fmtFechaLarga(parseFechaSheet(d["Meta Fecha Anuncio"]))}</div></div>
-    <div class="kpi-card"><div class="kpi-label">Alcance</div><div class="kpi-value" style="color:${c}">${fmt(d["Meta Alcance"])}</div></div>
+    <div class="kpi-card"><div class="kpi-label">Alcance semanal</div><div class="kpi-value" style="color:${c}">${fmt(d["Meta Alcance"])}</div><div class="kpi-sub">Semana ${d["Semana"]||"-"}</div></div>
     <div class="kpi-card"><div class="kpi-label">Presupuesto</div><div class="kpi-value" style="color:${c}">${fmtCLP(d["Meta Presupuesto"])}</div></div>
     <div class="kpi-card"><div class="kpi-label">CPR</div><div class="kpi-value" style="color:${c}">$${Math.round(d["Meta CPR"]||0)}</div></div>
     <div class="kpi-card"><div class="kpi-label">Gasto total</div><div class="kpi-value" style="color:${c}">${fmtCLP(gasto.total)}</div><div class="kpi-sub">${gasto.n} campañas desde Lanzamiento</div></div>
   `;
 
   drawCampanasChart(cfg);
+  renderTablaCampanas(cfg);
 
   document.getElementById("kpis-gads-"+cfg.codigo).innerHTML=`
     <div class="kpi-card"><div class="kpi-label">Impresiones</div><div class="kpi-value" style="color:${c}">${fmt(d["GAds Impresiones"])}</div></div>
@@ -1182,6 +1270,7 @@ function renderColegio(cfg){
 
   const postSem=postulacionesSemanales(d);
   document.getElementById("tabla-hub-"+cfg.codigo).innerHTML=`
+    <colgroup><col style="width:52%"><col style="width:24%"><col style="width:24%"></colgroup>
     <tr><th>Etapa</th><th>Actual</th><th>Año ant.</th></tr>
     <tr><td>Postulaciones totales</td><td><strong>${fmt(d["HS Postulaciones"])}</strong></td><td style="color:#7a90b5">${fmt(d["HS Post. Año Ant."])}</td></tr>
     <tr><td>Postulaciones semanales</td><td><strong>${postSem==null?"-":fmt(postSem)}</strong></td><td>-</td></tr>
